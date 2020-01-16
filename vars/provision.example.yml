@@ -23,23 +23,12 @@ cert_email_address: foo@example.com
   #~ - us-west-1
 aws_region: us-east-1
 
-# If you have Cloud Access setup for your account, set this to `cloud_access`. Otherwise, set this to `hourly`.
-ec2_ami_type: cloud_access
-
 # The ID of the Route53 hosted zone
 route53_hosted_zone_id: YP563J79RELJ4C
 
-# Your RHSM username
-rhsm_username: foo@example.com
-# Your RHSM password
-rhsm_password: P@55w0rD
-# The RHSM pool ID that contains OpenShift subscriptions
-rhsm_pool: ba4e7732f8abcdad545c7f62df736d1f
-
-# Your Red Hat registry username
-redhat_registry_username: 1234567|foo
-# Your Red Hat registry password/token
-redhat_registry_password: 0535VZW0qDK3fBjFwJE93emjk8fmzNBLJ2XHN8TNrAsxmaqDOOz2G
+# Pull secret, acquired from:
+# https://cloud.redhat.com/openshift/install/pull-secret
+cloud_redhat_com_pull_secret: '{"auths":{"cloud.openshift.com":{"auth":"b3B=","email":"foo@example.com"},"quay.io":{"auth":"b3B=","email":"foo@example.com"},"registry.connect.redhat.com":{"auth":"NTI=","email":"foo@example.com"},"registry.redhat.io":{"auth":"NTI=","email":"foo@example.com"}}}'
 
 # A list of manually created users:
 manual_users:
