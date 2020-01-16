@@ -1,6 +1,13 @@
 {
     "pip": [
         "boto3",
-        "botocore"
+        "botocore",
+        "ansible"
+    ],
+    "dnf": [
+        {
+            "pkg": "gnupg2",
+            "bin": "gpg"
+        }
     ]
 }

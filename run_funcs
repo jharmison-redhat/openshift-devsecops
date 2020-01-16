@@ -70,7 +70,11 @@ install_reqs() {
     pip_pkgs=$($jq -r '.pip[]' runreqs.json 2>/dev/null | tr '\n' ' ')
 
     if [ -n "${dnf_pkgs[@]}" ]; then
-        _dnf_install ${dnf_pkgs[@]} || return 1
+        for bin in $(echo "$dnf_pkgs" | $jq -r '.bin'); do
+            if ! which $bin &>/dev/null; then
+                _dnf_install $(jq -r 'select(.bin == "'$bin'").pkg') || return 1
+            fi
+        done
     fi
     if [ -n "${pip_pkgs[@]}" ]; then
         _pip_install ${pip_pkgs[@]} || return 1
