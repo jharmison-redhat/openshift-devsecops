@@ -1,0 +1,6 @@
+---
+- name: Generate an SSH key for use with the cluster
+  openssh_keypair:
+    path: '{{ tmp_dir }}/{{ cluster_name }}.{{ openshift_base_domain }}.rsa'
+    size: 4096
+    mode: 0600

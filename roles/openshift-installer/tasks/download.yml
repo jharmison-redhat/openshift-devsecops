@@ -66,3 +66,12 @@
       sum: '{{ openshift_install_sum }}'
     - type: client
       sum: '{{ openshift_client_sum }}'
+
+- name: Untar the archives
+  unarchive:
+    remote_src: yes
+    src: '{{ tmp_dir }}/openshift-{{ item }}.tar.gz'
+    dest: '{{ tmp_dir }}/'
+  loop:
+    - install
+    - client
