@@ -9,3 +9,5 @@ all:
       vars:
         ansible_user: ec2-user
         provision_type: aws
+  vars:
+    tmp_dir: '{{ playbook_dir }}/../tmp'
