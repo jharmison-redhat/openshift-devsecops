@@ -1,0 +1,78 @@
+# We only support Fedora-likes. Need DNF to guarantee things.
+_dnf_install() {
+    which dnf &>/dev/null || { echo "Need dnf to install $1 - your distribution is unsupported." >&2; return 1 ; }
+    echo "Need to elevate priveleges to install $1." >&2
+    sudo dnf install -y "${@}" >/dev/null || return 1
+}
+
+# Install packages with pip in user mode
+_pip_install() {
+    find_pip &>/dev/null || return 1
+    $pip install --user --upgrade "${@}" >/dev/null || return 1
+}
+
+# Identify python interpreter with a preference for 3
+find_python() {
+    which python3 2>/dev/null && return 0
+    which python 2>/dev/null && return 0
+    which python2 2>/dev/null && return 0
+    echo "Unable to identify python in \$PATH" >&2
+    return 1
+}
+
+# Validate python installation, install if necessary
+install_python() {
+    find_python && return 0
+    _dnf_install python3
+    find_python && return 0 || return 1
+}
+
+# Identify if pip is installed
+find_pip() {
+    which pip3 2>/dev/null && return 0
+    which pip 2>/dev/null && return 0
+    echo "Unable to identify pip version in \$PATH, try running again" >&2
+    return 1
+}
+
+# Validate pip install, install in user mode from bootstrap if necessary
+install_pip() {
+    find_pip && return 0 || echo "Installing pip in \`--user\` mode" >&2
+    curl https://bootstrap.pypa.io/get-pip.py -o tmp/get-pip.py &>/dev/null
+    $python tmp/get-pip.py --user &>/dev/null
+    find_pip && return 0 || return 1
+}
+
+# Identify if JQ is installed
+find_jq() {
+    which jq 2>/dev/null && return 0
+    echo "Unable to identify jq in \$PATH" >&2
+    return 1
+}
+
+# Validate jq install, install if necessary
+install_jq() {
+    find_jq && return 0
+    _dnf_install jq
+    find_jq && return 0 || return 1
+}
+
+# Validate all requirements in runreqs.json
+install_reqs() {
+    # Short-circuit if there aren't any
+    [ -f runreqs.json ] || return 0
+
+    python=$(install_python) || return 1
+    pip=$(install_pip) || return 1
+    jq=$(install_jq) || return 1
+
+    dnf_pkgs=$($jq -r '.dnf[]' runreqs.json 2>/dev/null | tr '\n' ' ')
+    pip_pkgs=$($jq -r '.pip[]' runreqs.json 2>/dev/null | tr '\n' ' ')
+
+    if [ -n "${dnf_pkgs[@]}" ]; then
+        _dnf_install ${dnf_pkgs[@]} || return 1
+    fi
+    if [ -n "${pip_pkgs[@]}" ]; then
+        _pip_install ${pip_pkgs[@]} || return 1
+    fi
+}

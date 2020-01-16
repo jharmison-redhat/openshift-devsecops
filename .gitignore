@@ -1,0 +1,9 @@
+*.log
+*.bak
+tmp/*
+!tmp/.gitkeep
+
+webpage/*-index.html
+
+vars/*
+!vars/*.example.yml

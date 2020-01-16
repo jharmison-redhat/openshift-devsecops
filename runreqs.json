@@ -1,0 +1,6 @@
+{
+    "pip": [
+        "boto3",
+        "botocore"
+    ]
+}
