@@ -1,2 +1,6 @@
 ---
 - hosts: localhost
+  vars_files:
+    - ../vars/provision.yml
+  roles:
+    - role: openshift-installer
