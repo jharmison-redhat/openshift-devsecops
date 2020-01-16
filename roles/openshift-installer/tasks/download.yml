@@ -1,0 +1,68 @@
+---
+- name: Pull latest openshift-install release info for version
+  uri:
+    url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{ openshift_version }}/release.txt
+    return_content: yes
+  register: release_text
+
+- name: Identify minor release version
+  set_fact:
+    openshift_version_minor: |-
+      {{ (release_text.content|regex_search('\nName:\s*4\S*', multiline=true)).split()|last }}
+
+- name: Grab the signing key
+  get_url:
+    url: https://www.redhat.com/security/fd431d51.txt
+    dest: '{{ tmp_dir }}/rh_key.txt'
+
+- name: Grab the latest release checksums
+  get_url:
+    url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{ openshift_version }}/sha256sum.txt
+    dest: '{{ tmp_dir }}/sha256sum.txt'
+
+- name: Grab the signature file
+  get_url:
+    url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{ openshift_version }}/sha256sum.txt.sig
+    dest: '{{ tmp_dir }}/sha256sum.txt.sig'
+
+- name: Import RH key, verify signature
+  shell: |
+    trust_key() {
+        echo -e '5\ny\n' | gpg --command-fd 0 --edit-key security@redhat.com trust
+        gpg --update-trustdb
+        echo changed
+    }
+    cd {{ tmp_dir }}
+    gpg --list-keys |& grep -qF security@redhat.com || gpg import rh_key.txt
+    gpg --list-keys |& grep -q 'ultimate.*security@redhat\.com' || trust_key
+    gpg --verify sha256sum.txt.sig |& grep -qF 'Good signature from "Red Hat' || exit 1
+  register: import_key
+  changed_when: '"changed" in import_key.stdout_lines'
+
+- name: Read expected sha256 for installer and client
+  set_fact:
+    openshift_install_sum: >-
+      {{ (lookup('file', '{{ tmp_dir }}/sha256sum.txt') |
+        regex_search('\n?(\S*)\s*openshift-install-linux-' +
+          openshift_version_minor|regex_escape() +
+          '\.tar\.gz', multiline=true
+        )).split() | first
+      }}
+    openshift_client_sum: >-
+      {{ (lookup('file', '{{ tmp_dir }}/sha256sum.txt') |
+        regex_search('\n?(\S*)\s*openshift-client-linux-' +
+          openshift_version_minor|regex_escape() +
+          '\.tar\.gz', multiline=true
+        )).split() | first
+      }}
+
+- name: Download latest release
+  get_url:
+    url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{ openshift_version }}/openshift-{{ item.type }}-linux-{{ openshift_version_minor }}.tar.gz
+    checksum: sha256:{{ item.sum }}
+    dest: '{{ tmp_dir }}/openshift-{{ item.type }}.tar.gz'
+  loop:
+    - type: install
+      sum: '{{ openshift_install_sum }}'
+    - type: client
+      sum: '{{ openshift_client_sum }}'
