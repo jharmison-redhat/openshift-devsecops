@@ -1,13 +1,16 @@
 {
     "pip": [
         "ansible",
-        "passlib",
         "openshift"
     ],
     "dnf": [
         {
             "pkg": "gnupg2",
             "bin": "gpg"
+        },
+        {
+            "pkg": "httpd-tools",
+            "bin": "htpasswd"
         }
     ]
 }

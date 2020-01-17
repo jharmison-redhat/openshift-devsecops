@@ -1,11 +1,16 @@
 ---
 - name: Create/update htpasswd file for users
-  htpasswd:
-    create: yes
-    crypt_scheme: bcrypt
-    name: '{{ user.username.replace(" ","")|lower }}'
-    password: '{{ user.password }}'
-    path: '{{ tmp_dir }}/users.htpasswd'
+  shell: |
+    cd {{ tmp_dir }}
+    [ -f users.htpasswd ] || touch users.htpasswd
+    if htpasswd -v -b users.htpasswd '{{ user.username }}' '{{ user.password }}' &>/dev/null; then
+        echo ok
+    else
+        htpasswd -B -b users.htpasswd '{{ user.username }}' '{{ user.password }}' &>/dev/null && echo changed || echo failed
+    fi
+  register: htpasswd
+  changed_when: '"changed" in htpasswd.stdout_lines'
+  failed_when: '"failed" in htpasswd.stdout_lines'
   loop: '{{ openshift_users }}'
   loop_control:
     loop_var: user
@@ -31,7 +36,7 @@
   k8s:
     state: present
     kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
-    namespace: openshift-config
+    apply: yes
     definition:
       apiVersion: v1
       kind: OAuth
