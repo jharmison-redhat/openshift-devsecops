@@ -1,7 +1,8 @@
 {
     "pip": [
         "ansible",
-        "passlib"
+        "passlib",
+        "openshift"
     ],
     "dnf": [
         {
