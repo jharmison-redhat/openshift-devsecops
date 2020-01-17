@@ -2,7 +2,7 @@
 # A list of manually created users:
 manual_users:
   - username: admin
-    password: 3ntr0PY!@
+    password: RedH@t1
     admin: yes
 
 # The number of users created, as a string
