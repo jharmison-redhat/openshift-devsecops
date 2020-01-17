@@ -70,8 +70,11 @@
 - name: Untar the archives
   unarchive:
     remote_src: yes
-    src: '{{ tmp_dir }}/openshift-{{ item }}.tar.gz'
+    src: '{{ tmp_dir }}/openshift-{{ item.type }}.tar.gz'
     dest: '{{ tmp_dir }}/'
+    creates: '{{ tmp_dir }}/{{ item.creates }}'
   loop:
-    - install
-    - client
+    - type: install
+      creates: openshift-install
+    - type: client
+      creates: oc
