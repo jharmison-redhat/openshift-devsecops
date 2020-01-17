@@ -21,94 +21,85 @@
       block:
       - pause:
           prompt: Enter the DNS-safe name for your cluster
-        register: cluster_name
+        register: cluster_name_tmp
 
       - set_fact:
-          cluster_name: '{{ cluster_name.user_input }}'
-      when: cluster_name is not defined or (cluster_name.user_input is defined)
-
-    - name: Set openshift_version
-      block:
-      - pause:
-          prompt: Enter a 4.X major/minor version number to deploy your cluster from
-        register: openshift_version
-      - set_fact:
-          openshift_version: '{{ openshift_version.user_input }}'
-      when: openshift_version is not defined or (openshift_version.user_input is defined)
+          cluster_name: '{{ cluster_name_tmp.user_input }}'
+      when: cluster_name is not defined
 
     - name: Set openshift_version
       block:
       - pause:
           prompt: Enter a 4.X major/minor version number to deploy your cluster from
-        register: openshift_version
+        register: openshift_version_tmp
       - set_fact:
-          openshift_version: '{{ openshift_version.user_input }}'
-      when: openshift_version is not defined or (openshift_version.user_input is defined)
+          openshift_version: '{{ openshift_version_tmp.user_input }}'
+      when: openshift_version is not defined
 
     - name: Set openshift_base_domain
       block:
       - pause:
           prompt: Enter the base domain name for your Route-53 public hosted zone
-        register: openshift_base_domain
+        register: openshift_base_domain_tmp
       - set_fact:
-          openshift_base_domain: '{{ openshift_base_domain.user_input }}'
-      when: openshift_base_domain is not defined or (openshift_base_domain.user_input is defined)
+          openshift_base_domain: '{{ openshift_base_domain_tmp.user_input }}'
+      when: openshift_base_domain is not defined
 
     - name: Set cert_email_address
       block:
       - pause:
           prompt: Enter the email address with which to register your LetsEncrypt certificates
-        register: cert_email_address
+        register: cert_email_address_tmp
       - set_fact:
-          cert_email_address: '{{ cert_email_address.user_input }}'
-      when: cert_email_address is not defined or (cert_email_address.user_input is defined)
+          cert_email_address: '{{ cert_email_address_tmp.user_input }}'
+      when: cert_email_address is not defined
 
     - name: Set aws_region
       block:
       - pause:
           prompt: 'Enter a supported AWS region with enough elastic IPs to support installation (ex: us-east-2)'
-        register: aws_region
+        register: aws_region_tmp
       - set_fact:
-          aws_region: '{{ aws_region.user_input }}'
-      when: aws_region is not defined or (aws_region.user_input is defined)
+          aws_region: '{{ aws_region_tmp.user_input }}'
+      when: aws_region is not defined
 
     - name: Set route53_hosted_zone_id
       block:
       - pause:
           prompt: Enter the zone ID of the Route 53 hosted zone
           echo: no
-        register: route53_hosted_zone_id
+        register: route53_hosted_zone_id_tmp
       - set_fact:
-          route53_hosted_zone_id: '{{ route53_hosted_zone_id.user_input }}'
-      when: route53_hosted_zone_id is not defined or (route53_hosted_zone_id.user_input is defined)
+          route53_hosted_zone_id: '{{ route53_hosted_zone_id_tmp.user_input }}'
+      when: route53_hosted_zone_id is not defined
 
     - name: Set cloud_redhat_com_pull_secret
       block:
       - pause:
           prompt: 'Enter your pull secret, copied from https://cloud.redhat.com/openshift/install/pull-secret'
           echo: no
-        register: cloud_redhat_com_pull_secret
+        register: cloud_redhat_com_pull_secret_tmp
       - set_fact:
-          cloud_redhat_com_pull_secret: '{{ cloud_redhat_com_pull_secret.user_input }}'
-      when: cloud_redhat_com_pull_secret is not defined or (cloud_redhat_com_pull_secret.user_input is defined)
+          cloud_redhat_com_pull_secret: '{{ cloud_redhat_com_pull_secret_tmp.user_input }}'
+      when: cloud_redhat_com_pull_secret is not defined
 
     - name: Set AWS_ACCESS_KEY_ID
       block:
       - pause:
           prompt: Enter your AWS Administrator account Access Key ID
-        register: AWS_ACCESS_KEY_ID
+        register: AWS_ACCESS_KEY_ID_tmp
       - set_fact:
-          AWS_ACCESS_KEY_ID: '{{ AWS_ACCESS_KEY_ID.user_input }}'
-      when: ('AWS_ACCESS_KEY_ID' not in ansible_env.keys()) or (AWS_ACCESS_KEY_ID.user_input is defined)
+          AWS_ACCESS_KEY_ID: '{{ AWS_ACCESS_KEY_ID_tmp.user_input }}'
+      when: ('AWS_ACCESS_KEY_ID' not in ansible_env.keys())
 
     - name: Set AWS_SECRET_ACCESS_KEY
       block:
       - pause:
           prompt: Enter your AWS Administrator account Access Key Secret
-        register: AWS_SECRET_ACCESS_KEY
+        register: AWS_SECRET_ACCESS_KEY_tmp
       - set_fact:
-          AWS_SECRET_ACCESS_KEY: '{{ AWS_SECRET_ACCESS_KEY.user_input }}'
-      when: ('AWS_SECRET_ACCESS_KEY' not in ansible_env.keys()) or (AWS_SECRET_ACCESS_KEY.user_input is defined)
+          AWS_SECRET_ACCESS_KEY: '{{ AWS_SECRET_ACCESS_KEY_tmp.user_input }}'
+      when: ('AWS_SECRET_ACCESS_KEY' not in ansible_env.keys())
 
   roles:
     - role: openshift-installer
