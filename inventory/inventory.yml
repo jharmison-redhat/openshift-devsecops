@@ -4,10 +4,5 @@ all:
   hosts:
     localhost:
       ansible_connection: local
-  children:
-    aws_ec2:
-      vars:
-        ansible_user: ec2-user
-        provision_type: aws
   vars:
     tmp_dir: '{{ playbook_dir }}/../tmp'

@@ -1,7 +1,5 @@
 {
     "pip": [
-        "boto3",
-        "botocore",
         "ansible"
     ],
     "dnf": [
