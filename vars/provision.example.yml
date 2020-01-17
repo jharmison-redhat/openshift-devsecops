@@ -16,11 +16,11 @@ openshift_base_domain: example.com
 cert_email_address: foo@example.com
 
 # The AWS region (i.e. `us-east-1`)
-
 # Current options:
   #~ - us-east-1
   #~ - us-east-2
   #~ - us-west-1
+# Please note that us-east-1 doesn't have enough elastic IPs allocated by default
 aws_region: us-east-1
 
 # The ID of the Route53 hosted zone
