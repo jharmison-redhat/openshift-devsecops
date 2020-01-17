@@ -1,6 +1,114 @@
 ---
 - hosts: localhost
+  tasks:
+    - name: Check for provision vars
+      stat:
+        path: ../vars/provision.yml
+      register: provision_vars
+
+    - name: Create an empty vars file if provision vars don't exist (prevents errors)
+      file:
+        path: ../vars/provision.yml
+        state: touch
+      when: not provision_vars.stat.exists
+
+- hosts: localhost
   vars_files:
     - ../vars/provision.yml
+
+  pre_tasks:
+    - name: Set cluster_name
+      block:
+      - pause:
+          prompt: Enter the DNS-safe name for your cluster
+        register: cluster_name
+
+      - set_fact:
+          cluster_name: '{{ cluster_name.user_input }}'
+      when: cluster_name is not defined or (cluster_name.user_input is defined)
+
+    - name: Set openshift_version
+      block:
+      - pause:
+          prompt: Enter a 4.X major/minor version number to deploy your cluster from
+        register: openshift_version
+      - set_fact:
+          openshift_version: '{{ openshift_version.user_input }}'
+      when: openshift_version is not defined or (openshift_version.user_input is defined)
+
+    - name: Set openshift_version
+      block:
+      - pause:
+          prompt: Enter a 4.X major/minor version number to deploy your cluster from
+        register: openshift_version
+      - set_fact:
+          openshift_version: '{{ openshift_version.user_input }}'
+      when: openshift_version is not defined or (openshift_version.user_input is defined)
+
+    - name: Set openshift_base_domain
+      block:
+      - pause:
+          prompt: Enter the base domain name for your Route-53 public hosted zone
+        register: openshift_base_domain
+      - set_fact:
+          openshift_base_domain: '{{ openshift_base_domain.user_input }}'
+      when: openshift_base_domain is not defined or (openshift_base_domain.user_input is defined)
+
+    - name: Set cert_email_address
+      block:
+      - pause:
+          prompt: Enter the email address with which to register your LetsEncrypt certificates
+        register: cert_email_address
+      - set_fact:
+          cert_email_address: '{{ cert_email_address.user_input }}'
+      when: cert_email_address is not defined or (cert_email_address.user_input is defined)
+
+    - name: Set aws_region
+      block:
+      - pause:
+          prompt: 'Enter a supported AWS region with enough elastic IPs to support installation (ex: us-east-2)'
+        register: aws_region
+      - set_fact:
+          aws_region: '{{ aws_region.user_input }}'
+      when: aws_region is not defined or (aws_region.user_input is defined)
+
+    - name: Set route53_hosted_zone_id
+      block:
+      - pause:
+          prompt: Enter the zone ID of the Route 53 hosted zone
+          echo: no
+        register: route53_hosted_zone_id
+      - set_fact:
+          route53_hosted_zone_id: '{{ route53_hosted_zone_id.user_input }}'
+      when: route53_hosted_zone_id is not defined or (route53_hosted_zone_id.user_input is defined)
+
+    - name: Set cloud_redhat_com_pull_secret
+      block:
+      - pause:
+          prompt: 'Enter your pull secret, copied from https://cloud.redhat.com/openshift/install/pull-secret'
+          echo: no
+        register: cloud_redhat_com_pull_secret
+      - set_fact:
+          cloud_redhat_com_pull_secret: '{{ cloud_redhat_com_pull_secret.user_input }}'
+      when: cloud_redhat_com_pull_secret is not defined or (cloud_redhat_com_pull_secret.user_input is defined)
+
+    - name: Set AWS_ACCESS_KEY_ID
+      block:
+      - pause:
+          prompt: Enter your AWS Administrator account Access Key ID
+        register: AWS_ACCESS_KEY_ID
+      - set_fact:
+          AWS_ACCESS_KEY_ID: '{{ AWS_ACCESS_KEY_ID.user_input }}'
+      when: ('AWS_ACCESS_KEY_ID' not in ansible_env.keys()) or (AWS_ACCESS_KEY_ID.user_input is defined)
+
+    - name: Set AWS_SECRET_ACCESS_KEY
+      block:
+      - pause:
+          prompt: Enter your AWS Administrator account Access Key Secret
+        register: AWS_SECRET_ACCESS_KEY
+      - set_fact:
+          AWS_SECRET_ACCESS_KEY: '{{ AWS_SECRET_ACCESS_KEY.user_input }}'
+      when: ('AWS_SECRET_ACCESS_KEY' not in ansible_env.keys()) or (AWS_SECRET_ACCESS_KEY.user_input is defined)
+
   roles:
     - role: openshift-installer
