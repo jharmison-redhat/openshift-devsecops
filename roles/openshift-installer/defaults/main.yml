@@ -1,0 +1,18 @@
+---
+key_pair_path: '{{ tmp_dir }}/{{ cluster_name }}.{{ openshift_base_domain }}.rsa'
+
+# A list of manually created users:
+manual_users:
+  - username: admin
+    password: 3ntr0PY!@
+    admin: yes
+
+# Generate a sequence of users
+sequence_users: |
+  {%- for username in lookup("sequence", "1-45:user%0i", wantlist=True) %}
+    - username: {{ username }}
+      password: openshift
+  {% endfor -%}
+
+# The users to create in OpenShift
+openshift_users: '{{ manual_users + sequence_users|from_yaml }}'

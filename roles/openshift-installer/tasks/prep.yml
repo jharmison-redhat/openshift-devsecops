@@ -1,6 +1,21 @@
 ---
 - name: Generate an SSH key for use with the cluster
   openssh_keypair:
-    path: '{{ tmp_dir }}/{{ cluster_name }}.{{ openshift_base_domain }}.rsa'
+    path: '{{ key_pair_path }}'
     size: 4096
     mode: 0600
+  register: cluster_key
+
+- name: Register the keypair with the SSH agent
+  shell: |
+    if ! ssh-add -l | greq -qF {{ key_pair_path }}; then
+        ssh-add {{ key_pair_path }} &>/dev/null && echo changed || echo failed
+    fi
+  register: ssh_add
+  changed_when: ssh_add.stdout_lines|last == 'changed'
+  failed_when: ssh_add.stdout_lines|last == 'failed'
+
+- name: Template install-config
+  template:
+    src: install-config.yaml.j2
+    dest: '{{ tmp_dir }}/install-config.yaml'
