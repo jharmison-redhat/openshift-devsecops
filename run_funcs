@@ -72,7 +72,7 @@ install_reqs() {
     if [ -n "${dnf_pkgs[@]}" ]; then
         for bin in $(echo "$dnf_pkgs" | $jq -r '.bin'); do
             if ! which $bin &>/dev/null; then
-                _dnf_install $(jq -r 'select(.bin == "'$bin'").pkg') || return 1
+                _dnf_install $($jq -r 'select(.bin == "'$bin'").pkg') || return 1
             fi
         done
     fi
