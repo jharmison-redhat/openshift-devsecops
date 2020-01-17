@@ -1,0 +1,19 @@
+---
+# A list of manually created users:
+manual_users:
+  - username: admin
+    password: 3ntr0PY!@
+    admin: yes
+
+# The number of users created, as a string
+number_of_users: "30"
+
+# Generate a sequence of users
+sequence_users: |
+  {%- for username in lookup("sequence", "1-" + number_of_users + ":user%0i", wantlist=True) %}
+    - username: {{ username }}
+      password: openshift
+  {% endfor -%}
+
+# The users to create in OpenShift
+openshift_users: '{{ manual_users + sequence_users|from_yaml }}'

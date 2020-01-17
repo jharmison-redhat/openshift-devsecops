@@ -1,0 +1,47 @@
+---
+- name: Create/update htpasswd file for users
+  htpasswd:
+    create: yes
+    crypt_scheme: bcrypt
+    name: '{{ user.username.replace(" ","")|lower }}'
+    password: '{{ user.password }}'
+    path: '{{ tmp_dir }}/users.htpasswd'
+  loop: '{{ openshift_users }}'
+  loop_control:
+    loop_var: user
+    label: '{{ user.username }}'
+
+- name: Create/update the htpasswd secret
+  k8s:
+    state: present
+    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        labels:
+          type: htpasswd
+        name: htpass-secret
+      type: Opaque
+      stringData:
+        htpasswd: '{{ lookup("file", tmp_dir + "/users.htpasswd") }}'
+
+- name: Create/update OAuth CR
+  k8s:
+    state: present
+    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    definition:
+      apiVersion: v1
+      kind: OAuth
+      metadata:
+        name: cluster
+        labels:
+          type: htpasswd
+      spec:
+        identityProviders:
+        - name: htpasswd
+        mappingMethod: claim
+        type: HTPasswd
+        htpasswd:
+          fileData:
+            name: htpass-secret

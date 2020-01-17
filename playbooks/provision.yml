@@ -103,3 +103,4 @@
 
   roles:
     - role: openshift-installer
+    - role: cluster-adjuster
