@@ -1,6 +1,7 @@
 {
     "pip": [
-        "ansible"
+        "ansible",
+        "passlib"
     ],
     "dnf": [
         {
