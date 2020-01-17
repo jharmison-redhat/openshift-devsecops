@@ -17,7 +17,13 @@
   changed_when: ssh_add.stdout_lines|last == 'changed'
   failed_when: ssh_add.stdout_lines|last == 'failed'
 
+- name: Check for existing kubeconfig
+  stat:
+    path: '{{ tmp_dir }}/auth/kubeconfig'
+  register: kubeconfig
+
 - name: Template install-config
   template:
     src: install-config.yaml.j2
     dest: '{{ tmp_dir }}/install-config.yaml'
+  when: not kubeconfig.stat.exists
