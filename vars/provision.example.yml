@@ -29,19 +29,3 @@ route53_hosted_zone_id: YP563J79RELJ4C
 # Pull secret, acquired from:
 # https://cloud.redhat.com/openshift/install/pull-secret
 cloud_redhat_com_pull_secret: '{"auths":{"cloud.openshift.com":{"auth":"b3B=","email":"foo@example.com"},"quay.io":{"auth":"b3B=","email":"foo@example.com"},"registry.connect.redhat.com":{"auth":"NTI=","email":"foo@example.com"},"registry.redhat.io":{"auth":"NTI=","email":"foo@example.com"}}}'
-
-# A list of manually created users:
-manual_users:
-  - username: admin
-    password: password
-    admin: yes
-
-# Generate a sequence of users
-sequence_users: |
-  {%- for username in lookup("sequence", "1-45:user%0i", wantlist=True) %}
-    - username: {{ username }}
-      password: openshift
-  {% endfor -%}
-
-# The users to create in OpenShift
-openshift_users: '{{ manual_users + sequence_users|from_yaml }}'
