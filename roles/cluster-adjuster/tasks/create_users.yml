@@ -42,8 +42,8 @@
       spec:
         identityProviders:
         - name: htpasswd
-        mappingMethod: claim
-        type: HTPasswd
-        htpasswd:
-          fileData:
-            name: htpass-secret
+          mappingMethod: claim
+          type: HTPasswd
+          htpasswd:
+            fileData:
+              name: htpass-secret
