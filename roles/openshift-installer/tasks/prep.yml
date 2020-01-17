@@ -8,7 +8,7 @@
 
 - name: Register the keypair with the SSH agent
   shell: |
-    if ! ssh-add -l | greq -qF {{ key_pair_path }}; then
+    if ! ssh-add -l | grep -qF {{ key_pair_path }}; then
         ssh-add {{ key_pair_path }} &>/dev/null && echo changed || echo failed
     fi
   register: ssh_add
