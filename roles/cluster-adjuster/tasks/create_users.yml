@@ -80,10 +80,10 @@
   shell: |
     export KUBECONFIG='{{ tmp_dir }}/auth/kubeconfig'
     $oc='{{ tmp_dir }}/oc'
-    admin_user={{ openshift_users|json_query('* | [?admin==true] | [0].username') }}
-    admin_password={{ openshift_users|json_query('* | [?admin==true] | [0].password') }}
-    if [ $($oc whoami) != $admin_user ]; then
-        {{ tmp_dir }}/oc login --insecure-skip-tls-verify=true -u $admin_user -p $admin_password && echo changed || echo failed
+    admin_user='{{ openshift_users|json_query('* | [?admin==true] | [0].username') }}'
+    admin_password='{{ openshift_users|json_query('* | [?admin==true] | [0].password') }}'
+    if [ $($oc whoami) != "$admin_user" ]; then
+        $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" && echo changed || echo failed
     else
         echo ok
     fi
