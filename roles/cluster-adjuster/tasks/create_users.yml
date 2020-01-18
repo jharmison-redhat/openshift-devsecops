@@ -76,6 +76,7 @@
       {% endif %}
       {% endfor %}
 
+# This is easier than jumping through API hoops myself to get to the token.
 - name: Login with a new admin to cache that token
   shell: |
     export KUBECONFIG='{{ tmp_dir }}/auth/kubeconfig'
