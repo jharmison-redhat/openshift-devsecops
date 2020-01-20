@@ -21,7 +21,7 @@
         --cert-file '{{ certificate_path }}/cert.pem' \
         --key-file '{{ certificate_path }}/key.pem' \
         --ca-file '{{ certificate_path }}/ca.pem' \
-        --fullchain-file '{{ certificate_path }}/fullchain.pem'
+        --fullchain-file '{{ certificate_path }}/fullchain.pem' --force
   args:
     creates: '{{ certificate_path }}/fullchain.pem'
   environment:
