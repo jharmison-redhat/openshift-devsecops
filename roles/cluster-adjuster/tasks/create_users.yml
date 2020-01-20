@@ -96,6 +96,9 @@
   register: oc_login
   changed_when: oc_login.stdout_lines|last == "changed"
   failed_when: oc_login.stdout_lines|last == "failed"
+  until: not oc_login.failed
+  retries: 5
+  delay: 30
 
 - name: Delete the generated kubeadmin secrets
   k8s:
