@@ -80,7 +80,7 @@
 - name: Login with a new admin to cache that token
   shell: |
     export KUBECONFIG='{{ tmp_dir }}/auth/kubeconfig'
-    $oc='{{ tmp_dir }}/oc'
+    oc='{{ tmp_dir }}/oc'
     admin_user='{{ openshift_users|json_query('* | [?admin==true] | [0].username') }}'
     admin_password='{{ openshift_users|json_query('* | [?admin==true] | [0].password') }}'
     if [ $($oc whoami) != "$admin_user" ]; then
