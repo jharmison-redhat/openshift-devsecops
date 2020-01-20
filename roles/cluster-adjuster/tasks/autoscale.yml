@@ -36,7 +36,7 @@
       metadata:
         name: '{{ item }}-autoscaler'
       spec:
-        minReplicas: 1
+        minReplicas: 0
         maxReplicas: 5
         scaleTargetRef:
           apiVersion: machine.openshift.io/v1beta1
