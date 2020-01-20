@@ -17,3 +17,5 @@ sequence_users: |
 
 # The users to create in OpenShift
 openshift_users: '{{ manual_users + sequence_users|from_yaml }}'
+
+certificate_path: '{{ tmp_dir }}/{{ cluster_name }}.{{ openshift_base_domain }}'

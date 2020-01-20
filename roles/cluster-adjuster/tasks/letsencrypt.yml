@@ -1,0 +1,59 @@
+---
+- name: Download acme.sh
+  git:
+    repo: https://github.com/neilpang/acme.sh
+    dest: '{{ tmp_dir }}/acme.sh'
+
+- name: Ensure certificate directory exists
+  file:
+    path: '{{ certificate_path }}'
+    state: directory
+
+- name: Get necessary certs
+  shell: |
+    oc='{{ tmp_dir }}/oc'
+    acme='{{ tmp_dir }}/acme.sh/acme.sh'
+
+    api_endpoint=$($oc whoami --show-server | cut -d: -f2 | cut -d/ -f3)
+    wildcard_endpoint=$($oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}')
+
+    $acme --issue -d $api_endpoint -d \*.$wildcard_endpoint --dns dns_aws \
+        --cert-file '{{ certificate_path }}/cert.pem' \
+        --key-file '{{ certificate_path }}/key.pem' \
+        --ca-file '{{ certificate_path }}/ca.pem' \
+        --fullchain-file '{{ certificate_path }}/fullchain.pem'
+  args:
+    creates: '{{ certificate_path }}/fullchain.pem'
+  environment:
+    AWS_ACCESS_KEY_ID: '{{ AWS_ACCESS_KEY_ID|default(ansible_env["AWS_ACCESS_KEY_ID"]) }}'
+    AWS_SECRET_ACCESS_KEY: '{{ AWS_SECRET_ACCESS_KEY|default(ansible_env["AWS_SECRET_ACCESS_KEY"]) }}'
+
+- name: Create the new TLS secrets
+  k8s:
+    state: present
+    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    namespace: openshift-ingress
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: router-certs
+      type: kubernetes.io/tls
+      stringData:
+        tls.crt: |
+          {{ lookup("file", certificate_path + "/fullchain.pem") }}
+        tls.key: |
+          {{ lookup("file", certificate_path + "/key.pem") }}
+
+- name: Update ingress controller to use new certs
+  k8s:
+    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    namespace: openshift-ingress-operator
+    merge_type: merge
+    definition:
+      kind: IngressController
+      metadata:
+        name: default
+      spec:
+        defaultCertificate:
+          name: router-certs
