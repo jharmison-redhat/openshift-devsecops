@@ -7,14 +7,14 @@ verbose_flag=''
 vault_flag=''
 become_flag=''
 extra=''
-playbook=''
+playbooks=()
 inventory=''
 
 . run_funcs
 
 usage="usage: $(basename $0) [-h|--help] | [-v|--verbose] [-V|--vault] [-b|--become] \\
   [(-e |--extra=)VARS] [(-i |--inventory=)FILE] [(-S |--source=)file/to/source] \\
-  [[path/to/]PLAY[.yml]]"
+  [[path/to/]PLAY[.yml]] [PLAY[.yml]]..."
 
 
 while [ "$#" -gt 0 ]; do
@@ -43,10 +43,16 @@ $usage
                                   (with or without the .yml extension) to run.
                                   If omitted, you will be presented with a menu
                                   to select your play from if there is more than
-                                  one available.
+                                  one available. If your playbook is outside of
+                                  the directory 'playbooks/', you can specify
+                                  the absolute path or the path relative to
+                                  run.sh. Multiple playbooks may be specified,
+                                  and they will be run sequentially (halting if
+                                  any playbook fails).
                                 NOTE: Playbooks must be in the 'playbooks/'
                                   subdirectory in the same path as this script
-                                  to be identified for the menu
+                                  to be identified by the menu presented if none
+                                  are provided on the command line.
 EOF
         exit                                                    ;;
         -v|--verbose)
@@ -78,11 +84,11 @@ EOF
             fi                                                  ;;
         *)
             if [ -f "playbooks/${1}.yml" ]; then
-                playbook="playbooks/${1}.yml"
+                playbooks+=("playbooks/${1}.yml")
             elif [ -f "playbooks/${1}" ]; then
-                playbook="playbooks/${1}"
+                playbooks+=("playbooks/${1}")
             elif [ -f "${1}" ]; then
-                playbook="${1}"
+                playbooks+=("${1}")
             else
                 echo -e "Error: $1 appears to be an invalid playbook.\n$usage" >&2
                 exit 1
@@ -98,15 +104,15 @@ fi
 
 args="$inventory $verbose_flag $become_flag $vault_flag"
 
-if [ -z "$playbook" ]; then
+if [ -z "${playbooks[*]}" ]; then
     if [ $(ls playbooks/ | wc -l) -eq 1 ]; then
-        playbook="playbooks/$(ls playbooks/)"
+        playbooks=("playbooks/$(ls playbooks/)")
     else
         echo 'Choose a play to run:'
         export PS3='> '
         select choice in $(ls playbooks/ | sed 's/\.yml//g'); do
             if [ "$choice" ]; then
-                playbook="playbooks/${choice}.yml"
+                playbooks=("playbooks/${choice}.yml")
                 break
             else
                 echo "Invalid selection, $REPLY, please select an index position from above." >&2
@@ -119,8 +125,10 @@ if [ -f "ansible.cfg" ]; then
     export ANSIBLE_CONFIG="${thisdir}/ansible.cfg"
 fi
 
-if [ -n "$extra" ]; then
-    ansible-playbook ${args} -e "$extra" "$playbook"
-else
-    ansible-playbook ${args} "$playbook"
-fi
+for playbook in "${playbooks[@]}"; do
+    if [ -n "$extra" ]; then
+        ansible-playbook ${args} -e "$extra" "$playbook" || exit $?
+    else
+        ansible-playbook ${args} "$playbook" || exit $?
+    fi
+done
