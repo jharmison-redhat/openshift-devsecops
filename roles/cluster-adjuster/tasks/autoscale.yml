@@ -1,0 +1,72 @@
+---
+- name: Recover existing machinesets
+  k8s_info:
+    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    api_version: machine.openshift.io/v1beta1
+    kind: MachineSet
+    namespace: openshift-machine-api
+  register: machinesets
+
+- name: Adjust machineset instancetype
+  k8s:
+    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    namespace: openshift-machine-api
+    merge_type: merge
+    definition:
+      apiVersion: machine.openshift.io/v1beta1
+      kind: MachineSet
+      metadata:
+        name: '{{ item }}'
+      spec:
+        template:
+          spec:
+            providerSpec:
+              value:
+                instaceType: m4.2xlarge
+  loop: '{{ machinesets|json_query("resources[].metadata.name") }}'
+
+- name: Create MachineAutoscaler for each machineset
+  k8s:
+    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    namespace: openshift-machine-api
+    apply: yes
+    definition:
+      apiVersion: autoscaling.openshift.io/v1beta1
+      kind: MachineAutoscaler
+      metadata:
+        name: '{{ item }}-autoscaler'
+      spec:
+        minReplicas: 1
+        maxReplicas: 5
+        scaleTargetRef:
+          apiVersion: machine.openshift.io/v1beta1
+          kind: MachineSet
+          name: '{{ item }}'
+  loop: '{{ machinesets|json_query("resources[].metadata.name") }}'
+
+- name: Create ClusterAutoscaler
+  k8s:
+    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    namespace: openshift-machine-api
+    apply: yes
+    definition:
+      apiVersion: autoscaling.openshift.io/v1
+      kind: ClusterAutoscaler
+      metadata:
+        name: default
+      spec:
+        podPriorityThreshhold: -10
+        resourceLimits:
+          maxNodesTotal: 15
+          cores:
+            min: 8
+            max: 100
+          memory:
+            min: 32
+            max: 256
+        scaleDown:
+          enabled: true
+          delayAfterAdd: 10m
+          delayAfterDelete: 5m
+          delayAfterFailure: 30s
+          unneededTime: 60s
