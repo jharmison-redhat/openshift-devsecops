@@ -61,11 +61,21 @@
     url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{ openshift_version }}/openshift-{{ item.type }}-linux-{{ openshift_version_minor }}.tar.gz
     checksum: sha256:{{ item.sum }}
     dest: '{{ tmp_dir }}/openshift-{{ item.type }}.tar.gz'
+  register: downloads
   loop:
     - type: install
       sum: '{{ openshift_install_sum }}'
     - type: client
       sum: '{{ openshift_client_sum }}'
+
+- name: Remove untarred installers when an update was downloaded
+  file:
+    path: '{{ tmp_dir }}/{{ item }}'
+    state: absent
+  loop:
+    - oc
+    - openshift-install
+  when: downloads|json_query("length(results[?changed]) > `0`")
 
 - name: Untar the archives
   unarchive:
