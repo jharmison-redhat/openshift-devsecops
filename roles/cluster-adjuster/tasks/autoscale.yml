@@ -22,7 +22,7 @@
           spec:
             providerSpec:
               value:
-                instaceType: m4.2xlarge
+                instanceType: m4.2xlarge
   loop: '{{ machinesets|json_query("resources[].metadata.name") }}'
 
 - name: Create MachineAutoscaler for each machineset
