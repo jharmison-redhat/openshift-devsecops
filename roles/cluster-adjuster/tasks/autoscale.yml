@@ -1,7 +1,7 @@
 ---
 - name: Recover existing machinesets
   k8s_info:
-    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    kubeconfig: '{{ kubeconfig }}'
     api_version: machine.openshift.io/v1beta1
     kind: MachineSet
     namespace: openshift-machine-api
@@ -9,7 +9,7 @@
 
 - name: Adjust machineset instancetype
   k8s:
-    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    kubeconfig: '{{ kubeconfig }}'
     namespace: openshift-machine-api
     merge_type: merge
     definition:
@@ -27,7 +27,7 @@
 
 - name: Create MachineAutoscaler for each machineset
   k8s:
-    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    kubeconfig: '{{ kubeconfig }}'
     namespace: openshift-machine-api
     apply: yes
     definition:
@@ -46,7 +46,7 @@
 
 - name: Create ClusterAutoscaler
   k8s:
-    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    kubeconfig: '{{ kubeconfig }}'
     namespace: openshift-machine-api
     apply: yes
     definition:

@@ -6,3 +6,4 @@ all:
       ansible_connection: local
   vars:
     tmp_dir: '{{ playbook_dir }}/../tmp'
+    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'

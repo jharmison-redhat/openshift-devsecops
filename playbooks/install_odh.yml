@@ -5,7 +5,7 @@
   tasks:
     - name: Create ODH namespace
       k8s:
-        kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+        kubeconfig: '{{ kubeconfig }}'
         api_version: v1
         kind: Namespace
         state: present
@@ -13,7 +13,7 @@
 
     - name: Subscribe odh-test to ODH
       k8s:
-        kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+        kubeconfig: '{{ kubeconfig }}'
         namespace: odh-test
         apply: yes
         definition:
@@ -31,7 +31,7 @@
 
     - name: Create an OperatorGroup for ODH operator
       k8s:
-        kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+        kubeconfig: '{{ kubeconfig }}'
         namespace: odh-test
         apply: yes
         definition:
@@ -45,7 +45,7 @@
 
     - name: Create ODH deployment
       k8s:
-        kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+        kubeconfig: '{{ kubeconfig }}'
         namespace: odh-test
         apply: yes
         definition:

@@ -31,7 +31,7 @@
 - name: Create the new TLS secrets
   k8s:
     state: present
-    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    kubeconfig: '{{ kubeconfig }}'
     namespace: openshift-ingress
     definition:
       apiVersion: v1
@@ -47,7 +47,7 @@
 
 - name: Update ingress controller to use new certs
   k8s:
-    kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+    kubeconfig: '{{ kubeconfig }}'
     namespace: openshift-ingress-operator
     merge_type: merge
     definition:
