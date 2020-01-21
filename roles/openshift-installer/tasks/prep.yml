@@ -11,7 +11,11 @@
     if ! ssh-add -l | grep -qF {{ key_pair_path }}; then
         ssh-add {{ key_pair_path }} &>/dev/null && echo changed || echo failed
     else
-        echo ok
+        if ! ssh-add -T {{ key_pair_path }}.pub; then
+            ssh-add {{ key_pair_path }} &>/dev/null && echo changed || echo failed
+        else
+            echo ok
+        fi
     fi
   register: ssh_add
   changed_when: ssh_add.stdout_lines|last == 'changed'
