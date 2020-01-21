@@ -1,0 +1,164 @@
+---
+- hosts: localhost
+  vars_files:
+    - ../vars/provision.yml
+  tasks:
+    - name: Create ODH namespace
+      k8s:
+        kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+        api_version: v1
+        kind: Namespace
+        state: present
+        name: odh-test
+
+    - name: Subscribe odh-test to ODH
+      k8s:
+        kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+        namespace: odh-test
+        apply: yes
+        definition:
+          apiVersion: operators.coreos.com/v1alpha1
+          kind: Subscription
+          metadata:
+            name: opendatahub-operator
+          spec:
+            channel: alpha
+            installPlanApproval: Automatic
+            name: opendatahub-operator
+            source: community-operators
+            sourceNamespace: openshift-marketplace
+            startingCSV: opendatahub-operator.v0.5.0
+
+    - name: Create an OperatorGroup for ODH operator
+      k8s:
+        kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+        namespace: odh-test
+        apply: yes
+        definition:
+          apiVersion: operators.coreos.com/v1
+          kind: OperatorGroup
+          metadata:
+            name: odh-test-og
+          spec:
+            targetNamespaces:
+              - odh-test
+
+    - name: Create ODH deployment
+      k8s:
+        kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+        namespace: odh-test
+        apply: yes
+        definition:
+          apiVersion: opendatahub.io/v1alpha1
+          kind: OpenDataHub
+          metadata:
+            name: example-opendatahub
+          spec:
+            ai-library:
+              odh_deploy: false
+            aicoe-jupyterhub:
+              db_memory: 1Gi
+              deploy_all_notebooks: false
+              gpu_mode: ''
+              user_pvc_size: 2Gi
+              jupyterhub_memory: 1Gi
+              notebook_cpu: 1
+              notebook_image: 's2i-minimal-notebook:3.6'
+              notebook_memory: 2Gi
+              odh_deploy: true
+              registry: quay.io
+              repository: odh-jupyterhub
+              s3_endpoint_url: ''
+              spark_configmap_template: jupyterhub-spark-operator-configmap
+              spark_cpu: 3
+              spark_home: /opt/app-root/lib/python3.6/site-packages/pyspark/
+              spark_image: 'quay.io/opendatahub/spark-cluster-image:spark22python36'
+              spark_master_nodes: 1
+              spark_memory: 4Gi
+              spark_pyspark_driver_python: jupyter
+              spark_pyspark_driver_python_opts: notebook
+              spark_pyspark_submit_args: >-
+                --conf spark.cores.max=6 --conf spark.executor.instances=2 --conf
+                spark.executor.memory=3G --conf spark.executor.cores=3 --conf
+                spark.driver.memory=4G --conf spark.jars.ivy=$HOME --packages
+                com.amazonaws:aws-java-sdk:1.7.4,org.apache.hadoop:hadoop-aws:2.7.3
+                pyspark-shell
+              spark_pythonpath: >-
+                $PYTHONPATH:/opt/app-root/lib/python3.6/site-packages/:/opt/app-root/lib/python3.6/site-packages/pyspark/python/:/opt/app-root/lib/python3.6/site-packages/pyspark/python/lib/py4j-0.8.2.1-src.zip
+              spark_worker_nodes: 2
+              storage_class: ''
+            argo:
+              odh_deploy: false
+            beakerx:
+              odh_deploy: false
+            data-catalog:
+              aws_access_key_id: '{{ AWS_ACCESS_KEY_ID|default(ansible_env["AWS_ACCESS_KEY_ID"]) }}'
+              aws_secret_access_key: '{{ AWS_SECRET_ACCESS_KEY|default(ansible_env["AWS_SECRET_ACCESS_KEY"]) }}'
+              hive-metastore:
+                database:
+                  driver: org.postgresql.Driver
+                  image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
+                  memory_limit: 1Gi
+                  password: password
+                  username: hiveuser
+                  volume_capacity: 10Gi
+                warehouse_volume_capacity: 10Gi
+              hue:
+                database:
+                  image: registry.access.redhat.com/rhscl/mysql-57-rhel7
+                  memory_limit: 1Gi
+                  password: password
+                  root_password: root
+                  username: hueuser
+                  volume_capacity: 10Gi
+                hue_secret_key: secret_hue
+              odh_deploy: true
+              s3_endpoint: https://s3.{{ aws_region }}.amazonaws.com
+              s3_is_secure: true
+              s3_port: 443
+              spark-cluster:
+                master_cpu: 1
+                master_memory: 1Gi
+                master_node_count: 1
+                spark_cluster_name: spark-cluster-data-catalog
+                spark_image: 'quay.io/opendatahub/spark-cluster-image:spark24'
+                worker_cpu: 2
+                worker_memory: 2Gi
+                worker_node_count: 2
+              thrift-server:
+                spark_cluster_port: 7077
+                spark_max_cores: 6
+            kafka:
+              kafka_broker_replicas: 3
+              kafka_cluster_name: odh-message-bus
+              kafka_zookeeper_replicas: 3
+              odh_deploy: false
+            monitoring:
+              enable_pushgateway: false
+              odh_deploy: true
+            seldon:
+              odh_deploy: false
+            spark-operator:
+              master_cpu: 1
+              master_memory: 1Gi
+              master_node_count: 0
+              odh_deploy: true
+              worker_cpu: 2
+              worker_memory: 2Gi
+              worker_node_count: 0
+            superset:
+              data_volume_size: 512Mi
+              odh_deploy: false
+              secret_key: thisISaSECRET_1234
+              sqlalchemy_db_uri: 'sqlite:////var/lib/superset/superset.db'
+              superset_admin:
+                admin_email: admin@fab.org
+                admin_fname: admin
+                admin_lname: admin
+                admin_psw: 7ujmko0
+                admin_usr: userKPJ
+              version: 0.34.0
+      register: odh_subscription
+      until: not odh_subscription.failed
+      retries: 5
+      delay: 30
