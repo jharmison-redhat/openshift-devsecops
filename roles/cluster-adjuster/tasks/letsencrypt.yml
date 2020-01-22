@@ -25,7 +25,7 @@
     acme='{{ tmp_dir }}/acme.sh/acme.sh'
 
     abort=0
-    while ! api_endpoint=$($oc whoami --show-server | cut -d: -f2 | cut -d/ -f3); do
+    while ! api_endpoint=$($oc whoami --show-server); do
         sleep 5
         ((abort++))
         if [ $abort -ge 5 ]; then
@@ -33,9 +33,10 @@
             exit 1
         fi
     done
+    api_endpoint=$(echo "$api_endpoint" | cut -d: -f2 | cut -d/ -f3)
 
     abort=0
-    while ! wildcard_endpoint=$($oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}'); do
+    while ! wildcard_endpoint=\*.$($oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}'); do
         sleep 5
         ((abort++))
         if [ $abort -ge 5 ]; then
@@ -44,11 +45,19 @@
         fi
     done
 
-    $acme --issue -d $api_endpoint -d \*.$wildcard_endpoint --dns dns_aws \
-        --cert-file '{{ certificate_path }}/cert.pem' \
-        --key-file '{{ certificate_path }}/key.pem' \
-        --ca-file '{{ certificate_path }}/ca.pem' \
-        --fullchain-file '{{ certificate_path }}/fullchain.pem' --force
+    acme_args=(-d "$api_endpoint" -d "$wildcard_endpoint" --dns dns_aws
+        --cert-file '{{ certificate_path }}/cert.pem'
+        --key-file '{{ certificate_path }}/key.pem'
+        --ca-file '{{ certificate_path }}/ca.pem'
+        --fullchain-file '{{ certificate_path }}/fullchain.pem'
+    )
+    if $acme --list | grep -qF "$api_endpoint" && $acme --list | grep -qF "$wildcard_endpoint"; then
+        if ! $acme --install-cert "${acme_args[@]}"; then
+            $acme --renew "${acme_args[@]}" || exit 1
+        fi
+    else
+        $acme --issue "${acme_args[@]}" || exit 1
+    fi
   args:
     creates: '{{ certificate_path }}/fullchain.pem'
   environment:
