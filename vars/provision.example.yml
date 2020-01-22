@@ -12,9 +12,6 @@ openshift_version: "4.2"
 # Example: If you set this to `example.com`, a DNS entry for `<cluster_name>.example.com` will be created)
 openshift_base_domain: example.com
 
-# The email address to use when generating Lets Encrypt certs for the cluster.
-cert_email_address: foo@example.com
-
 # The AWS region (i.e. `us-east-1`)
 # Current options:
   #~ - us-east-1
@@ -29,3 +26,22 @@ route53_hosted_zone_id: YP563J79RELJ4C
 # Pull secret, acquired from:
 # https://cloud.redhat.com/openshift/install/pull-secret
 cloud_redhat_com_pull_secret: '{"auths":{"cloud.openshift.com":{"auth":"b3B=","email":"foo@example.com"},"quay.io":{"auth":"b3B=","email":"foo@example.com"},"registry.connect.redhat.com":{"auth":"NTI=","email":"foo@example.com"},"registry.redhat.io":{"auth":"NTI=","email":"foo@example.com"}}}'
+
+# A list of manually created users:
+manual_users:
+  - username: openshift-admin
+    password: RedHat1
+    admin: yes
+
+# The number of users created, as a string
+number_of_users: "30"
+
+# Generate a sequence of users
+sequence_users: |
+  {%- for username in lookup("sequence", "1-" + number_of_users + ":user%0i", wantlist=True) %}
+    - username: {{ username }}
+      password: openshift
+  {% endfor -%}
+
+# The users to create in OpenShift
+openshift_users: '{{ manual_users + sequence_users|from_yaml }}'
