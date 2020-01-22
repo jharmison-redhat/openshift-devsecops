@@ -11,9 +11,9 @@
 
 - name: Get necessary certs
   shell: |
+    # Make very sure we're logged in
     export KUBECONFIG='{{ kubeconfig }}'
     oc='{{ tmp_dir }}/oc'
-
     admin_user='{{ user.username }}'
     admin_password='{{ user.password }}'
     if [ $($oc whoami) != "$admin_user" ]; then
@@ -22,8 +22,7 @@
         echo ok
     fi
 
-    acme='{{ tmp_dir }}/acme.sh/acme.sh'
-
+    # Make very sure we've got the right endpoints
     abort=0
     while ! api_endpoint=$($oc whoami --show-server); do
         sleep 5
@@ -34,7 +33,6 @@
         fi
     done
     api_endpoint=$(echo "$api_endpoint" | cut -d: -f2 | cut -d/ -f3)
-
     abort=0
     while ! wildcard_endpoint=\*.$($oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}'); do
         sleep 5
@@ -45,17 +43,23 @@
         fi
     done
 
+    # Define our full path and reusable args
+    acme='{{ tmp_dir }}/acme.sh/acme.sh'
     acme_args=(-d "$api_endpoint" -d "$wildcard_endpoint" --dns dns_aws
         --cert-file '{{ certificate_path }}/cert.pem'
         --key-file '{{ certificate_path }}/key.pem'
         --ca-file '{{ certificate_path }}/ca.pem'
         --fullchain-file '{{ certificate_path }}/fullchain.pem'
     )
+    # If there is a cert issued already
     if $acme --list | grep -qF "$api_endpoint" && $acme --list | grep -qF "$wildcard_endpoint"; then
+        # Try to install it
         if ! $acme --install-cert "${acme_args[@]}"; then
-            $acme --renew "${acme_args[@]}" || exit 1
+            # See about renewing it
+            $acme --renew "${acme_args[@]}" --force || exit 1
         fi
     else
+        # If no certs issued, request them
         $acme --issue "${acme_args[@]}" || exit 1
     fi
   args:
