@@ -14,3 +14,11 @@
   loop: '{{ sequence_users|from_yaml|json_query("[].username") }}'
   loop_control:
     loop_var: username
+
+- name: Allow CICD projects to manipulate Task projects
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "service_manipulation.yml.j2")|from_yaml }}'
+  loop: '{{ sequence_users|from_yaml|json_query("[].username") }}'
+  loop_control:
+    loop_var: username
