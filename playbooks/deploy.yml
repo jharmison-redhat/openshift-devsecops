@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  vars_files:
+    - ../vars/provision.yml
+    - ../vars/devsecops.yml
+
+  roles:
+    - role: devsecops

@@ -1,0 +1,15 @@
+---
+
+projects:
+  - name: dev
+    disp: Tasks - Dev
+    env: dev
+  - name: stage
+    disp: Tasks - Stage
+    env: stage
+  - name: prod
+    disp: Tasks - Prod
+    env: prod
+  - name: cicd
+    disp: CI/CD
+

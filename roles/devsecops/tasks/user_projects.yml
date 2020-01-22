@@ -1,0 +1,16 @@
+---
+- name: Generate projects per-user
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "project.yml.j2")|from_yaml }}'
+  loop: '{{ sequence_users|from_yaml|json_query("[].username") }}'
+  loop_control:
+    loop_var: username
+
+- name: Make users admins of their projects
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "rolebinding.yml.j2")|from_yaml }}'
+  loop: '{{ sequence_users|from_yaml|json_query("[].username") }}'
+  loop_control:
+    loop_var: username

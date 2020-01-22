@@ -1,0 +1,11 @@
+{% for project in projects %}
+- apiVersion: project.openshift.io/v1
+  kind: Project
+  metadata:
+    name: '{{ username }}-{{ project.name }}'
+    labels:
+      name: '{{ username }}-{{ project.name }}'
+      environment: '{{ project.env|default(omit) }}'
+    annotations:
+      openshift.io/display-name: '{{ username|capitalize }} {{ project.disp }}'
+{% endfor %}
