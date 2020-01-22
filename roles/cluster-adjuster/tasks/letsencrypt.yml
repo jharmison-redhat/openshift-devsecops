@@ -11,11 +11,38 @@
 
 - name: Get necessary certs
   shell: |
+    export KUBECONFIG='{{ kubeconfig }}'
     oc='{{ tmp_dir }}/oc'
+
+    admin_user='{{ user.username }}'
+    admin_password='{{ user.password }}'
+    if [ $($oc whoami) != "$admin_user" ]; then
+        $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" && echo changed || echo failed
+    else
+        echo ok
+    fi
+
     acme='{{ tmp_dir }}/acme.sh/acme.sh'
 
-    api_endpoint=$($oc whoami --show-server | cut -d: -f2 | cut -d/ -f3)
-    wildcard_endpoint=$($oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}')
+    abort=0
+    while ! api_endpoint=$($oc whoami --show-server | cut -d: -f2 | cut -d/ -f3); do
+        sleep 5
+        ((abort++))
+        if [ $abort -ge 5 ]; then
+            echo "Unable to get API endpoint address" >&2
+            exit 1
+        fi
+    done
+
+    abort=0
+    while ! wildcard_endpoint=$($oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}'); do
+        sleep 5
+        ((abort++))
+        if [ $abort -ge 5 ]; then
+            echo "Unable to get API endpoint address" >&2
+            exit 1
+        fi
+    done
 
     $acme --issue -d $api_endpoint -d \*.$wildcard_endpoint --dns dns_aws \
         --cert-file '{{ certificate_path }}/cert.pem' \
@@ -27,6 +54,11 @@
   environment:
     AWS_ACCESS_KEY_ID: '{{ AWS_ACCESS_KEY_ID|default(ansible_env["AWS_ACCESS_KEY_ID"]) }}'
     AWS_SECRET_ACCESS_KEY: '{{ AWS_SECRET_ACCESS_KEY|default(ansible_env["AWS_SECRET_ACCESS_KEY"]) }}'
+  loop:
+    - "{{ openshift_users|json_query('[?admin] | [0]') }}"
+  loop_control:
+    loop_var: user
+    label: '{{ user.username }}'
 
 - name: Create the new TLS secrets
   k8s:
