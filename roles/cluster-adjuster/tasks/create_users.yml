@@ -111,3 +111,20 @@
       kind: Secret
       metadata:
         name: kubeadmin
+
+- name: Create User objects for each HTPasswd user
+  k8s:
+    state: present
+    kubeconfig: '{{ kubeconfig }}'
+    apply: yes
+    definition:
+      apiVersion: user.openshift.io/v1
+      kind: User
+      identities:
+      - 'htpasswd:{{ user.username }}'
+      metadata:
+        name: '{{ user.username }}'
+  loop: '{{ openshift_users }}'
+  loop_control:
+    loop_var: user
+    label: '{{ user.username }}'
