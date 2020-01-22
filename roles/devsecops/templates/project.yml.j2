@@ -8,4 +8,5 @@
       environment: '{{ project.env|default(omit) }}'
     annotations:
       openshift.io/display-name: '{{ username|capitalize }} {{ project.disp }}'
+      demo: openshift-cd-{{ username }}
 {% endfor %}
