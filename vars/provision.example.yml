@@ -6,7 +6,7 @@ cluster_name: openshift
 
 # The OpenShift version to install
 # MUST BE 4.X!!!
-openshift_version: "4.2"
+openshift_version: "4.3"
 
 # The base subdomain to use for your cluster.
 # Example: If you set this to `example.com`, a DNS entry for `<cluster_name>.example.com` will be created)
