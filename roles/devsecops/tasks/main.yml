@@ -1,2 +1,3 @@
 ---
 - import_tasks: user_projects.yml
+- import_tasks: jenkins_operator.yml

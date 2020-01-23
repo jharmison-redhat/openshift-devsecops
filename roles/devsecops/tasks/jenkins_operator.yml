@@ -1,0 +1,69 @@
+---
+- name: Subscribe to Jenkins operator
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: jenkins-operator
+        namespace: openshift-operators
+      spec:
+        channel: alpha
+        installPlanApproval: Automatic
+        name: jenkins-operator
+        source: community-operators
+        sourceNamespace: openshift-marketplace
+        startingCSV: jenkins-operator.v0.2.2
+
+- name: Allow Jenkins operator serviceaccount to create nonroot pods
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    merge_type: merge
+    definition:
+      apiVersion: security.openshift.io/v1
+      kind: SecurityContextConstraints
+      metadata:
+        name: nonroot
+      users:
+      - system:serviceaccount:openshift-operators:jenkins-operator
+
+- name: Create a Jenkins instance for each user
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "jenkins_deployment.yml.j2")|from_yaml }}'
+  loop: '{{ sequence_users|from_yaml|json_query("[].username") }}'
+  loop_control:
+    loop_var: username
+
+- name: Create a rolebinding to allow the Jenkins serviceaccounts access to needed resources
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "jenkins_serviceaccount_edit.yml.j2")|from_yaml }}'
+  loop: '{{ sequence_users|from_yaml|json_query("[].username") }}'
+  loop_control:
+    loop_var: username
+
+- name: Create routes for Jenkins instances
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "jenkins_route.yml.j2")|from_yaml }}'
+  loop: '{{ sequence_users|from_yaml|json_query("[].username") }}'
+  loop_control:
+    loop_var: username
+
+- name: Update the Jenkins serviceaccounts with the OAuth annotation for the routes
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: jenkins-operator-{{ username }}-jenkins
+        namespace: '{{ username }}-cicd'
+        annotations:
+          serviceaccounts.openshift.io/oauth-redirectreference.primary: |
+            '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"{{ username }}-jenkins"}}'
+  loop: '{{ sequence_users|from_yaml|json_query("[].username") }}'
+  loop_control:
+    loop_var: username
