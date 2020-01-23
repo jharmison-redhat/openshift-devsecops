@@ -3,7 +3,9 @@ baseDomain: {{ openshift_base_domain }}
 compute:
 - hyperthreading: Enabled
   name: worker
-  platform: {}
+  platform:
+    aws:
+      type: m4.2xlarge
   replicas: 3
 controlPlane:
   hyperthreading: Enabled
