@@ -12,6 +12,7 @@
         ssh-add {{ key_pair_path }} &>/dev/null && echo changed || echo failed
     else
         if ! ssh-add -T {{ key_pair_path }}.pub; then
+            ssh-add -d {{ key_pair_path }} &>/dev/null
             ssh-add {{ key_pair_path }} &>/dev/null && echo changed || echo failed
         else
             echo ok
