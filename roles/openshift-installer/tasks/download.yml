@@ -18,12 +18,12 @@
 - name: Grab the latest release checksums
   get_url:
     url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{ openshift_version }}/sha256sum.txt
-    dest: '{{ tmp_dir }}/sha256sum.txt'
+    dest: '{{ tmp_dir }}/{{ openshift_version_minor }}-sha256sum.txt'
 
 - name: Grab the signature file
   get_url:
     url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{ openshift_version }}/sha256sum.txt.sig
-    dest: '{{ tmp_dir }}/sha256sum.txt.sig'
+    dest: '{{ tmp_dir }}/{{ openshift_version_minor }}-sha256sum.txt.sig'
 
 - name: Import RH key, verify signature
   shell: |
@@ -35,21 +35,21 @@
     cd {{ tmp_dir }}
     gpg --list-keys |& grep -qF security@redhat.com || gpg import rh_key.txt
     gpg --list-keys |& grep -q 'ultimate.*security@redhat\.com' || trust_key
-    gpg --verify sha256sum.txt.sig |& grep -qF 'Good signature from "Red Hat' || exit 1
+    gpg --verify {{ openshift_version_minor }}-sha256sum.txt.sig |& grep -qF 'Good signature from "Red Hat' || exit 1
   register: import_key
   changed_when: '"changed" in import_key.stdout_lines'
 
 - name: Read expected sha256 for installer and client
   set_fact:
     openshift_install_sum: >-
-      {{ (lookup('file', '{{ tmp_dir }}/sha256sum.txt') |
+      {{ (lookup('file', '{{ tmp_dir }}/{{ openshift_version_minor }}-sha256sum.txt') |
         regex_search('\n?(\S*)\s*openshift-install-linux-' +
           openshift_version_minor|regex_escape() +
           '\.tar\.gz', multiline=true
         )).split() | first
       }}
     openshift_client_sum: >-
-      {{ (lookup('file', '{{ tmp_dir }}/sha256sum.txt') |
+      {{ (lookup('file', '{{ tmp_dir }}/{{ openshift_version_minor }}-sha256sum.txt') |
         regex_search('\n?(\S*)\s*openshift-client-linux-' +
           openshift_version_minor|regex_escape() +
           '\.tar\.gz', multiline=true
