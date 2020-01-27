@@ -1,0 +1,13 @@
+{% for machineset in machinesets|json_query("resources[].metadata.name") %}
+- apiVersion: autoscaling.openshift.io/v1beta1
+  kind: MachineAutoscaler
+  metadata:
+    name: '{{ machineset }}-autoscaler'
+  spec:
+    minReplicas: 0
+    maxReplicas: 5
+    scaleTargetRef:
+      apiVersion: machine.openshift.io/v1beta1
+      kind: MachineSet
+      name: '{{ machineset }}'
+{% endfor %}

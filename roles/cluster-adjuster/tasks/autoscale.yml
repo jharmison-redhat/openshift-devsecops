@@ -12,37 +12,14 @@
     kubeconfig: '{{ kubeconfig }}'
     namespace: openshift-machine-api
     merge_type: merge
-    definition:
-      apiVersion: machine.openshift.io/v1beta1
-      kind: MachineSet
-      metadata:
-        name: '{{ item }}'
-      spec:
-        template:
-          spec:
-            providerSpec:
-              value:
-                instanceType: m4.2xlarge
-  loop: '{{ machinesets|json_query("resources[].metadata.name") }}'
+    definition: '{{ lookup("template", "machinesets.yml.j2")|from_yaml }}'
 
 - name: Create MachineAutoscaler for each machineset
   k8s:
     kubeconfig: '{{ kubeconfig }}'
     namespace: openshift-machine-api
     apply: yes
-    definition:
-      apiVersion: autoscaling.openshift.io/v1beta1
-      kind: MachineAutoscaler
-      metadata:
-        name: '{{ item }}-autoscaler'
-      spec:
-        minReplicas: 0
-        maxReplicas: 5
-        scaleTargetRef:
-          apiVersion: machine.openshift.io/v1beta1
-          kind: MachineSet
-          name: '{{ item }}'
-  loop: '{{ machinesets|json_query("resources[].metadata.name") }}'
+    definition: '{{ lookup("template", "machineset_autoscaler.yml.j2")|from_yaml }}'
 
 - name: Create ClusterAutoscaler
   k8s:
