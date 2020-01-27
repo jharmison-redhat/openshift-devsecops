@@ -2,3 +2,4 @@
 - import_tasks: create_users.yml
 - import_tasks: letsencrypt.yml
 - import_tasks: autoscale.yml
+- import_tasks: console.yml
