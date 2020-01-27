@@ -1,3 +1,4 @@
+---
 - name: Subscribe to OCS4
   k8s:
     kubeconfig: '{{ kubeconfig }}'
