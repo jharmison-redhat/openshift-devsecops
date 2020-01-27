@@ -3,3 +3,4 @@
 - import_tasks: jenkins_operator.yml
 # Temporarily disabled as resource requirements are likely too high to justify at this scale
 # - import_tasks: ocs.yml
+- import_tasks: quay.yml
