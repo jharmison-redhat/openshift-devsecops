@@ -3,9 +3,6 @@
   k8s:
     kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "project.yml.j2")|from_yaml }}'
-  loop: '{{ sequence_users|from_yaml|json_query("[].username") }}'
-  loop_control:
-    loop_var: username
 
 # Since the default (and only supported SDN plugin in 4.2) is OpenShiftSDN
 # (which isn't multi-tenant), I'm not going to translate Siamak's "adm

@@ -32,6 +32,3 @@
   k8s:
     kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "jenkins_deployment.yml.j2")|from_yaml }}'
-  loop: '{{ sequence_users|from_yaml|json_query("[].username") }}'
-  loop_control:
-    loop_var: username

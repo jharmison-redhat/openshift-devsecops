@@ -1,3 +1,4 @@
+{% for username in sequence_users|from_yaml|json_query("[].username") %}
 {% for project in projects %}
 - apiVersion: project.openshift.io/v1
   kind: Project
@@ -40,4 +41,5 @@
     kind: Group
     name: system:serviceaccounts:{{ username }}-cicd
 {% endif %}
+{% endfor %}
 {% endfor %}
