@@ -19,7 +19,7 @@
     kubeconfig: '{{ kubeconfig }}'
     namespace: openshift-machine-api
     apply: yes
-    definition: '{{ lookup("template", "machineset_autoscaler.yml.j2")|from_yaml }}'
+    definition: '{{ lookup("template", "machine_autoscaler.yml.j2")|from_yaml }}'
 
 - name: Create ClusterAutoscaler
   k8s:
