@@ -1,4 +1,16 @@
 ---
+- name: Ensure Generic DevSecOps namespace exists
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: devsecops
+        annotations:
+          openshift.io/display-name: 'DevSecOps Common Resources'
+      spec: {}
+
 - name: Deploy resources for GOGS Operator
   k8s:
     kubeconfig: '{{ kubeconfig }}'
@@ -66,8 +78,6 @@
         $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" || exit 1
     fi
 
-    gogs_pod={{ (gogs_pod.resources|first).metadata.name }}
-
     {% for user in openshift_users %}
     args=(--name {{ user.username }} --password '{{ user.password }}')
     {% if user.admin is defined and user.admin %}
@@ -75,8 +85,8 @@
     {% endif %}
     args+=(--email '{{ user.username }}@{{ cluster_name }}.{{ openshift_base_domain }}')
 
-    echo "running: $oc exec $gogs_pod -n devsecops -- /opt/gogs/gogs admin create-user ${args[@]}"
-    output=$($oc exec $gogs_pod -n devsecops -- /opt/gogs/gogs admin create-user "${args[@]}" 2>&1)
+    echo "running: $oc exec deploy/gogs -n devsecops -- /opt/gogs/gogs admin create-user ${args[@]}"
+    output=$($oc exec deploy/gogs -n devsecops -- /opt/gogs/gogs admin create-user "${args[@]}" 2>&1)
     if echo "$output" | grep -qF 'created!'; then
         echo changed
     elif echo "$output" | grep -qF 'already exists'; then

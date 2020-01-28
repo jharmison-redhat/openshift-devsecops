@@ -1,22 +1,9 @@
 ---
 # TODO:
-#  - GOGS (https://github.com/wkulhanek/gogs-operator)
 #  - Nexus (in catalog)
 #  - SonarQube (https://github.com/wkulhanek/sonarqube-operator)
 #  - Che/CRW (in catalog)
 #  - Pipeline rework to match operated services
-- name: Ensure Generic DevSecOps namespace exists
-  k8s:
-    kubeconfig: '{{ kubeconfig }}'
-    definition:
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: devsecops
-        annotations:
-          openshift.io/display-name: 'DevSecOps Common Resources'
-      spec: {}
-
 - import_tasks: user_projects.yml
 - import_tasks: jenkins_operator.yml
 # Temporarily disabled as resource requirements are likely too high to justify at this scale
