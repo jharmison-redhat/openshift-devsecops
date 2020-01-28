@@ -30,7 +30,7 @@ cloud_redhat_com_pull_secret: '{"auths":{"cloud.openshift.com":{"auth":"b3B=","e
 # A list of manually created users:
 manual_users:
   - username: openshift-admin
-    password: RedHat1
+    password: RedHatAdmin1
     admin: yes
 
 # The number of users created, as a string
