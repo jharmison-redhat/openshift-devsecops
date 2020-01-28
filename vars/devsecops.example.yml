@@ -8,3 +8,5 @@ projects:
     env: stage
   - name: cicd
     disp: CI/CD
+
+github_project: jharmison-redhat
