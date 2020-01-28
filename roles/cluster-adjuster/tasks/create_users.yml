@@ -81,18 +81,13 @@
   shell: |
     export KUBECONFIG='{{ kubeconfig }}'
     oc='{{ tmp_dir }}/oc'
-    admin_user='{{ user.username }}'
-    admin_password='{{ user.password }}'
+    admin_user='{{ workshop_admin.username }}'
+    admin_password='{{ workshop_admin.password }}'
     if [ $($oc whoami) != "$admin_user" ]; then
         $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" && echo changed || echo failed
     else
         echo ok
     fi
-  loop:
-    - "{{ openshift_users|json_query('[?admin] | [0]') }}"
-  loop_control:
-    loop_var: user
-    label: '{{ user.username }}'
   register: oc_login
   changed_when: oc_login.stdout_lines|last == "changed"
   failed_when: oc_login.stdout_lines|last == "failed"

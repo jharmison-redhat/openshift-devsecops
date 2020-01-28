@@ -33,6 +33,12 @@ manual_users:
     password: RedHatAdmin1
     admin: yes
 
+# A specially designated user for administering workshop content
+workshop_admin:
+  username: devsecops
+  password: RedHatAdmin1
+  admin: yes
+
 # The number of users created, as a string
 number_of_users: "30"
 
@@ -44,4 +50,4 @@ sequence_users: |
   {% endfor -%}
 
 # The users to create in OpenShift
-openshift_users: '{{ manual_users + sequence_users|from_yaml }}'
+openshift_users: '{{ manual_users + [workshop_admin] + sequence_users|from_yaml }}'
