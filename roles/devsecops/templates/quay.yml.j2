@@ -31,7 +31,7 @@
     sourceNamespace: openshift-marketplace
     startingCSV: quay.v1.0.1
 
-# Secrets required to pull from quay.io and more
+# Secret required to pull from quay.io
 - apiVersion: v1
   kind: Secret
   metadata:
@@ -40,3 +40,15 @@
   type: kubernetes.io/dockerconfigjson
   data:
     .dockerconfigjson: ewogICJhdXRocyI6IHsKICAgICJxdWF5LmlvIjogewogICAgICAiYXV0aCI6ICJjbVZrYUdGMEszRjFZWGs2VHpneFYxTklVbE5LVWpFMFZVRmFRa3MxTkVkUlNFcFRNRkF4VmpSRFRGZEJTbFl4V0RKRE5GTkVOMHRQTlRsRFVUbE9NMUpGTVRJMk1USllWVEZJVWc9PSIsCiAgICAgICJlbWFpbCI6ICIiCiAgICB9CiAgfQp9
+
+# Secret to change default password for super-user
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: quay-superuser
+    namespace: quay-enterprise
+  type: Opaque
+  stringData:
+    superuser-username: quay
+    superuser-password: {{ quay_password }}
+    superuser-email: quay@redhat.com

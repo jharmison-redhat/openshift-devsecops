@@ -1,7 +1,8 @@
 {
     "pip": [
         "ansible",
-        "openshift"
+        "openshift",
+        "requests"
     ],
     "dnf": [
         {

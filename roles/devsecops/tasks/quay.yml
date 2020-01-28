@@ -16,12 +16,14 @@
       spec:
         quay:
           imagePullSecretName: redhat-pull-secret
+          superuserCredentialsSecretName: quay-superuser
           registryStorage:
             persistentVolumeSize: 10Gi
             persistentVolumeAccessModes:
               - ReadWriteOnce
           database:
             volumeSize: 10Gi
+          routeHost: quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}
         clair:
           enabled: true
           imagePullSecretName: redhat-pull-secret
@@ -29,3 +31,42 @@
   until: not quay_deployment.failed
   retries: 5
   delay: 10
+
+- name: Wait for Quay route to be created by the Operator
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    api_version: route.openshift.io/v1
+    kind: Route
+    namespace: quay-enterprise
+    name: quayecosystem-quay
+  register: quay_route
+  until: quay_route.resources|length > 0
+  retries: 10
+  delay: 30
+
+- name: Wait for Quay route to begin answering requests
+  uri:
+    url: 'https://{{ quay_route|json_query("resources[0].spec.host") }}/'
+    return_content: yes
+    validate_certs: no
+  register: quay_index
+  until: '"DOCTYPE html" in quay_index.content'
+  retries: 10
+  delay: 30
+
+- name: Add users to Quay instance
+  shell: >-
+    python3 {{ role_path }}/scripts/quay-user.py
+    https://{{ quay_route|json_query("resources[0].spec.host") }}
+    --login-username quay --login-password '{{ quay_password }}'
+    {% for user in openshift_users %}
+    {% if user.password|length >= 8 %}
+    --username '{{ user.username }}' --password '{{ user.password }}'
+    {% else %}
+    --username '{{ user.username }}' --password password
+    {% endif %}
+    {% endfor %}
+  register: quay_users
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: quay_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
