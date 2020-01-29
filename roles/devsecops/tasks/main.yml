@@ -1,6 +1,5 @@
 ---
 # TODO:
-#  - Nexus (in catalog)
 #  - SonarQube (https://github.com/wkulhanek/sonarqube-operator)
 #  - Che/CRW (in catalog)
 #  - Pipeline rework to match operated services
@@ -10,3 +9,4 @@
 # - import_tasks: ocs.yml
 - import_tasks: quay.yml
 - import_tasks: gogs.yml
+- import_tasks: nexus.yml

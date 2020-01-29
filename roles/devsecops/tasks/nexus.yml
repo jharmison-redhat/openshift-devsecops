@@ -1,0 +1,103 @@
+---
+- name: Ensure Generic DevSecOps namespace exists
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: devsecops
+        annotations:
+          openshift.io/display-name: 'DevSecOps Common Resources'
+      spec: {}
+
+- name: Subscribe to Nexus
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "nexus.yml.j2")|from_yaml }}'
+
+- name: Deploy Nexus via CR
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: apps.m88i.io/v1alpha1
+      kind: Nexus
+      metadata:
+        name: nexus
+        namespace: devsecops
+      spec:
+        networking:
+          expose: true
+          exposeAs: Route
+        persistence:
+          persistent: true
+          volumeSize: 10Gi
+        replicas: 1
+        resources:
+          limits:
+            cpu: "4"
+            memory: 4Gi
+          requests:
+            cpu: "1"
+            memory: 4Gi
+        useRedHatImage: true
+  register: nexus_deployment
+  until: not nexus_deployment.failed
+  retries: 5
+  delay: 10
+
+- name: Wait for Nexus route to be created by the Operator
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    api_version: route.openshift.io/v1
+    kind: Route
+    namespace: devsecops
+    name: nexus
+  register: nexus_route
+  until: nexus_route.resources|length > 0
+  retries: 10
+  delay: 30
+
+- name: Wait for Nexus route to begin answering requests
+  uri:
+    url: 'http://{{ nexus_route|json_query("resources[0].spec.host") }}/'
+    return_content: yes
+    validate_certs: no
+  register: nexus_index
+  until: '"DOCTYPE html" in nexus_index.content'
+  retries: 10
+  delay: 30
+
+- name: Retrieve admin password for Nexus
+  shell: |
+    export KUBECONFIG='{{ kubeconfig }}'
+    oc='{{ tmp_dir }}/oc'
+    admin_user='{{ workshop_admin.username }}'
+    admin_password='{{ workshop_admin.password }}'
+    if [ $($oc whoami) != "$admin_user" ]; then
+        $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" &>/dev/null || exit 1
+    fi
+
+    while ! $oc exec deploy/nexus -n devsecops -- [ -f /nexus-data/admin.password ] &>/dev/null; do
+        sleep 1
+    done
+    $oc exec deploy/nexus -n devsecops -- cat /nexus-data/admin.password || exit 1
+  register: nexus_password
+  changed_when: false
+
+- name: Add users to Nexus instance
+  shell: >-
+    python3 {{ role_path }}/scripts/nexus-user.py
+    http://{{ nexus_route|json_query("resources[0].spec.host") }}
+    --login-username admin --login-password '{{ nexus_password.stdout }}'
+    {% for user in openshift_users %}
+    {% if user.password|length >= 8 %}
+    --username '{{ user.username }}' --password '{{ user.password }}'
+    {% else %}
+    --username '{{ user.username }}' --password password
+    {% endif %}
+    {% endfor %}
+  register: nexus_users
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: nexus_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
