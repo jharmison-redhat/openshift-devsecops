@@ -24,7 +24,6 @@
           database:
             volumeSize: 10Gi
           routeHost: quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}
-          hostname: quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}
           sslCertificatesSecretName: quay-tls-certs
         clair:
           enabled: true
