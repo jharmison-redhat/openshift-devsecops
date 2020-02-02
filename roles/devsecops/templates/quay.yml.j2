@@ -63,4 +63,3 @@
   data:
     ssl.cert: {{ lookup("file", certificate_path + "/fullchain.pem")|b64encode }}
     ssl.key: {{ lookup("file", certificate_path + "/key.pem")|b64encode }}
-
