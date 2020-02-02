@@ -1,6 +1,7 @@
 ---
 # TODO:
 #  - Che/CRW (in catalog)
+#  - Gut Jenkins and replace entirely with Tekton
 #  - Pipeline rework to match operated services
 - import_tasks: user_projects.yml
 - import_tasks: jenkins_operator.yml
