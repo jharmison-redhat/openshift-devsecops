@@ -52,3 +52,15 @@
     superuser-username: quay
     superuser-password: {{ quay_password }}
     superuser-email: quay@redhat.com
+
+# Secret to use cluster certs for Quay
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: quay-tls-certs
+    namespace: quay-enterprise
+  type: Opaque
+  data:
+    ssl.cert: {{ lookup("file", certificate_path + "/fullchain.pem")|b64encode }}
+    ssl.key: {{ lookup("file", certificate_path + "/key.pem")|b64encode }}
+
