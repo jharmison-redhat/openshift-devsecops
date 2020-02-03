@@ -5,7 +5,7 @@ compute:
   name: worker
   platform:
     aws:
-      type: m4.2xlarge
+      type: '{{ cluster_worker_machine_type }}'
   replicas: 2
 controlPlane:
   hyperthreading: Enabled

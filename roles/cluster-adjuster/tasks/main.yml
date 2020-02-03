@@ -1,5 +1,9 @@
 ---
-- import_tasks: create_users.yml
-- import_tasks: letsencrypt.yml
-- import_tasks: autoscale.yml
-- import_tasks: console.yml
+- include_tasks: create_users.yml
+  when: create_users|default(true)
+- include_tasks: letsencrypt.yml
+  when: letsencrypt|default(true)
+- include_tasks: autoscale.yml
+  when: autoscale|default(true)
+- include_tasks: console.yml
+  when: adjust_console|default(true)

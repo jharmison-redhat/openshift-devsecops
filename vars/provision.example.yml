@@ -1,4 +1,13 @@
 ---
+# Uncomment the following to NOT install openshift
+# install_openshift: no
+# kubeconfig: /path/to/your/kubeconfig
+
+# Uncomment the following to disable post-install tasks
+# create_users: no    # Creates users listed below and removes kubeadmin
+# letsencrypt: no     # Creates a LetsEncrypt wildcard and api certificate and makes it the default
+# autoscale: no       # Enables cluster auto-scaling using the limits listed below
+# adjust_console: no  # Adjusts the console route to be just "console.apps" instead of "console-openshift-console.apps"
 
 # The name of the cluster.
 # This value will be in your DNS entries and should conform to valid DNS characters.
@@ -51,3 +60,17 @@ sequence_users: |
 
 # The users to create in OpenShift
 openshift_users: '{{ manual_users + [workshop_admin] + sequence_users|from_yaml }}'
+
+# The type of worker to provision (including MachineSet adjustments)
+cluster_worker_machine_type: m4.2xlarge
+# The MachineSet replicas to enable on the MachineAutoscaler
+machineset_min_replicas: 0
+machineset_max_replicas: 5
+# The number of nodes to limit the overall cluster to across all MachineSets
+cluster_max_nodes_total: 15
+# Uncomment the following to adjust the overall minimum/maximum resources for the entire cluster
+# cluster_resources:
+#   min_cores: 8
+#   max_cores: 100
+#   min_ram_gb: 32
+#   max_ram_gb: 256

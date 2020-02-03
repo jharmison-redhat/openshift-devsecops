@@ -22,6 +22,9 @@
           AWS_SECRET_ACCESS_KEY: '{{ AWS_SECRET_ACCESS_KEY_tmp.user_input }}'
       when: ('AWS_SECRET_ACCESS_KEY' not in ansible_env.keys())
 
-  roles:
-    - role: openshift-installer
-    - role: cluster-adjuster
+  tasks:
+    - include_role: openshift-installer
+      when: install_openshift|default(true)
+
+    # Individual adjustment tasks have their own toggles
+    - include_role: cluster-adjuster
