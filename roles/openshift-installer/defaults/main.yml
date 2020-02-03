@@ -1,2 +1,5 @@
 ---
 key_pair_path: '{{ tmp_dir }}/{{ cluster_name }}.{{ openshift_base_domain }}.rsa'
+
+# The type of worker to provision (including MachineSet adjustments)
+cluster_worker_machine_type: m4.2xlarge
