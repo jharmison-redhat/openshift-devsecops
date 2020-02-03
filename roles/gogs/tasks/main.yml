@@ -1,21 +1,21 @@
 ---
-- name: Ensure Generic DevSecOps namespace exists
+- name: Ensure namespace exists
   k8s:
     kubeconfig: '{{ kubeconfig }}'
     definition:
       apiVersion: v1
       kind: Namespace
       metadata:
-        name: devsecops
+        name: '{{ gogs_project_name }}'
         annotations:
-          openshift.io/display-name: 'DevSecOps Common Resources'
+          openshift.io/display-name: '{{ gogs_project_display }}'
       spec: {}
 
 - name: Deploy resources for GOGS Operator
   k8s:
     kubeconfig: '{{ kubeconfig }}'
     namespace: '{{ resource.namespace|default(omit) }}'
-    definition: '{{ lookup("url", resource.url, split_lines=False)|from_yaml|regex_replace("REPLACE_ME", "devsecops") }}'
+    definition: '{{ lookup("url", resource.url, split_lines=False)|from_yaml|regex_replace("REPLACE_ME", gogs_project_name) }}'
   loop:
     - name: crd
       url: https://raw.githubusercontent.com/{{ github_project }}/gogs-operator/master/deploy/crds/gpte_v1alpha1_gogs_crd.yaml
@@ -23,13 +23,13 @@
       url: https://raw.githubusercontent.com/{{ github_project }}/gogs-operator/master/deploy/cluster_role.yaml
     - name: service_account
       url: https://raw.githubusercontent.com/{{ github_project }}/gogs-operator/master/deploy/service_account.yaml
-      namespace: devsecops
+      namespace: '{{ gogs_project_name }}'
     - name: cluster_role_binding
       url: https://raw.githubusercontent.com/{{ github_project }}/gogs-operator/master/deploy/cluster_role_binding.yaml
-      namespace: devsecops
+      namespace: '{{ gogs_project_name }}'
     - name: operator
       url: https://raw.githubusercontent.com/{{ github_project }}/gogs-operator/master/deploy/operator.yaml
-      namespace: devsecops
+      namespace: '{{ gogs_project_name }}'
   loop_control:
     loop_var: resource
     label: '{{ resource.name }}'
@@ -37,7 +37,7 @@
 - name: Create GOGS from a CR
   k8s:
     kubeconfig: '{{ kubeconfig }}'
-    namespace: devsecops
+    namespace: '{{ gogs_project_name }}'
     definition:
       apiVersion: gpte.opentlc.com/v1alpha1
       kind: Gogs
@@ -58,7 +58,7 @@
     kubeconfig: '{{ kubeconfig }}'
     api_version: v1
     kind: Pod
-    namespace: devsecops
+    namespace: '{{ gogs_project_name }}'
     label_selectors:
       - app=gogs
   register: gogs_pod
@@ -85,8 +85,8 @@
     {% endif %}
     args+=(--email '{{ user.username }}@{{ cluster_name }}.{{ openshift_base_domain }}')
 
-    echo "running: $oc exec deploy/gogs -n devsecops -- /opt/gogs/gogs admin create-user ${args[@]}"
-    output=$($oc exec deploy/gogs -n devsecops -- /opt/gogs/gogs admin create-user "${args[@]}" 2>&1)
+    echo "running: $oc exec deploy/gogs -n {{ gogs_project_name }} -- /opt/gogs/gogs admin create-user ${args[@]}"
+    output=$($oc exec deploy/gogs -n {{ gogs_project_name }} -- /opt/gogs/gogs admin create-user "${args[@]}" 2>&1)
     if echo "$output" | grep -qF 'created!'; then
         echo changed
     elif echo "$output" | grep -qF 'already exists'; then

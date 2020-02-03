@@ -1,14 +1,14 @@
 ---
-- name: Ensure Generic DevSecOps namespace exists
+- name: Ensure namespace exists
   k8s:
     kubeconfig: '{{ kubeconfig }}'
     definition:
       apiVersion: v1
       kind: Namespace
       metadata:
-        name: devsecops
+        name: '{{ nexus_project_name }}'
         annotations:
-          openshift.io/display-name: 'DevSecOps Common Resources'
+          openshift.io/display-name: '{{ nexus_project_display }}'
       spec: {}
 
 - name: Subscribe to Nexus
@@ -24,7 +24,7 @@
       kind: Nexus
       metadata:
         name: nexus
-        namespace: devsecops
+        namespace: '{{ nexus_project_name }}'
       spec:
         networking:
           expose: true
@@ -51,7 +51,7 @@
     kubeconfig: '{{ kubeconfig }}'
     api_version: route.openshift.io/v1
     kind: Route
-    namespace: devsecops
+    namespace: '{{ nexus_project_name }}'
     name: nexus
   register: nexus_route
   until: nexus_route.resources|length > 0
@@ -78,10 +78,10 @@
         $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" &>/dev/null || exit 1
     fi
 
-    while ! $oc exec deploy/nexus -n devsecops -- [ -f /nexus-data/admin.password ] &>/dev/null; do
+    while ! $oc exec deploy/nexus -n {{ nexus_project_name }} -- [ -f /nexus-data/admin.password ] &>/dev/null; do
         sleep 1
     done
-    $oc exec deploy/nexus -n devsecops -- cat /nexus-data/admin.password || exit 1
+    $oc exec deploy/nexus -n {{ nexus_project_name }} -- cat /nexus-data/admin.password || exit 1
   register: nexus_password
   changed_when: false
 

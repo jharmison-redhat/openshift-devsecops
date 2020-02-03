@@ -3,7 +3,7 @@
   kind: OperatorGroup
   metadata:
     name: nexus-operatorgroup
-    namespace: devsecops
+    namespace: {{ nexus_project_name }}
   spec:
     targetNamespaces:
     - devsecops
@@ -13,7 +13,7 @@
   kind: Subscription
   metadata:
     name: nexus-operator-hub
-    namespace: devsecops
+    namespace: {{ nexus_project_name }}
   spec:
     channel: alpha
     installPlanApproval: Automatic

@@ -1,4 +1,5 @@
 ---
+# The projects to create per-user, with names including the username (e.g. user1-dev)
 projects:
   - name: dev
     disp: Tasks - Dev
@@ -9,4 +10,12 @@ projects:
   - name: cicd
     disp: CI/CD
 
+# The project from which custom Operators will be pulled
 github_project: jharmison-redhat
+
+# You can disable these by uncommenting the lines below.
+# deploy_quay: no
+# deploy_service_mesh: no
+# deploy_gogs: no
+# deploy_sonarqube: no
+# deploy_nexus: no

@@ -4,11 +4,24 @@
 #  - Gut Jenkins and replace entirely with Tekton
 #  - Pipeline rework to match operated services
 #  - Service Mesh integration
-- import_tasks: user_projects.yml
-# - import_tasks: jenkins_operator.yml
-# Temporarily disabled as resource requirements are likely too high to justify at this scale
-# - import_tasks: ocs.yml
-- import_tasks: quay.yml
-- import_tasks: gogs.yml
-- import_tasks: nexus.yml
-- import_tasks: sonarqube.yml
+
+- name: Generate projects per-user
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "project.yml.j2")|from_yaml }}'# - import_tasks: jenkins_operator.yml
+
+- include_role:
+    name: quay
+  when: deploy_quay|default(true)
+- include_role:
+    name: service_mesh
+  when: deploy_service_mesh|default(true)
+- include_role:
+    name: gogs
+  when: deploy_gogs|default(true)
+- include_role:
+    name: sonarqube
+  when: deploy_sonarqube|default(true)
+- include_role:
+    name: nexus
+  when: deploy_nexus|default(true)

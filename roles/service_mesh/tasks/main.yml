@@ -1,0 +1,66 @@
+---
+- name: Ensure Istio control plane namespace exists
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: istio-system
+        annotations:
+          openshift.io/display-name: 'Service Mesh Control Plane'
+      spec: {}
+
+- name: Subscribe to Service Mesh
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: servicemeshoperator
+        namespace: openshift-operators
+      spec:
+        channel: "1.0"
+        installPlanApproval: Automatic
+        name: servicemeshoperator
+        source: redhat-operators
+        sourceNamespace: openshift-marketplace
+        startingCSV: servicemeshoperator.v1.0.5
+
+- name: Deploy Service Mesh Control PLane
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: maistra.io/v1
+      kind: ServiceMeshControlPlane
+      metadata:
+        name: basic-install
+        namespace: istio-system
+      spec:
+        istio:
+          gateways:
+            istio-egressgateway:
+              autoscaleEnabled: false
+            istio-ingressgateway:
+              autoscaleEnabled: false
+          grafana:
+            enabled: true
+          kiali:
+            enabled: true
+          mixer:
+            policy:
+              autoscaleEnabled: false
+            telemetry:
+              autoscaleEnabled: false
+          pilot:
+            autoscaleEnabled: false
+            traceSampling: 100
+          tracing:
+            enabled: true
+            jaeger:
+              template: all-in-one
+  register: control_plane_deployment
+  until: not control_plane_deployment.failed
+  retries: 5
+  delay: 10
