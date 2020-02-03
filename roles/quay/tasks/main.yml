@@ -1,4 +1,53 @@
 ---
+- name: Download acme.sh
+  git:
+    repo: https://github.com/neilpang/acme.sh
+    dest: '{{ tmp_dir }}/acme.sh'
+
+- name: Ensure certificate directory exists
+  file:
+    path: '{{ certificate_path }}'
+    state: directory
+
+- name: Get necessary certs
+  shell: |
+    export KUBECONFIG='{{ kubeconfig }}'
+    oc='{{ tmp_dir }}/oc'
+    admin_user='{{ workshop_admin.username }}'
+    admin_password='{{ workshop_admin.password }}'
+    if [ $($oc whoami) != "$admin_user" ]; then
+        $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" && echo changed || echo failed
+    else
+        echo ok
+    fi
+
+    quay_endpoint='quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}'
+
+    # Define our full path and reusable args
+    acme='{{ tmp_dir }}/acme.sh/acme.sh'
+    acme_args=(-d "$quay_endpoint" --dns dns_aws
+        --cert-file '{{ certificate_path }}/quay-cert.pem'
+        --key-file '{{ certificate_path }}/quay-key.pem'
+        --ca-file '{{ certificate_path }}/quay-ca.pem'
+        --fullchain-file '{{ certificate_path }}/quay-fullchain.pem'
+    )
+    # If there is a cert issued already
+    if $acme --list | grep -qF "$quay_endpoint"; then
+        # Try to install it
+        if ! $acme --install-cert "${acme_args[@]}"; then
+            # See about renewing it
+            $acme --renew "${acme_args[@]}" --force || exit 1
+        fi
+    else
+        # If no certs issued, request them
+        $acme --issue "${acme_args[@]}" || exit 1
+    fi
+  args:
+    creates: '{{ certificate_path }}/quay-fullchain.pem'
+  environment:
+    AWS_ACCESS_KEY_ID: '{{ AWS_ACCESS_KEY_ID|default(ansible_env["AWS_ACCESS_KEY_ID"]) }}'
+    AWS_SECRET_ACCESS_KEY: '{{ AWS_SECRET_ACCESS_KEY|default(ansible_env["AWS_SECRET_ACCESS_KEY"]) }}'
+
 - name: Subscribe to Quay Enterprise
   k8s:
     kubeconfig: '{{ kubeconfig }}'
