@@ -34,13 +34,13 @@
       spec:
         podPriorityThreshhold: -10
         resourceLimits:
-          maxNodesTotal: '{{ cluster_max_nodes_total }}'
+          maxNodesTotal: '{{ cluster_max_nodes_total|int }}'
           cores:
-            min: '{{ cluster_resources.min_cores|default(omit) }}'
-            max: '{{ cluster_resources.max_cores|default(omit) }}'
+            min: '{{ cluster_min_cores|int }}'
+            max: '{{ cluster_max_cores|int }}'
           memory:
-            min: '{{ cluster_resources.min_ram_gb|default(omit) }}'
-            max: '{{ cluster_resources.max_ram_gb|default(omit) }}'
+            min: '{{ cluster_min_ram_gb|int }}'
+            max: '{{ cluster_max_ram_gb|int }}'
         scaleDown:
           enabled: true
           delayAfterAdd: 10m

@@ -27,3 +27,8 @@ machineset_min_replicas: 0
 machineset_max_replicas: 5
 # The number of nodes to limit the overall cluster to across all MachineSets
 cluster_max_nodes_total: 15
+# Overall minimum/maximum resources for the entire cluster
+cluster_min_cores: 8
+cluster_max_cores: 100
+cluster_min_ram_gb: 32
+cluster_max_ram_gb: 256

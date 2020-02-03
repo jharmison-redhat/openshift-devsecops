@@ -4,8 +4,8 @@
   metadata:
     name: '{{ machineset }}-autoscaler'
   spec:
-    minReplicas: '{{ machineset_min_replicas }}'
-    maxReplicas: '{{ machineset_max_replicas }}'
+    minReplicas: {{ machineset_min_replicas }}
+    maxReplicas: {{ machineset_max_replicas }}
     scaleTargetRef:
       apiVersion: machine.openshift.io/v1beta1
       kind: MachineSet
