@@ -1,7 +1,7 @@
 ---
 # TODO:
 #  - Che/CRW (in catalog)
-#  - Gut Jenkins and replace entirely with Tekton
+#  - Tekton/Pipelines (in catalog)
 #  - Pipeline rework to match operated services
 #  - Service Mesh integration
 

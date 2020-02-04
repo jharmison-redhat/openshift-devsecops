@@ -53,49 +53,42 @@
   retries: 5
   delay: 10
 
-- name: Wait for SonarQube to finish being created
+- name: Wait for SonarQube route to be created by the Operator
   k8s_info:
     kubeconfig: '{{ kubeconfig }}'
-    api_version: v1
-    kind: Pod
+    api_version: route.openshift.io/v1
+    kind: Route
     namespace: '{{ sonarqube_project_name }}'
-    label_selectors:
-      - app=sonarqube
-  register: sonarqube_pod
-  until: sonarqube_pod.resources|length > 0 and (sonarqube_pod.resources|first).status.phase == "Running"
+    name: sonarqube
+  register: sonarqube_route
+  until: sonarqube_route.resources|length > 0
   retries: 10
   delay: 30
 
-#~ # This is super hacky, I know... but it works for now. Will need fixing.
-#~ # Intent is to eventually clean up the operator and add more levers to the CRD.
-#~ - name: Create users in GOGS
-  #~ shell: |
-    #~ export KUBECONFIG='{{ kubeconfig }}'
-    #~ oc='{{ tmp_dir }}/oc'
-    #~ admin_user='{{ workshop_admin.username }}'
-    #~ admin_password='{{ workshop_admin.password }}'
-    #~ if [ $($oc whoami) != "$admin_user" ]; then
-        #~ $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" || exit 1
-    #~ fi
+- name: Wait for SonarQube route to begin answering requests
+  uri:
+    url: 'https://{{ sonarqube_route|json_query("resources[0].spec.host") }}/'
+    return_content: yes
+    validate_certs: no
+  register: sonarqube_index
+  until: '"doctype html" in sonarqube_index.content'
+  retries: 10
+  delay: 30
 
-    #~ {% for user in openshift_users %}
-    #~ args=(--name {{ user.username }} --password '{{ user.password }}')
-    #~ {% if user.admin is defined and user.admin %}
-    #~ args+=(--admin)
-    #~ {% endif %}
-    #~ args+=(--email '{{ user.username }}@{{ cluster_name }}.{{ openshift_base_domain }}')
-
-    #~ echo "running: $oc exec deploy/gogs -n devsecops -- /opt/gogs/gogs admin create-user ${args[@]}"
-    #~ output=$($oc exec deploy/gogs -n devsecops -- /opt/gogs/gogs admin create-user "${args[@]}" 2>&1)
-    #~ if echo "$output" | grep -qF 'created!'; then
-        #~ echo changed
-    #~ elif echo "$output" | grep -qF 'already exists'; then
-        #~ echo ok
-    #~ else
-        #~ echo failed
-        #~ echo "output: $output"
-    #~ fi
-    #~ {% endfor %}
-  #~ register: gogs_users
-  #~ changed_when: '"changed" in gogs_users.stdout_lines'
-  #~ failed_when: '"failed" in gogs_users.stdout_lines'
+- name: Create users (and update admin password) in SonarQube
+  shell: >-
+    python3 {{ role_path }}/scripts/sonarqube-user.py
+    https://{{ sonarqube_route|json_query("resources[0].spec.host") }}
+    --login-username admin --login-password admin
+    --new-login-password '{{ sonarqube_password }}'
+    {% for user in openshift_users %}
+    {% if user.password|length >= 8 %}
+    --username '{{ user.username }}' --password '{{ user.password }}'
+    {% else %}
+    --username '{{ user.username }}' --password password
+    {% endif %}
+    {% endfor %}
+  register: sonarqube_users
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: sonarqube_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
