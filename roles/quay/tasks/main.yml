@@ -23,7 +23,6 @@
 
     quay_endpoint='quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}'
 
-    # Define our full path and reusable args
     acme='{{ tmp_dir }}/acme.sh/acme.sh'
     acme_args=(-d "$quay_endpoint" --dns dns_aws
         --cert-file '{{ certificate_path }}/quay-cert.pem'
@@ -31,15 +30,12 @@
         --ca-file '{{ certificate_path }}/quay-ca.pem'
         --fullchain-file '{{ certificate_path }}/quay-fullchain.pem'
     )
-    # If there is a cert issued already
-    if $acme --list | grep -qF "$quay_endpoint"; then
-        # Try to install it
-        if ! $acme --install-cert "${acme_args[@]}"; then
-            # See about renewing it
+
+    if $acme --list | grep -qF "$quay_endpoint"; then # there is a cert issued already
+        if ! $acme --install-cert "${acme_args[@]}"; then # we couldn't install it, try to renew
             $acme --renew "${acme_args[@]}" --force || exit 1
         fi
-    else
-        # If no certs issued, request them
+    else # no certs issued, request them
         $acme --issue "${acme_args[@]}" || exit 1
     fi
   args:
