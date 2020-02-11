@@ -1,0 +1,3 @@
+---
+ocs_node_query: 'resources[*]|[?contains(@.metadata.annotations."machine.openshift.io/machine", `ocs-worker`)]'
+nodes_ready_query: '[].status.conditions[]|[?@.type == `Ready`].status'

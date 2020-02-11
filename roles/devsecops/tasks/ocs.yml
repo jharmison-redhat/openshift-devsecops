@@ -1,9 +1,0 @@
----
-# Temporarily disabled as resource requirements are likely too high to justify at this scale
-
-- name: Subscribe to OCS4
-  k8s:
-    kubeconfig: '{{ kubeconfig }}'
-    definition: '{{ lookup("template", "ocs.yml.j2")|from_yaml }}'
-
-# - name: Create an OCS StorageCluster

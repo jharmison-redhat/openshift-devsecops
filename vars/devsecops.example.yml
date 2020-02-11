@@ -19,3 +19,4 @@ github_project: jharmison-redhat
 # deploy_gogs: no
 # deploy_sonarqube: no
 # deploy_nexus: no
+# deploy_3scale: no

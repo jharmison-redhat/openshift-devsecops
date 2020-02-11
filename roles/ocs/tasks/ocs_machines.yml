@@ -1,0 +1,18 @@
+---
+- name: Recover existing machinesets
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    api_version: machine.openshift.io/v1beta1
+    kind: MachineSet
+    namespace: openshift-machine-api
+  register: machinesets
+
+- name: Recover important variables from existing machinesets
+  set_fact:
+    cluster_id: '{{ (machinesets.resources|first).metadata.labels["machine.openshift.io/cluster-api-cluster"] }}'
+    ami_id: '{{ (machinesets.resources|first).spec.template.spec.providerSpec.value.ami.id }}'
+
+- name: Deploy new machinesets for OCS workers
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "ocs-machinesets.yml.j2")|from_yaml }}'

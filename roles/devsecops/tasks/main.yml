@@ -25,3 +25,6 @@
 - include_role:
     name: nexus
   when: deploy_nexus|default(true)
+- include_role:
+    name: ocs
+  when: deploy_3scale|default(true)

@@ -1,0 +1,25 @@
+---
+- name: Create OCS MachineSets
+  include_tasks: ocs_machines.yml
+
+- name: Subscribe to OCS4
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "ocs.yml.j2")|from_yaml }}'
+
+- name: Wait for OCS nodes to come up from MachineSets
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    kind: Node
+  register: nodes
+  until:
+    - nodes|to_json|from_json|json_query(ocs_node_query)|length == 3
+    - nodes|to_json|from_json|json_query(ocs_node_query)|json_query(nodes_ready_query) == ["True", "True", "True"]
+  retries: 20
+  delay: 30
+
+- name: Assign OCS nodes to new var
+  set_fact:
+    ocs_nodes: '{{ nodes|to_json|from_json|json_query(ocs_node_query) }}'
+
+- debug: var=ocs_nodes
