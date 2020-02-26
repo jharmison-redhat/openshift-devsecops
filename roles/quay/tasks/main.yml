@@ -10,34 +10,7 @@
     state: directory
 
 - name: Get necessary certs
-  shell: |
-    export KUBECONFIG='{{ kubeconfig }}'
-    oc='{{ tmp_dir }}/oc'
-    admin_user='{{ workshop_admin.username }}'
-    admin_password='{{ workshop_admin.password }}'
-    if [ $($oc whoami) != "$admin_user" ]; then
-        $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" && echo changed || echo failed
-    else
-        echo ok
-    fi
-
-    quay_endpoint='quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}'
-
-    acme='{{ tmp_dir }}/acme.sh/acme.sh'
-    acme_args=(-d "$quay_endpoint" --dns dns_aws
-        --cert-file '{{ certificate_path }}/quay-cert.pem'
-        --key-file '{{ certificate_path }}/quay-key.pem'
-        --ca-file '{{ certificate_path }}/quay-ca.pem'
-        --fullchain-file '{{ certificate_path }}/quay-fullchain.pem'
-    )
-
-    if $acme --list | grep -qF "$quay_endpoint"; then # there is a cert issued already
-        if ! $acme --install-cert "${acme_args[@]}"; then # we couldn't install it, try to renew
-            $acme --renew "${acme_args[@]}" --force || exit 1
-        fi
-    else # no certs issued, request them
-        $acme --issue "${acme_args[@]}" || exit 1
-    fi
+  shell: '{{ lookup("template", "quay_certs.sh.j2") }}'
   args:
     creates: '{{ certificate_path }}/quay-fullchain.pem'
   environment:
