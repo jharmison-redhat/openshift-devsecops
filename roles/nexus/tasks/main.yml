@@ -78,9 +78,12 @@
         $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" &>/dev/null || exit 1
     fi
 
+    counter=0
     pod=$($oc get pods -n {{ nexus_project_name }} -l app=nexus -o jsonpath='{.items[0].metadata.name}')
     while ! $oc exec $pod -n {{ nexus_project_name }} -- [ -f /nexus-data/admin.password ] &>/dev/null; do
         sleep 1
+        ((counter++))
+        [ $counter -gt 300 ] && exit 1
     done
     $oc exec $pod -n {{ nexus_project_name }} -- cat /nexus-data/admin.password || exit 1
   register: nexus_password
