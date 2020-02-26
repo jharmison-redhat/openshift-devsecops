@@ -85,8 +85,9 @@
     {% endif %}
     args+=(--email '{{ user.username }}@{{ cluster_name }}.{{ openshift_base_domain }}')
 
-    echo "running: $oc exec deploy/gogs -n {{ gogs_project_name }} -- /opt/gogs/gogs admin create-user ${args[@]}"
-    output=$($oc exec deploy/gogs -n {{ gogs_project_name }} -- /opt/gogs/gogs admin create-user "${args[@]}" 2>&1)
+    pod=$($oc get pods -n {{ gogs_project_name }} -l app=gogs -o jsonpath='{.items[0].metadata.name}')
+    echo "running: $oc exec $pod -n {{ gogs_project_name }} -- /opt/gogs/gogs admin create-user ${args[@]}"
+    output=$($oc exec $pod -n {{ gogs_project_name }} -- /opt/gogs/gogs admin create-user "${args[@]}" 2>&1)
     if echo "$output" | grep -qF 'created!'; then
         echo changed
     elif echo "$output" | grep -qF 'already exists'; then
