@@ -1,10 +1,4 @@
 ---
-# TODO:
-#  - Che/CRW (in catalog)
-#  - Tekton/Pipelines (in catalog)
-#  - Pipeline rework to match operated services
-#  - Service Mesh integration
-
 - name: Generate projects per-user
   k8s:
     kubeconfig: '{{ kubeconfig }}'
