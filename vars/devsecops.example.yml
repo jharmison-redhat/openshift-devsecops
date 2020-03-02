@@ -12,8 +12,11 @@ projects:
 
 # The project from which custom Operators will be pulled
 github_project: jharmison-redhat
+# NOTE: If the operators themselves still point to another image on Quay, the
+#   operator coming from this repo won't affect the images themselves.
 
 # You can disable these by uncommenting the lines below.
+# deploy_ocs: no
 # deploy_quay: no
 # deploy_service_mesh: no
 # deploy_gogs: no
