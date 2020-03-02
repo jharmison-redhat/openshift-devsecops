@@ -1,0 +1,5 @@
+---
+change_default_storage_class: true
+new_default_storage_class: ocs-storagecluster-cephfs
+
+change_image_registry_storage: true

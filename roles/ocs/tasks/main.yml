@@ -18,8 +18,46 @@
   retries: 20
   delay: 30
 
-- name: Assign OCS nodes to new var
-  set_fact:
-    ocs_nodes: '{{ nodes|to_json|from_json|json_query(ocs_node_query) }}'
+- name: Create OCS-backed StorageCluster
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: ocs.openshift.io/v1
+      kind: StorageCluster
+      metadata:
+        name: ocs-storagecluster
+        namespace: openshift-storage
+      spec:
+        manageNodes: false
+        storageDeviceSets:
+          - count: 1
+            dataPVCTemplate:
+              spec:
+                accessModes:
+                - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 2Ti
+                storageClassName: gp2
+                volumeMode: Block
+            name: ocs-deviceset
+            placement: {}
+            portable: true
+            replica: 3
+            resources: {}
 
-- debug: var=ocs_nodes
+- name: Wait for OCS-backed StorageCluster to provide StorageClasses
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    kind: StorageCluster
+    namespace: openshift-storage
+  register: storagecluster
+  until: storagecluster|to_json|from_json|json_query(ocs_storage_class_query)
+  retries: 20
+  delay: 30
+
+- include_tasks: change_default.yml
+  when: change_default_storage_class
+
+- include_tasks: update_registry.yml
+  when: change_image_registry_storage

@@ -5,6 +5,9 @@
     definition: '{{ lookup("template", "project.yml.j2")|from_yaml }}'
 
 - include_role:
+    name: ocs
+  when: deploy_ocs|default(true)
+- include_role:
     name: quay
   when: deploy_quay|default(true)
 - include_role:
@@ -20,5 +23,5 @@
     name: nexus
   when: deploy_nexus|default(true)
 - include_role:
-    name: ocs
+    name: 3scale
   when: deploy_3scale|default(true)

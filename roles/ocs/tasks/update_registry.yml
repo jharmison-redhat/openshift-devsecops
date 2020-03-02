@@ -1,0 +1,19 @@
+---
+- name: Create a PVC for the Registry
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "registry_pvc.yml.j2")|from_yaml }}'
+
+- name: Patch the Image Registry Config resource with the new storage PVC
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    merge_type: merge
+    definition:
+      apiVersion: imageregistry.operator.openshift.io/v1
+      kind: Config
+      metadata:
+        name: cluster
+      spec:
+        storage:
+          pvc:
+            claim: ocs4registry

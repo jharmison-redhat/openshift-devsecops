@@ -1,0 +1,13 @@
+apiVersion: apps.3scale.net/v1alpha1
+kind: APIManager
+metadata:
+  name: devsecops-apimanager
+  namespace: 3scale
+spec:
+  resourceRequirementsEnabled: true
+  system:
+    fileStorage:
+{%- if rwx_backing_style == "pvc" %}
+      persistentVolumeClaim:
+        storageClassName: {{ rwx_backing_store }}
+{%- endif %}

@@ -1,0 +1,4 @@
+---
+- fail:
+    msg: Unable to deploy 3scale without RWX storage provided by OCS
+  when: !(deploy_ocs|default(true))
