@@ -33,7 +33,7 @@
         echo changed
     }
     cd {{ tmp_dir }}
-    gpg --list-keys |& grep -qF security@redhat.com || gpg import rh_key.txt
+    gpg --list-keys |& grep -qF security@redhat.com || gpg --import rh_key.txt
     gpg --list-keys |& grep -q 'ultimate.*security@redhat\.com' || trust_key
     gpg --verify {{ openshift_version_minor }}-sha256sum.txt.sig |& grep -qF 'Good signature from "Red Hat' || exit 1
   register: import_key
