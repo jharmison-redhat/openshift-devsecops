@@ -1,0 +1,107 @@
+---
+- name: Ensure namespace exists
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: '{{ gitea_project_name }}'
+        annotations:
+          openshift.io/display-name: '{{ gitea_project_display }}'
+      spec: {}
+
+- name: Deploy resources for Gitea Operator
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    namespace: '{{ resource.namespace|default(omit) }}'
+    definition: '{{ lookup("url", resource.url, split_lines=False)|from_yaml|regex_replace("REPLACE_ME", gitea_project_name) }}'
+  loop:
+    - name: crd
+      url: https://raw.githubusercontent.com/{{ github_project }}/gitea-operator/master/deploy/crds/gpte_v1alpha1_gitea_crd.yaml
+    - name: cluster_role
+      url: https://raw.githubusercontent.com/{{ github_project }}/gitea-operator/master/deploy/cluster_role.yaml
+    - name: service_account
+      url: https://raw.githubusercontent.com/{{ github_project }}/gitea-operator/master/deploy/service_account.yaml
+      namespace: '{{ gitea_project_name }}'
+    - name: cluster_role_binding
+      url: https://raw.githubusercontent.com/{{ github_project }}/gitea-operator/master/deploy/cluster_role_binding.yaml
+      namespace: '{{ gitea_project_name }}'
+    - name: operator
+      url: https://raw.githubusercontent.com/{{ github_project }}/gitea-operator/master/deploy/operator.yaml
+      namespace: '{{ gitea_project_name }}'
+  loop_control:
+    loop_var: resource
+    label: '{{ resource.name }}'
+
+- name: Create Gitea from a CR
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    namespace: '{{ gitea_project_name }}'
+    definition:
+      apiVersion: gpte.opentlc.com/v1alpha1
+      kind: Gitea
+      metadata:
+        name: gitea-server
+      spec:
+        postgresqlVolumeSize: 4Gi
+        giteaVolumeSize: 4Gi
+        giteaSsl: True
+        giteaName: gitea
+  register: gitea_deployment
+  until: not gitea_deployment.failed
+  retries: 5
+  delay: 10
+
+- name: Wait for Gitea to finish being created
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    api_version: v1
+    kind: Pod
+    namespace: '{{ gitea_project_name }}'
+    label_selectors:
+      - app=gitea
+  register: gitea_pod
+  until: gitea_pod.resources|length > 0 and (gitea_pod.resources|first).status.phase == "Running"
+  retries: 10
+  delay: 30
+
+# This is super hacky, I know... but it works for now. Will need fixing.
+# Intent is to eventually clean up the operator and add more levers to the CRD.
+- name: Create users in Gitea
+  shell: |
+    export KUBECONFIG='{{ kubeconfig }}'
+    oc='{{ tmp_dir }}/oc'
+    admin_user='{{ workshop_admin.username }}'
+    admin_password='{{ workshop_admin.password }}'
+    if [ $($oc whoami) != "$admin_user" ]; then
+        $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" || exit 1
+    fi
+
+    {% for user in openshift_users %}
+    args=(--name {{ user.username }} --password '{{ user.password }}')
+    {% if user.admin is defined and user.admin %}
+    args+=(--admin)
+    {% endif %}
+    args+=(--email '{{ user.username }}@{{ cluster_name }}.{{ openshift_base_domain }}')
+    args+=(--access-token)
+
+    pod=$($oc get pods -n {{ gitea_project_name }} -l app=gitea -o jsonpath='{.items[0].metadata.name}')
+    echo "running: $oc exec $pod -n {{ gitea_project_name }} -- /opt/gitea/gitea admin create-user ${args[@]}"
+    output=$($oc exec $pod -n {{ gitea_project_name }} -- /opt/gitea/gitea admin create-user "${args[@]}" 2>&1)
+    if echo "$output" | grep -qF 'created!'; then
+        echo changed
+    elif echo "$output" | grep -qF 'already exists'; then
+        echo ok
+    else
+        echo failed
+        echo "output: $output"
+    fi
+    echo "$output" >&2
+    {% endfor %}
+  register: gitea_users
+  changed_when: '"changed" in gitea_users.stdout_lines'
+  failed_when: '"failed" in gitea_users.stdout_lines'
+
+- debug: var=gitea_users
+- fail:

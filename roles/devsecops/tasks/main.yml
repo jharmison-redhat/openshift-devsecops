@@ -14,8 +14,8 @@
     name: service_mesh
   when: deploy_service_mesh|default(true)
 - include_role:
-    name: gogs
-  when: deploy_gogs|default(true)
+    name: gitea
+  when: deploy_gitea|default(true)
 - include_role:
     name: sonarqube
   when: deploy_sonarqube|default(true)

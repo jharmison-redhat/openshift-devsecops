@@ -1,1 +1,10 @@
 ---
+- name: Download openshift-tasks
+  git:
+    repo: https://github.com/{{ github_project }}/openshift-tasks
+    dest: '{{ tmp_dir }}/openshift-tasks'
+
+- name: Load openshift-tasks into every user on Gogs
+  shell: |
+    git remote add {{ user.username }} https://gogs-devsecops.apps.{{ cluster_name }}.{{ openshift_base_domain }}/{{ user.username }}/openshift-tasks.git
+
