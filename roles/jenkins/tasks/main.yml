@@ -1,6 +1,4 @@
 ---
-# Temporarily disabled as will be attempting full Tekton/Pipelines integration
-
 - name: Subscribe to Jenkins operator
   k8s:
     kubeconfig: '{{ kubeconfig }}'

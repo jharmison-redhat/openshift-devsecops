@@ -15,6 +15,13 @@ github_project: jharmison-redhat
 # NOTE: If the operators themselves still point to another image on Quay, the
 #   operator coming from this repo won't affect the images themselves.
 
+# Uncomment the following to change the pipeline workflow from Tekton to Jenkins
+# pipeline_style: jenkins
+
+
+# NOTE: OCS will make your cluster much larger (and more expensive). Consider
+#   disabling OCS and 3scale (which requires RWX, so either OCS or its own S3
+#   bucket) if you are price sensitive.
 # You can disable these by uncommenting the lines below.
 # deploy_ocs: no
 # deploy_quay: no
@@ -23,3 +30,4 @@ github_project: jharmison-redhat
 # deploy_sonarqube: no
 # deploy_nexus: no
 # deploy_3scale: no
+# deploy_pipeline: no
