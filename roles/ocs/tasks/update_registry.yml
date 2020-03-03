@@ -4,10 +4,17 @@
     kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "registry_pvc.yml.j2")|from_yaml }}'
 
+- name: Retrieve the current Image Registry Config resource
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    api_version: imageregistry.operator.openshift.io/v1
+    kind: Config
+    name: cluster
+  register: imageregistry_config
+
 - name: Patch the Image Registry Config resource with the new storage PVC
   k8s:
     kubeconfig: '{{ kubeconfig }}'
-    merge_type: merge
     definition:
       apiVersion: imageregistry.operator.openshift.io/v1
       kind: Config
@@ -17,3 +24,14 @@
         storage:
           pvc:
             claim: ocs4registry
+
+- name: Remove the S3 backing store from the ImageRegistry
+  k8s_json_patch:
+    kubeconfig: '{{ kubeconfig }}'
+    api_version: imageregistry.operator.openshift.io/v1
+    kind: Config
+    name: cluster
+    patch:
+      - op: remove
+        path: /spec/storage/s3
+  register: remove_s3_test

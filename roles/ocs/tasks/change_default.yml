@@ -5,7 +5,7 @@
     kind: StorageClass
     name: '{{ new_default_storage_class }}'
   register: storageclass
-  until: len(storageclass.resources) > 0
+  until: storageclass.resources|length > 0
   retries: 20
   delay: 30
 
