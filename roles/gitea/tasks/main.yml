@@ -87,8 +87,8 @@
     args+=(--access-token)
 
     pod=$($oc get pods -n {{ gitea_project_name }} -l app=gitea -o jsonpath='{.items[0].metadata.name}')
-    echo "running: $oc exec $pod -n {{ gitea_project_name }} -- /opt/gitea/gitea admin create-user ${args[@]}"
-    output=$($oc exec $pod -n {{ gitea_project_name }} -- /opt/gitea/gitea admin create-user "${args[@]}" 2>&1)
+    echo "running: $oc exec $pod -n {{ gitea_project_name }} -- /home/gitea/gitea admin create-user ${args[@]}"
+    output=$($oc exec $pod -n {{ gitea_project_name }} -- /home/gitea/gitea admin create-user "${args[@]}" 2>&1)
     if echo "$output" | grep -qF 'created!'; then
         echo changed
     elif echo "$output" | grep -qF 'already exists'; then
