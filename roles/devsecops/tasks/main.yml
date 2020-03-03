@@ -26,9 +26,6 @@
     name: 3scale
   when: deploy_3scale|default(true)
 - include_role:
-    name: load_tasks
-  when: deploy_pipeline|default(true)
-- include_role:
     name: tekton
   when:
     - deploy_pipeline|default(true)

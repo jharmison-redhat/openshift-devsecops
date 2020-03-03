@@ -1,3 +1,6 @@
 ---
 gitea_project_name: devsecops
 gitea_project_display: DevSecOps Common Resources
+
+repos_to_load:
+  - openshift-tasks
