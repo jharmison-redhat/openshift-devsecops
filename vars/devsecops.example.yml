@@ -26,7 +26,7 @@ github_project: jharmison-redhat
 # deploy_ocs: no
 # deploy_quay: no
 # deploy_service_mesh: no
-# deploy_gogs: no
+# deploy_gitea: no
 # deploy_sonarqube: no
 # deploy_nexus: no
 # deploy_3scale: no

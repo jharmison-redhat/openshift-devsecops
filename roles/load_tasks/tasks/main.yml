@@ -6,5 +6,5 @@
 
 - name: Load openshift-tasks into every user on Gogs
   shell: |
-    git remote add {{ user.username }} https://gogs-devsecops.apps.{{ cluster_name }}.{{ openshift_base_domain }}/{{ user.username }}/openshift-tasks.git
+    git remote add {{ user.username }} https://gitea-devsecops.apps.{{ cluster_name }}.{{ openshift_base_domain }}/{{ user.username }}/openshift-tasks.git
 
