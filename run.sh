@@ -132,3 +132,4 @@ for playbook in "${playbooks[@]}"; do
         ansible-playbook ${args} "$playbook" || exit $?
     fi
 done
+
