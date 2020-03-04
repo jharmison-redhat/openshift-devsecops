@@ -94,7 +94,7 @@
     python3 {{ role_path }}/scripts/nexus-user.py
     http://{{ nexus_route|json_query("resources[0].spec.host") }}
     --login-username admin --login-password '{{ nexus_password.stdout }}'
-    {% for user in openshift_users %}
+    {% for user in workshop_users %}
     {% if user.password|length >= 8 %}
     --username '{{ user.username }}' --password '{{ user.password }}'
     {% else %}

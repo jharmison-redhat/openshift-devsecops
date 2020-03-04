@@ -78,7 +78,7 @@
     python3 {{ role_path }}/scripts/quay-user.py
     https://{{ quay_route|json_query("resources[0].spec.host") }}
     --login-username quay --login-password '{{ quay_password }}'
-    {% for user in openshift_users %}
+    {% for user in workshop_users %}
     {% if user.password|length >= 8 %}
     --username '{{ user.username }}' --password '{{ user.password }}'
     {% else %}

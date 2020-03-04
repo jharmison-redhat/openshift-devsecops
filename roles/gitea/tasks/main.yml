@@ -78,7 +78,7 @@
         $oc login --insecure-skip-tls-verify=true -u "$admin_user" -p "$admin_password" || exit 1
     fi
 
-    {% for user in openshift_users %}
+    {% for user in workshop_users %}
     args=(--username {{ user.username }} --password '{{ user.password }}')
     {% if user.admin is defined and user.admin %}
     args+=(--admin)

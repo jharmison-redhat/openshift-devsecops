@@ -44,7 +44,7 @@ manual_users:
 
 # A specially designated user for administering workshop content
 workshop_admin:
-  username: devsecops
+  username: workshop-admin
   password: RedHatAdmin1
   admin: yes
 
@@ -60,6 +60,8 @@ sequence_users: |
 
 # The users to create in OpenShift
 openshift_users: '{{ manual_users + [workshop_admin] + sequence_users|from_yaml }}'
+# The users to create workshop projects/integrations for
+openshift_users: '{{ [workshop_admin] + sequence_users|from_yaml }}'
 
 # The type of worker to provision (including MachineSet adjustments)
 cluster_worker_machine_type: m4.2xlarge

@@ -1,4 +1,4 @@
-{% for username in sequence_users|from_yaml|json_query("[].username") %}
+{% for username in workshop_users|json_query("[].username") %}
 {% for project in projects %}
 - apiVersion: project.openshift.io/v1
   kind: Project

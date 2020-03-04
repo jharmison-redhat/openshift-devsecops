@@ -81,7 +81,7 @@
     https://{{ sonarqube_route|json_query("resources[0].spec.host") }}
     --login-username admin --login-password admin
     --new-login-password '{{ sonarqube_password }}'
-    {% for user in openshift_users %}
+    {% for user in workshop_users %}
     {% if user.password|length >= 8 %}
     --username '{{ user.username }}' --password '{{ user.password }}'
     {% else %}
