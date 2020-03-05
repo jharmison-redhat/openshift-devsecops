@@ -29,9 +29,9 @@
     name: tekton
   when:
     - deploy_pipeline|default(true)
-    - (pipeline_style == 'tekton')|default(true)
+    - pipeline_style|default('tekton') == 'tekton'
 - include_role:
     name: jenkins
   when:
     - deploy_pipeline|default(true)
-    - (pipeline_style == 'jenkins')|default(false)
+    - pipeline_style|default('tekton') == 'jenkins'
