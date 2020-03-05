@@ -25,7 +25,7 @@
 - name: Deploy Quay Enterprise via CR
   k8s:
     kubeconfig: '{{ kubeconfig }}'
-    definition:
+    definition: |
       apiVersion: redhatcop.redhat.io/v1alpha1
       kind: QuayEcosystem
       metadata:
@@ -37,8 +37,10 @@
           superuserCredentialsSecretName: quay-superuser
           registryStorage:
             persistentVolumeSize: 10Gi
+      {% if not (deploy_ocs|default(true)) %}
             persistentVolumeAccessModes:
               - ReadWriteOnce
+      {% endif %}
           database:
             volumeSize: 10Gi
           hostname: quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}
