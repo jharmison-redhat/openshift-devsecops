@@ -8,6 +8,7 @@ Several design goals were set in place before this started, and they have evolve
   - Every role should be useful outside of the context of this workshop
   - Every interaction with OpenShift should be done via the Kubernetes API, using the Ansible `k8s` module, except where it is impractical, to best support declarative configuration and enable fault tolerance and recovery from failures.
   - Everywhere that an action is not natively idempotent (ex: `shell` module), effort should be made to make it idempotent and report appropriate status back to Ansible.
+      (Any failures at all due to network conditions, timing problems, etc. should be 100% resolvable by running the exact same playbook without introducing new errors)
   - Everything should be OpenShift 4.x native. This means preferring built-in functionality over third-party functionality, and it means using Operators as the primary deployment/management mechanism.
   - There should be zero interaction required from the time you start to deploy the cluster to the time that the workshop is available for use. Anywhere that automation can make a decision about setting something up, it should have a variable available to change its behavior but assume a sane default.
   - Readability is fundamentally important and any time that something is deemed to be too difficult to understand (large in-line Jinja or JMESPath, for example), it should be separated to be easier to understand.
