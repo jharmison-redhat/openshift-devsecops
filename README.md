@@ -46,6 +46,12 @@ To run the playbooks yourself, using `ansible-playbook` and without `run.sh`, `j
    ```
 1. Wait a while. Currently, in my experience, it takes just under an hour to deploy everything I've made so far.
 1. Access the cluster via cli or web console. The `oc` client is downloaded into `tmp` and `prep.sh` has put that into your path. The web console should be available at `https://console.apps.{{ cluster_name }}.{{ openshift_base_domain }}`.
+1. When you are ready to tear the cluster down, run the following commands from the project root:
+   ```shell
+   cd tmp            # this is important for the next command to work correctly
+   openshift-install destroy cluster
+   ```
+   If you attempt to do this from outside of the tmp directory, openshift-install will throw an error. I should probably just add a playbook for it.
 
 ## Basic Structure
 There are two major playbooks implemented currently:
