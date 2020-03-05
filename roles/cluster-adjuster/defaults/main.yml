@@ -1,4 +1,9 @@
 ---
+create_users: true
+letsencrypt: true
+autoscale: true
+adjust_console: true
+
 certificate_path: '{{ tmp_dir }}/{{ cluster_name }}.{{ openshift_base_domain }}'
 
 # A list of manually created users:

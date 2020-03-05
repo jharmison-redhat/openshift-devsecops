@@ -6,32 +6,32 @@
 
 - include_role:
     name: ocs
-  when: deploy_ocs|default(true)
+  when: deploy_ocs
 - include_role:
     name: quay
-  when: deploy_quay|default(true)
+  when: deploy_quay
 - include_role:
     name: service_mesh
-  when: deploy_service_mesh|default(true)
+  when: deploy_service_mesh
 - include_role:
     name: gitea
-  when: deploy_gitea|default(true)
+  when: deploy_gitea
 - include_role:
     name: sonarqube
-  when: deploy_sonarqube|default(true)
+  when: deploy_sonarqube
 - include_role:
     name: nexus
-  when: deploy_nexus|default(true)
+  when: deploy_nexus
 - include_role:
     name: 3scale
-  when: deploy_3scale|default(true)
+  when: deploy_3scale
 - include_role:
     name: tekton
   when:
-    - deploy_pipeline|default(true)
-    - pipeline_style|default('tekton') == 'tekton'
+    - deploy_pipeline
+    - pipeline_style == 'tekton'
 - include_role:
     name: jenkins
   when:
-    - deploy_pipeline|default(true)
-    - pipeline_style|default('tekton') == 'jenkins'
+    - deploy_pipeline
+    - pipeline_style == 'jenkins'

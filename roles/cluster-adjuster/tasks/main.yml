@@ -1,9 +1,9 @@
 ---
 - include_tasks: create_users.yml
-  when: create_users|default(true)
+  when: create_users
 - include_tasks: letsencrypt.yml
-  when: letsencrypt|default(true)
+  when: letsencrypt
 - include_tasks: autoscale.yml
-  when: autoscale|default(true)
+  when: autoscale
 - include_tasks: console.yml
-  when: adjust_console|default(true)
+  when: adjust_console
