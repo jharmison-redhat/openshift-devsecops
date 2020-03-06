@@ -91,7 +91,7 @@
 
 - name: Add users to Nexus instance
   shell: >-
-    python3 {{ role_path }}/scripts/nexus-user.py
+    devsecops-api nexus
     http://{{ nexus_route|json_query("resources[0].spec.host") }}
     --login-username admin --login-password '{{ nexus_password.stdout }}'
     {% for user in workshop_users %}

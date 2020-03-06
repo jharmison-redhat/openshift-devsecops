@@ -77,7 +77,7 @@
 
 - name: Add users to Quay instance
   shell: >-
-    python3 {{ role_path }}/scripts/quay-user.py
+    devsecops-api quay
     https://{{ quay_route|json_query("resources[0].spec.host") }}
     --login-username quay --login-password '{{ quay_password }}'
     {% for user in workshop_users %}

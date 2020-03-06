@@ -77,7 +77,7 @@
 
 - name: Create users (and update admin password) in SonarQube
   shell: >-
-    python3 {{ role_path }}/scripts/sonarqube-user.py
+    devsecops-api sonarqube
     https://{{ sonarqube_route|json_query("resources[0].spec.host") }}
     --login-username admin --login-password admin
     --new-login-password '{{ sonarqube_password }}'
