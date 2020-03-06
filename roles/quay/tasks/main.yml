@@ -32,22 +32,22 @@
         name: quayecosystem
         namespace: quay-enterprise
       spec:
+        clair:
+          enabled: true
+          imagePullSecretName: redhat-pull-secret
         quay:
+          hostname: quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}
+          sslCertificatesSecretName: quay-tls-certs
           imagePullSecretName: redhat-pull-secret
           superuserCredentialsSecretName: quay-superuser
+          database:
+            volumeSize: 10Gi
           registryStorage:
             persistentVolumeSize: 10Gi
       {% if not (deploy_ocs|default(true)) %}
             persistentVolumeAccessModes:
               - ReadWriteOnce
       {% endif %}
-          database:
-            volumeSize: 10Gi
-          hostname: quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}
-          sslCertificatesSecretName: quay-tls-certs
-        clair:
-          enabled: true
-          imagePullSecretName: redhat-pull-secret
   register: quay_deployment
   until: not quay_deployment.failed
   retries: 5
