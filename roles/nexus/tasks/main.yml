@@ -100,4 +100,4 @@
   # https://github.com/ansible/ansible/issues/27299
   # to_json|from_json| is a terrible hack but here we are
   changed_when: nexus_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
-  changed_when: nexus_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0
+  failed_when: nexus_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or nexu_users.rc != 0
