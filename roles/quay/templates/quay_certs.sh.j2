@@ -8,7 +8,7 @@ if [ $($oc whoami) != "$admin_user" ]; then
 else
     echo ok
 fi
-quay_endpoint='quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}'
+quay_endpoint='{{ quay_route }}'
 acme='{{ tmp_dir }}/acme.sh/acme.sh'
 acme_args=(-d "$quay_endpoint" --dns dns_aws
     --cert-file '{{ certificate_path }}/quay-cert.pem'
