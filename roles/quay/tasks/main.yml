@@ -77,16 +77,11 @@
 
 - name: Add users to Quay instance
   shell: >-
-    python3 {{ role_path }}/scripts/quay-user.py
+    devsecops-api quay add-user
     https://{{ quay_route|json_query("resources[0].spec.host") }}
     --login-username quay --login-password '{{ quay_password }}'
-    {% for user in workshop_users %}
-    {% if user.password|length >= 8 %}
-    --username '{{ user.username }}' --password '{{ user.password }}'
-    {% else %}
-    --username '{{ user.username }}' --password password
-    {% endif %}
-    {% endfor %}
+    --usernames '{{ workshop_users|json_query("[].username")|join(",") }}'
+    --passwords '{{ workshop_users|json_query("[].password")|join(",") }}'
   register: quay_users
   # https://github.com/ansible/ansible/issues/27299
   # to_json|from_json| is a terrible hack but here we are

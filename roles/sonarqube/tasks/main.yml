@@ -77,18 +77,14 @@
 
 - name: Create users (and update admin password) in SonarQube
   shell: >-
-    python3 {{ role_path }}/scripts/sonarqube-user.py
+    devsecops-api sonarqube add-user
     https://{{ sonarqube_route|json_query("resources[0].spec.host") }}
     --login-username admin --login-password admin
     --new-login-password '{{ sonarqube_password }}'
-    {% for user in workshop_users %}
-    {% if user.password|length >= 8 %}
-    --username '{{ user.username }}' --password '{{ user.password }}'
-    {% else %}
-    --username '{{ user.username }}' --password password
-    {% endif %}
-    {% endfor %}
+    --usernames '{{ workshop_users|json_query("[].username")|join(",") }}'
+    --passwords '{{ workshop_users|json_query("[].password")|join(",") }}'
   register: sonarqube_users
   # https://github.com/ansible/ansible/issues/27299
   # to_json|from_json| is a terrible hack but here we are
   changed_when: sonarqube_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+  failed_when: sonarqube_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or sonarqube_users.rc != 0
