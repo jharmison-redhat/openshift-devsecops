@@ -1,0 +1,22 @@
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: QuayEcosystem
+metadata:
+  name: quayecosystem
+  namespace: quay-enterprise
+spec:
+  clair:
+    enabled: true
+    imagePullSecretName: redhat-pull-secret
+  quay:
+    hostname: {{ quay_route }}
+    sslCertificatesSecretName: quay-tls-certs
+    imagePullSecretName: redhat-pull-secret
+    superuserCredentialsSecretName: quay-superuser
+    database:
+      volumeSize: 10Gi
+    registryStorage:
+      persistentVolumeSize: 10Gi
+{% if not (deploy_ocs|default(true)) %}
+      persistentVolumeAccessModes:
+        - ReadWriteOnce
+{% endif %}

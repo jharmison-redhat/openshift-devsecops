@@ -25,49 +25,18 @@
 - name: Deploy Quay Enterprise via CR
   k8s:
     kubeconfig: '{{ kubeconfig }}'
-    definition: |
-      apiVersion: redhatcop.redhat.io/v1alpha1
-      kind: QuayEcosystem
-      metadata:
-        name: quayecosystem
-        namespace: quay-enterprise
-      spec:
-        clair:
-          enabled: true
-          imagePullSecretName: redhat-pull-secret
-        quay:
-          hostname: quay.apps.{{ cluster_name }}.{{ openshift_base_domain }}
-          sslCertificatesSecretName: quay-tls-certs
-          imagePullSecretName: redhat-pull-secret
-          superuserCredentialsSecretName: quay-superuser
-          database:
-            volumeSize: 10Gi
-          registryStorage:
-            persistentVolumeSize: 10Gi
-      {% if not (deploy_ocs|default(true)) %}
-            persistentVolumeAccessModes:
-              - ReadWriteOnce
-      {% endif %}
+    definition: '{{ lookup("template", "quay_cr.yml.j2")|from_yaml }}'
   register: quay_deployment
   until: not quay_deployment.failed
   retries: 5
   delay: 10
 
-- name: Wait for Quay route to be created by the Operator
-  k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
-    api_version: route.openshift.io/v1
-    kind: Route
-    namespace: quay-enterprise
-    name: quayecosystem-quay
-  register: quay_route
-  until: quay_route.resources|length > 0
-  retries: 10
-  delay: 30
+- include_tasks: validate_route.yml
+  when: quay_deployment.changed
 
 - name: Wait for Quay route to begin answering requests
   uri:
-    url: 'https://{{ quay_route|json_query("resources[0].spec.host") }}/'
+    url: 'https://{{ quay_route }}/'
     return_content: yes
     validate_certs: no
   register: quay_index
@@ -77,8 +46,7 @@
 
 - name: Add users to Quay instance
   shell: >-
-    devsecops-api quay add-user
-    https://{{ quay_route|json_query("resources[0].spec.host") }}
+    devsecops-api quay add-user https://{{ quay_route }}
     --login-username quay --login-password '{{ quay_password }}'
     --usernames '{{ workshop_users|json_query("[].username")|join(",") }}'
     --passwords '{{ workshop_users|json_query("[].password")|join(",") }}'
