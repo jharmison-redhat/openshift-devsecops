@@ -6,11 +6,11 @@ metadata:
 spec:
   clair:
     enabled: true
-    imagePullSecretName: redhat-pull-secret
+    imagePullSecretName: dummy-pull-secret
   quay:
     hostname: {{ quay_route }}
     sslCertificatesSecretName: quay-tls-certs
-    imagePullSecretName: redhat-pull-secret
+    imagePullSecretName: dummy-pull-secret
     superuserCredentialsSecretName: quay-superuser
     database:
       volumeSize: 10Gi
