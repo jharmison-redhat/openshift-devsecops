@@ -18,9 +18,6 @@ openshift_version: "4.3"
 # Please note that us-east-1 doesn't have enough elastic IPs allocated by default
 aws_region: us-east-1
 
-# The ID of the Route53 hosted zone
-route53_hosted_zone_id: YP563J79RELJ4C
-
 # Pull secret, acquired from:
 # https://cloud.redhat.com/openshift/install/pull-secret
 cloud_redhat_com_pull_secret: '{"auths":{"cloud.openshift.com":{"auth":"b3B=","email":"foo@example.com"},"quay.io":{"auth":"b3B=","email":"foo@example.com"},"registry.connect.redhat.com":{"auth":"NTI=","email":"foo@example.com"},"registry.redhat.io":{"auth":"NTI=","email":"foo@example.com"}}}'
