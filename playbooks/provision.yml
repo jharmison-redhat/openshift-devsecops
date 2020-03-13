@@ -1,9 +1,22 @@
 ---
 - hosts: localhost
-  vars_files:
-    - ../vars/provision.yml
-
   pre_tasks:
+    - name: Look for default defined common variables
+      include_vars: ../vars/common.yml
+      when: common_included is not defined or not common_included
+
+    - fail:
+        msg: Unable to continue without common variables set
+      when: common_included is not defined or not common_included
+
+    - name: Look for default defined provision variables
+      include_vars: ../vars/provision.yml
+      when: provision_included is not defined or not provision_included
+
+    - fail:
+        msg: Unable to continue without provision variables set
+      when: provision_included is not defined or not provision_included
+
     - name: Set AWS_ACCESS_KEY_ID
       block:
       - pause:
@@ -26,7 +39,3 @@
     - include_role:
         name: openshift-installer
       when: install_openshift|default(true)
-
-    # Individual adjustment tasks have their own toggles
-    - include_role:
-        name: cluster-adjuster

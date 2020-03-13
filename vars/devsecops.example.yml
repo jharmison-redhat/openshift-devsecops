@@ -1,4 +1,7 @@
 ---
+# This tells the playbooks to not try to include default-named vars files
+devsecops_included: yes
+
 # The projects to create per-user, with names including the username (e.g. user1-dev)
 projects:
   - name: dev
@@ -26,7 +29,7 @@ github_project: jharmison-redhat
 #   bucket) if you are price sensitive.
 # You can disable these by uncommenting the lines below.
 
-# deploy_ocs: no
+# deploy_ocs: no  # This OCS deployment only _currently_ works on AWS. It should theoretically work without AWS creds on AWS (for example, RHPDS-provisioned clusters on AWS)
 # deploy_quay: no
 # deploy_service_mesh: no
 # deploy_gitea: no
@@ -34,3 +37,20 @@ github_project: jharmison-redhat
 # deploy_nexus: no
 # deploy_3scale: no
 # deploy_pipeline: no
+
+
+# 3scale specific:
+#   3scale requires RWX storage to deploy. If you deploy OCS and 3scale in the
+#     provisioner, it will user RWX storage provided by OCS's CephFS file type.
+#     If you don't deploy OCS, you will need to include the following variables:
+# rwx_backing_style: s3
+# aws_region: us-east-1
+# rwx_backing_s3_bucket: bucket_name
+
+# If using AWS S3 to back 3scale, ensure the AWS credentials you intend for
+#   3scale, which are already configured with read/write access to the bucket
+#   above (which should also be already created!), are either in the environment
+#   by exporting them, or you can set them here (where they will override those
+#   in environment, in case you were provisioning with different accesses):
+# AWS_ACCESS_KEY_ID: <key>
+# AWS_SECRET_ACCESS_KEY: <secret>
