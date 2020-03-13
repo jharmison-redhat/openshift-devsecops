@@ -2,7 +2,9 @@
 - include_tasks: create_users.yml
   when: create_users
 - include_tasks: letsencrypt.yml
-  when: letsencrypt
+  when:
+    - letsencrypt
+    - AWS_ACCESS_KEY_ID is defined or ansible_env["AWS_ACCESS_KEY_ID"] is defined
 - include_tasks: autoscale.yml
   when: autoscale
 - include_tasks: console.yml
