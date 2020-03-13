@@ -113,7 +113,7 @@
     name: {{ username }}-jenkins
     namespace: {{ username }}-cicd
   spec:
-    host: {{ username }}-jenkins.apps.{{ cluster_name }}.{{ openshift_base_domain }}
+    host: {{ username }}-jenkins.apps.{{ full_cluster_name }}
     port:
       targetPort: 8080
     tls:

@@ -4,7 +4,7 @@ letsencrypt: true
 autoscale: true
 adjust_console: true
 
-certificate_path: '{{ tmp_dir }}/{{ cluster_name }}.{{ openshift_base_domain }}'
+certificate_path: '{{ tmp_dir }}/certs'
 
 # A list of manually created users:
 manual_users:

@@ -83,7 +83,7 @@
     {% if user.admin is defined and user.admin %}
     args+=(--admin)
     {% endif %}
-    args+=(--email '{{ user.username }}@{{ cluster_name }}.{{ openshift_base_domain }}')
+    args+=(--email '{{ user.username }}@{{ full_cluster_name }}')
     args+=(--access-token --must-change-password=false)
 
     pod=$($oc get pods -n {{ gitea_project_name }} -l app=gitea-server -o jsonpath='{.items[0].metadata.name}')
