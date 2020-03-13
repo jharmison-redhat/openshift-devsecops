@@ -6,21 +6,21 @@
       machine.openshift.io/cluster-api-cluster: {{ cluster_id }}
       machine.openshift.io/cluster-api-machine-role: workerocs
       machine.openshift.io/cluster-api-machine-type: workerocs
-    name: {{ cluster_id }}-ocs-worker-{{ aws_region }}{{ availability_zone }}
+    name: {{ cluster_id }}-ocs-worker-{{ machine_aws_region }}{{ availability_zone }}
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
         machine.openshift.io/cluster-api-cluster: {{ cluster_id }}
-        machine.openshift.io/cluster-api-machineset: {{ cluster_id }}-ocs-worker-{{ aws_region }}{{ availability_zone }}
+        machine.openshift.io/cluster-api-machineset: {{ cluster_id }}-ocs-worker-{{ machine_aws_region }}{{ availability_zone }}
     template:
       metadata:
         labels:
           machine.openshift.io/cluster-api-cluster: {{ cluster_id }}
           machine.openshift.io/cluster-api-machine-role: workerocs
           machine.openshift.io/cluster-api-machine-type: workerocs
-          machine.openshift.io/cluster-api-machineset: {{ cluster_id }}-ocs-worker-{{ aws_region }}{{ availability_zone }}
+          machine.openshift.io/cluster-api-machineset: {{ cluster_id }}-ocs-worker-{{ machine_aws_region }}{{ availability_zone }}
       spec:
         metadata:
           labels:
@@ -46,8 +46,8 @@
             metadata:
               creationTimestamp: null
             placement:
-              availabilityZone: {{ aws_region }}{{ availability_zone }}
-              region: {{ aws_region }}
+              availabilityZone: {{ machine_aws_region }}{{ availability_zone }}
+              region: {{ machine_aws_region }}
             publicIp: null
             securityGroups:
             - filters:
@@ -58,7 +58,7 @@
               filters:
               - name: tag:Name
                 values:
-                - {{ cluster_id }}-private-{{ aws_region }}{{ availability_zone }}
+                - {{ cluster_id }}-private-{{ machine_aws_region }}{{ availability_zone }}
             tags:
             - name: kubernetes.io/cluster/{{ cluster_id }}
               value: owned
