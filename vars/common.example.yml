@@ -57,8 +57,8 @@ cluster_max_nodes_total: 15
 # cluster_max_ram_gb: 256
 
 # You should not really change or comment these
-_tmp_parent = '{{ "/".join([ playbook_dir, "../tmp" ])|realpath }}'
-full_cluster_name = '{{ ".".join([ cluster_name, openshift_base_domain ]) }}'
+_tmp_parent: '{{ "/".join([ playbook_dir, "../tmp" ])|realpath }}'
+full_cluster_name: '{{ ".".join([ cluster_name, openshift_base_domain ]) }}'
 tmp_dir: '{{ "/".join([ _tmp_parent, _full_cluster_name ]) }}'
 
 # If you're not using the installer, this should be the path to the kubeconfig
