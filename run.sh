@@ -6,7 +6,7 @@ cd "$thisdir"
 verbose_flag=''
 vault_flag=''
 become_flag=''
-extra=''
+extra=()
 playbooks=()
 inventory=''
 
@@ -64,9 +64,9 @@ EOF
         -e|--extra=*)
             if [ "$1" == '-e' ]; then
                 shift
-                extra="$1"
+                extra+=('-e' "$1")
             else
-                extra=$(echo "$1" | cut -d= -f2-)
+                extra+=('-e' $(echo "$1" | cut -d= -f2-))
             fi                                                  ;;
         -i|--inventory=*)
             if [ "$1" == '-i' ]; then
@@ -126,10 +126,6 @@ if [ -f "ansible.cfg" ]; then
 fi
 
 for playbook in "${playbooks[@]}"; do
-    if [ -n "$extra" ]; then
-        ansible-playbook ${args} -e "$extra" "$playbook" || exit $?
-    else
-        ansible-playbook ${args} "$playbook" || exit $?
-    fi
+    ansible-playbook ${args} "${extra[@]}" "$playbook" || exit $?
 done
 
