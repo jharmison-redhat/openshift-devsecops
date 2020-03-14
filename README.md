@@ -23,33 +23,70 @@ The requirements for running the playbooks and roles have been mostly consolidat
 To run the playbooks yourself, using `ansible-playbook` and without `run.sh`, `jq` is not required but the other binaries in the `dnf` key as well as the Python libraries in the `pip` key of `runreqs.json` are all required.
 
 ## Basic operation
+### Deployment of an OpenShift cluster
 1. For easiest operation, you should create a file at the project root named `.aws` with the following content:
    ```shell
    export AWS_ACCESS_KEY_ID=<your actual access key ID>
    export AWS_SECRET_ACCESS_KEY=<your actual access key secret>
    ```
-   It is in .gitignore, so it won't be committed if you make changes.
+   It is in .gitignore, so you won't be committing secrets if you make changes.
 1. Open a terminal and change into the project directory. Source `prep.sh`:
    ```shell
-   cd openshift-devsecops # or wherever you put it
+   cd openshift-devsecops # or wherever you put the project root
    . prep.sh
    ```
 1. Copy the vars examples and edit them to match your desired environment
    ```shell
+   cp vars/common.example.yml vars/common.yml
+   vi vars/common.yml               # Change the appropriate variables
    cp vars/provision.example.yml vars/provision.yml
-   vi vars/provision.yml # Change the appropriate variables
-   cp vars/devsecops.example.yml vars/devsecops.yml
-   vi vars/devsecops.yml # Change variables as you desire to enable/disable content
+   vi vars/provision.yml            # Change the appropriate variables
    ```
 1. Execute `run.sh` with the names of the playbooks you would like run, in order.
    ```shell
-   ./run.sh provision deploy
+   ./run.sh provision
    ```
-1. Wait a while. Currently, in my experience, it takes just under an hour to deploy everything I've made so far.
-1. Access the cluster via cli or web console. The `oc` client is downloaded into `tmp` and `prep.sh` has put that into your path. The web console should be available at `https://console.apps.{{ cluster_name }}.{{ openshift_base_domain }}`.
-1. When you are ready to tear the cluster down, run the following commands from the project root:
+1. Wait a while. Currently, in my experience, it takes about 35-45 minutes to deploy a cluster.
+### Deployment of workshop on an existing cluster
+1. Open a terminal and change into the project directory. Copy the vars examples and edit them to match your desired environment.
    ```shell
-   cd tmp            # this is important for the next command to work correctly
+   cd openshift-devsecops # or wherever you put the project root
+   cp vars/common.example.yml vars/common.yml
+   vi vars/common.yml               # Change the appropriate variables
+   cp vars/devsecops.example.yml vars/devsecops.yml
+   vi vars/devsecops.yml            # Change the appropriate variables
+   ```
+1. Execute `run.sh` with the names of the devsecops playbook
+   ```shell
+   ./run.sh devsecops
+   ```
+1. Wait a while. Currently, in my experience, it takes about 15-30 minutes to deploy everything I've made so far.
+### Alternatively, deploy a cluster and the workshop content at once
+1. Do all of the above steps for both parts at once.
+   ```shell
+   cd openshift-devsecops # or wherever you put the project root
+   . prep.sh
+   cp vars/common.example.yml vars/common.yml
+   vi vars/common.yml               # Change the appropriate variables
+   cp vars/provision.example.yml vars/provision.yml
+   vi vars/provision.yml            # Change the appropriate variables
+   cp vars/devsecops.example.yml vars/devsecops.yml
+   vi vars/devsecops.yml            # Change the appropriate variables
+   ./run.sh provision devsecops
+   ```
+1. Wait a while. Currently, in my experience, it takes about an hour to deploy a cluster and everything I've made so far.
+### Access the workshop services if you deployed the cluster from this repo
+1. Access the cluster via cli or web console. If this repo deployed your cluster, the `oc` client is downloaded into `tmp`, in a directory named after the cluster, and `prep.sh` can put that into your path. The web console should be available at `https://console.apps.{{ cluster_name }}.{{ openshift_base_domain }}`. If you have recently deployed a cluster, you can update kubeconfig paths and $PATH for running binaries with the following:
+   ```shell
+   cd openshift-devsecops # or wherever you put the project root
+   . prep.sh
+   ```
+   prep.sh is aware of multiple clusters and will let you add to PATH and KUBECONFIG on a per-cluster basis in multiple terminals if you would like.
+1. If you deployed the cluster with this repo, when you are ready to tear the cluster down, run the following commands from the project root:
+   ```shell
+   cd openshift-devsecops # or wherever you put the project root
+   . prep.sh
+   cd tmp/{{ cluster_name }}.{{ openshift_base_domain }}      # this is important for the next command to work correctly, ensure that you have the right cluster name swapped in (do this manually, don't copy+paste)
    openshift-install destroy cluster
    ```
    If you attempt to do this from outside of the tmp directory, openshift-install will throw an error. I should probably just add a playbook for it.
@@ -57,45 +94,44 @@ To run the playbooks yourself, using `ansible-playbook` and without `run.sh`, `j
 ## Basic Structure
 There are two major playbooks implemented currently:
   - `playbooks/provision.yml`
-  - `playbooks/deploy.yml`
+  - `playbooks/devescops.yml`
 
-There's also a currently-unmaintained playbook that was used at one point to spin up ODH on a cluster built from this repo. It may be further integrated and maintained at a later date, but for now the remains of that work is available at:
-  - `playbooks/install_odh.yml`
-
-Additionally, there are two important vars files currently:
+Additionally, there are three important vars files currently:
   - `vars/provision.yml`
   - `vars/devsecops.yml`
+  - `vars/common.yml`
 
 There are a significant number of in-flux roles that are part of building the cluster and workshop content. You should explore individual roles on your own, or look at how the playbooks use them to understand their operation. The intent of the final release of this repo is that the roles will be capable of being developed/maintained independently, and they may be split into separate repositories with role depdendency, git submodules, or some combination of the two used to install them from GitHub or another SCM.
 
 ### Playbooks
 ---
 #### playbooks/provision.yml
-This playbook will, given access to AWS keys for an administrator account on which Route53 is managing DNS on a hosted zone, provision an OpenShift 4.x cluster using the latest installer for that major.minor release. Additionally, it conducts the following adjustments to the cluster:
+This playbook will, given access to AWS keys for an administrator account on which Route53 is managing DNS, provision an OpenShift 4.x cluster using the latest installer for the specified major.minor release.
+Future plans for this playbook:
+  - Implement provisioning for other CCSPs (TBD)
+
+#### playbooks/devescops.yml
+This playbook will deploy all of the services to be used in the workshop. First it adjusts the cluster to be ready to accept workshop content by doing the following:
   - Create htpasswd-backed users based on the vars provided
   - Delete the kubeadmin default user
-  - Generate and apply LetsEncrypt certificates for both the API endpoint and the default certificate for the OpenShift Router
+  - Generate and apply LetsEncrypt certificates for both the API endpoint and the default certificate for the OpenShift Router (If you have AWS keys sourced or included in vars)
   - Enable Machine and Cluster Autoscalers to allow the cluster to remain as small as possible (two 2xlarge instances as workers by default) until a load requires more nodes to be provisioned.
   - Change the console route to `console.apps.{{ cluster_name }}.{{ openshift_base_domain }}` because `console-openshift-console.apps` was deemed to be _just a bit much_.
 
-Future plans for this playbook:
-  - Implement provisioning for other CCSPs (TBD)
-  - Better separate the concerns between what we can do with AWS, other CCSPs, and RHPDS-built clusters.
-
-#### playbooks/deploy.yml
-This playbook will deploy all of the services to be used in the workshop. As a rule, it uses Operators for the provisioning/management of all services. Where an appropriate Operator was available in the default catalog sources, thosewere used. Where one doesn't exist, they were sourced from Red Hat GPTE published content. Also as a rule, it tries to stand up only one of each service and provision users on each service. The roles have all been designed such that they attempt to deploy sane defaults in the absence of custom variables, but there should be enough configuration available through templated variables that the roles are valuable outside of the scope of this workshop.
+As a rule, it uses Operators for the provisioning/management of all services. Where an appropriate Operator was available in the default catalog sources, those were used. Where one doesn't exist, they were sourced from Red Hat GPTE published content. Also as a rule, it tries to stand up only one of each service and provision users on each service. The roles have all been designed such that they attempt to deploy sane defaults in the absence of custom variables, but there should be enough configuration available through templated variables that the roles are valuable outside of the scope of this workshop.
 
 The services provided are currently in rapid flux and you should simply look through the listing to see what's applied. For roles to be implemented or changed in the future, please refer to GitHub Issues as these are the tracking mechanism I'm using to keep myself on track.
-
-Right now this playbook is requiring the provision variables be set, and also requesting access to AWS keys. This is expected to change in the future as the concerns are better separated.
 
 ### Variable Files
 ---
 There are example files that may be copied and changed for the variable files. Where deemed necessary, the variables are appropriately commented to explain where you should derive their values from, and what they will do for you.
-There is currently an open issue regarding what I dislike about the rigid structure of requiring these files in these directories. Some effort will be made at a later date to make their inclusion optional for normal workshop provisioning, and some amount of detection will be implemented to facilitate that.
+If you do not have them named exactly as they are shown, as long as you include a vars_file that sets the <vars_type>_included (eg common_included) using `-e` on the `run.sh` or `ansible-playbook` command line. This means you can name the files differently, and deploy multiple clusters at once.
+
+#### vars/common.yml
+These variables include things that are important for both an RHPDS-deployed cluster and a cluster deployed from this project. They either define where the cluster is for connection, or they define how to deploy and later connect to the cluster.
 
 #### vars/provision.yml
-The primary function of these variables is to provide information necessary to the `provision.yml` playbook for deployment and adjustment of the cluster. Future plans for this file align with the future plans for the playbook, intended to enable and facilitate more modularity and allow more infrastrucure platforms. Additionally, those variables identified as necessary for workshop provisioning on top of an established cluster will likely be split out into a third, `common.yml`, vars file.
+The primary function of these variables is to provide information necessary to the `provision.yml` playbook for deploymen of the cluster. Future plans for this file align with the future plans for the playbook, intended to enable more infrastrucure platforms.
 
 #### vars/devsecops.yml
 This mostly contains switches to enable or disable workshop services and infrastructure. It's also used right now to control from which GitHub project the various GPTE-built operators are sourced.
