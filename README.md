@@ -125,7 +125,29 @@ The services provided are currently in rapid flux and you should simply look thr
 ### Variable Files
 ---
 There are example files that may be copied and changed for the variable files. Where deemed necessary, the variables are appropriately commented to explain where you should derive their values from, and what they will do for you.
-If you do not have them named exactly as they are shown, as long as you include a vars_file that sets the <vars_type>_included (eg common_included) using `-e` on the `run.sh` or `ansible-playbook` command line. This means you can name the files differently, and deploy multiple clusters at once.
+If you do not have them named exactly as they are shown, as long as you include a vars_file that sets the <vars_type>_included (eg common_included) using `-e` on the `run.sh` or `ansible-playbook` command line. This means you can name the files differently, and deploy multiple clusters at once. A hypothetical multi-cluster deployment workflow could be like this:
+   ```shell
+   cd openshift-devsecops # or wherever you put the project root
+   . prep.sh
+
+   # Deploy cluster 1
+   cp vars/common.example.yml vars/common_cluster1.yml
+   vi vars/common_cluster1.yml               # Change the appropriate variables
+   cp vars/provision.example.yml vars/provision_cluster1.yml
+   vi vars/provision_cluster1.yml            # Change the appropriate variables
+   cp vars/devsecops.example.yml vars/devsecops_cluster1.yml
+   vi vars/devsecops_cluster1.yml            # Change the appropriate variables
+   ./run.sh provision devsecops -e @vars/common_cluster1.yml -e @vars/provision_cluster1.yml -e @vars/devsecops_cluster1.yml
+
+   # Deploy cluster 2
+   cp vars/common.example.yml vars/common_cluster2.yml
+   vi vars/common_cluster2.yml               # Change the appropriate variables
+   cp vars/provision.example.yml vars/provision_cluster2.yml
+   vi vars/provision_cluster2.yml            # Change the appropriate variables
+   cp vars/devsecops.example.yml vars/devsecops_cluster2.yml
+   vi vars/devsecops_cluster2.yml            # Change the appropriate variables
+   ./run.sh provision devsecops -e @vars/common_cluster2.yml -e @vars/provision_cluster2.yml -e @vars/devsecops_cluster2.yml
+   ```
 
 #### vars/common.yml
 These variables include things that are important for both an RHPDS-deployed cluster and a cluster deployed from this project. They either define where the cluster is for connection, or they define how to deploy and later connect to the cluster.
