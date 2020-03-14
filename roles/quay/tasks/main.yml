@@ -2,7 +2,7 @@
 - name: Download acme.sh
   git:
     repo: https://github.com/neilpang/acme.sh
-    dest: '{{ tmp_dir }}/acme.sh'
+    dest: '{{ _tmp_parent }}/acme.sh'
 
 - name: Ensure certificate directory exists
   file:

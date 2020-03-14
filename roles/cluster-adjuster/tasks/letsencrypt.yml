@@ -2,7 +2,7 @@
 - name: Download acme.sh
   git:
     repo: https://github.com/neilpang/acme.sh
-    dest: '{{ tmp_dir }}/acme.sh'
+    dest: '{{ _tmp_parent }}/acme.sh'
 
 - name: Ensure certificate directory exists
   file:
@@ -41,7 +41,7 @@
         fi
     done
 
-    acme='{{ tmp_dir }}/acme.sh/acme.sh'
+    acme='{{ _tmp_parent }}/acme.sh/acme.sh'
     acme_args=(-d "$api_endpoint" -d "$wildcard_endpoint" --dns dns_aws
         --cert-file '{{ certificate_path }}/cert.pem'
         --key-file '{{ certificate_path }}/key.pem'
