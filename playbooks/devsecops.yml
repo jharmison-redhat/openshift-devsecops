@@ -21,5 +21,4 @@
     - include_role:
         name: cluster-adjuster
   roles:
-    - role: cluster-adjuster
     - role: devsecops
