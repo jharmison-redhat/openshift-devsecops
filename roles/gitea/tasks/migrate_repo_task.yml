@@ -1,7 +1,7 @@
 ---
 - name: Make an API request for each user to migrate this project
   uri:
-    url: https://gitea-server-{{ gitea_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}/api/v1/repos/migrate
+    url: https://gitea-server-{{ gitea_project_name }}.apps.{{ full_cluster_name }}/api/v1/repos/migrate
     body_format: json
     method: POST
     headers:

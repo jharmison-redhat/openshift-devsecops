@@ -11,4 +11,4 @@
         name: console
         namespace: openshift-console
       spec:
-        host: console.apps.{{ cluster_name }}.{{ openshift_base_domain }}
+        host: console.apps.{{ full_cluster_name }}

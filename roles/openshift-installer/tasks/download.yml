@@ -13,7 +13,7 @@
 - name: Grab the signing key
   get_url:
     url: https://www.redhat.com/security/fd431d51.txt
-    dest: '{{ tmp_dir }}/rh_key.txt'
+    dest: '{{ _tmp_parent }}/rh_key.txt'
 
 - name: Grab the latest release checksums
   get_url:
@@ -32,9 +32,10 @@
         gpg --update-trustdb
         echo changed
     }
-    cd {{ tmp_dir }}
+    cd {{ _tmp_parent }}
     gpg --list-keys |& grep -qF security@redhat.com || gpg --import rh_key.txt
     gpg --list-keys |& grep -q 'ultimate.*security@redhat\.com' || trust_key
+    cd {{ tmp_dir }}
     gpg --verify {{ openshift_version_minor }}-sha256sum.txt.sig |& grep -qF 'Good signature from "Red Hat' || exit 1
   register: import_key
   changed_when: '"changed" in import_key.stdout_lines'

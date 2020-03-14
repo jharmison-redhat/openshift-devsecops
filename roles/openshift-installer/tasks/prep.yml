@@ -4,12 +4,12 @@
     path: '{{ key_pair_path }}'
     size: 4096
     mode: 0600
-    comment: '{{ workshop_admin.username }}@{{ cluster_name }}.{{ openshift_base_domain }}'
+    comment: '{{ workshop_admin.username }}@{{ full_cluster_name }}'
   register: cluster_key
 
 - name: Register the keypair with the SSH agent
   shell: |
-    if ! ssh-add -l | grep -qF '{{ workshop_admin.username }}@{{ cluster_name }}.{{ openshift_base_domain }}'; then
+    if ! ssh-add -l | grep -qF '{{ workshop_admin.username }}@{{ full_cluster_name }}'; then
         ssh-add {{ key_pair_path }} &>/dev/null && echo changed || echo failed
     else
         if ! ssh-add -T {{ key_pair_path }}.pub; then
