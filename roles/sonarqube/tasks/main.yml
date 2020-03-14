@@ -88,3 +88,7 @@
   # to_json|from_json| is a terrible hack but here we are
   changed_when: sonarqube_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
   failed_when: sonarqube_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or sonarqube_users.rc != 0
+# I'm not sure why it's failing sometimes and not others, I guess the API is flakey.
+  until: not sonarqube_users.failed
+  retries: 3
+  delay: 10
