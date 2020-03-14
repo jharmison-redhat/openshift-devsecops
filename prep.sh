@@ -24,6 +24,7 @@ for cluster_dir in "${cluster_dirs[@]}"; do
     if [ -f "${cluster_dir}/oc" -o -f "${cluster_dir}/openshift-install" -o -f "${cluster_dir}/auth/kubeconfig" ]; then
         # In order to let multiple terminals handle different clusters, we can do this
         read -n1 -p "Do you want to add $this_cluster to PATH and KUBECONFIG (y/n Default: Y)?" add_cluster
+        echo
         if [ "${add_cluster^^}" = "Y" -o -z "${add_cluster}" ]; then
             echo "$PATH" | grep -qF "$cluster_dir" || export PATH=$cluster_dir:$PATH
             this_kubeconfig="$cluster_dir/auth/kubeconfig"
