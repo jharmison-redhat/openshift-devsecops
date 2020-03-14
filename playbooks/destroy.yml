@@ -30,12 +30,16 @@
   tasks:
     - name: Ensure we're destroying the right cluster
       pause:
-        prompt: Do you want to destroy {{ full_cluster_name }} (y/n Default: N)?
+        prompt: |-
+
+          Do you want to destroy {{ full_cluster_name }} (y/n Default: N)?
       register: destroy_cluster
 
     - name: Determine if we should delete the tmp directory
       pause:
-        prompt: Do you want to remove {{ tmp_dir }} as well (y/n Default: N)?
+        prompt: |-
+
+          Do you want to remove {{ tmp_dir }} as well (y/n Default: N)?
       register: destroy_tmp
 
     - name: Destroy the cluster
