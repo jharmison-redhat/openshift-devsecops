@@ -101,3 +101,15 @@
   # to_json|from_json| is a terrible hack but here we are
   changed_when: nexus_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
   failed_when: nexus_users.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or nexus_users.rc != 0
+
+- name: Create a new repository named after every user
+  shell: >-
+    devsecops-api nexus add-repository
+    http://{{ nexus_route|json_query("resources[0].spec.host") }}
+    --login-username admin --login-password '{{ nexus_password.stdout }}'
+    --repository-names '{{ workshop_users|json_query("[].username")|join(",") }}'
+  register: nexus_repos
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: nexus_repos.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+  failed_when: nexus_repos.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or nexus_repos.rc != 0
