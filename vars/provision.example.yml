@@ -16,7 +16,7 @@ openshift_version: "4.3"
   #~ - us-east-2
   #~ - us-west-1
 # Please note that us-east-1 doesn't have enough elastic IPs allocated by default
-aws_region: us-east-1
+aws_region: us-east-2
 
 # Pull secret, acquired from:
 # https://cloud.redhat.com/openshift/install/pull-secret
