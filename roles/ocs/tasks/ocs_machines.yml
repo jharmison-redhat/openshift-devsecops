@@ -11,7 +11,7 @@
   set_fact:
     cluster_id: '{{ (machinesets.resources|first).metadata.labels["machine.openshift.io/cluster-api-cluster"] }}'
     ami_id: '{{ (machinesets.resources|first).spec.template.spec.providerSpec.value.ami.id }}'
-    machine_aws_region: '{{ (machinesets.resources|first).spec.providerSpec.value.placement.region }}'
+    machine_aws_region: '{{ (machinesets.resources|first).spec.template.spec.providerSpec.value.placement.region }}'
 
 - name: Deploy new machinesets for OCS workers
   k8s:
