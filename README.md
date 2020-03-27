@@ -86,15 +86,15 @@ To run the playbooks yourself, using `ansible-playbook` and without `run.sh`, `j
    ```shell
    cd openshift-devsecops # or wherever you put the project root
    . prep.sh
-   cd tmp/{{ cluster_name }}.{{ openshift_base_domain }}      # this is important for the next command to work correctly, ensure that you have the right cluster name swapped in (do this manually, don't copy+paste)
-   openshift-install destroy cluster
+   ./run.sh destroy
    ```
-   If you attempt to do this from outside of the tmp directory, openshift-install will throw an error. I should probably just add a playbook for it.
+   If you are using multiple clusters or otherwise non-default vars files locations, you can specify a common.yml path (e.g. with `-e @vars/my_common.yml`) to destroy a specific cluster.
 
 ## Basic Structure
-There are two major playbooks implemented currently:
+There are three major playbooks implemented currently:
   - `playbooks/provision.yml`
   - `playbooks/devescops.yml`
+  - `playbooks/destroy.yml`
 
 Additionally, there are three important vars files currently:
   - `vars/provision.yml`
@@ -121,6 +121,9 @@ This playbook will deploy all of the services to be used in the workshop. First 
 As a rule, it uses Operators for the provisioning/management of all services. Where an appropriate Operator was available in the default catalog sources, those were used. Where one doesn't exist, they were sourced from Red Hat GPTE published content. Also as a rule, it tries to stand up only one of each service and provision users on each service. The roles have all been designed such that they attempt to deploy sane defaults in the absence of custom variables, but there should be enough configuration available through templated variables that the roles are valuable outside of the scope of this workshop.
 
 The services provided are currently in rapid flux and you should simply look through the listing to see what's applied. For roles to be implemented or changed in the future, please refer to GitHub Issues as these are the tracking mechanism I'm using to keep myself on track.
+
+#### playbooks/destroy.yml
+This playbook will, provided a common.yml, identify if openshift-install was run from this host and confirm you would like to remove this cluster. It will completely tear the cluster down, and remove everything from the temporary directory for this cluster.
 
 ### Variable Files
 ---
@@ -150,7 +153,7 @@ If you do not have them named exactly as they are shown, as long as you include 
    ```
 
 #### vars/common.yml
-These variables include things that are important for both an RHPDS-deployed cluster and a cluster deployed from this project. They either define where the cluster is for connection, or they define how to deploy and later connect to the cluster.
+These variables include things that are important for both an RHPDS-deployed cluster and a cluster deployed from this project. They either define where the cluster is for connection, or they define how to deploy and later connect to the cluster. For clusters created with this project, it also indicates how to destroy the cluster.
 
 #### vars/provision.yml
 The primary function of these variables is to provide information necessary to the `provision.yml` playbook for deploymen of the cluster. Future plans for this file align with the future plans for the playbook, intended to enable more infrastrucure platforms.

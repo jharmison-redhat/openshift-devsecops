@@ -1,9 +1,9 @@
 ---
 - name: Install OpenShift on AWS
   shell: |
-    cd {{ tmp_dir }}
     ./openshift-install create cluster
   args:
+    chdir: '{{ tmp_dir }}'
     creates: '{{ kubeconfig }}'
   environment:
     AWS_ACCESS_KEY_ID: '{{ AWS_ACCESS_KEY_ID|default(ansible_env["AWS_ACCESS_KEY_ID"]) }}'

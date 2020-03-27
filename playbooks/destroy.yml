@@ -1,0 +1,63 @@
+---
+- hosts: localhost
+  pre_tasks:
+    - name: Look for default defined common variables
+      include_vars: ../vars/common.yml
+      when: common_included is not defined or not common_included
+
+    - fail:
+        msg: Unable to continue without common variables set
+      when: common_included is not defined or not common_included
+
+    - name: Set AWS_ACCESS_KEY_ID
+      block:
+      - pause:
+          prompt: Enter your AWS Administrator account Access Key ID
+        register: AWS_ACCESS_KEY_ID_tmp
+      - set_fact:
+          AWS_ACCESS_KEY_ID: '{{ AWS_ACCESS_KEY_ID_tmp.user_input }}'
+      when: ('AWS_ACCESS_KEY_ID' not in ansible_env.keys())
+
+    - name: Set AWS_SECRET_ACCESS_KEY
+      block:
+      - pause:
+          prompt: Enter your AWS Administrator account Access Key Secret
+        register: AWS_SECRET_ACCESS_KEY_tmp
+      - set_fact:
+          AWS_SECRET_ACCESS_KEY: '{{ AWS_SECRET_ACCESS_KEY_tmp.user_input }}'
+      when: ('AWS_SECRET_ACCESS_KEY' not in ansible_env.keys())
+
+  tasks:
+    - name: Ensure we're destroying the right cluster
+      pause:
+        prompt: |-
+
+          Do you want to destroy {{ full_cluster_name }} (y/n Default: N)?
+      register: destroy_cluster
+
+    - name: Determine if we should delete the tmp directory
+      pause:
+        prompt: |-
+
+          Do you want to remove {{ tmp_dir }} as well (y/n Default: N)?
+      register: destroy_tmp
+
+    - name: Destroy the cluster
+      shell: |
+        export KUBECONFIG='{{ tmp_dir }}/auth/kubeconfig'
+        ./openshift-install destroy cluster
+      args:
+        chdir: '{{ tmp_dir }}'
+        removes: '{{ tmp_dir }}/auth/kubeconfig'
+      environment:
+        AWS_ACCESS_KEY_ID: '{{ AWS_ACCESS_KEY_ID|default(ansible_env["AWS_ACCESS_KEY_ID"]) }}'
+        AWS_SECRET_ACCESS_KEY: '{{ AWS_SECRET_ACCESS_KEY|default(ansible_env["AWS_SECRET_ACCESS_KEY"]) }}'
+      when:
+        - destroy_cluster.user_input.strip()|upper == 'Y'
+
+    - name: Delete tmp directory
+      file:
+        path: '{{ tmp_dir }}'
+        state: absent
+      when:
+        - destroy_tmp.user_input.strip()|upper == "Y"
