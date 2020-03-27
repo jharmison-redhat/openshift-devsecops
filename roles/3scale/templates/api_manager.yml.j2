@@ -8,12 +8,12 @@ spec:
   resourceRequirementsEnabled: true
   system:
     fileStorage:
-{%- if rwx_backing_style == "pvc" %}
+{% if rwx_backing_style == "pvc" %}
       persistentVolumeClaim:
         storageClassName: {{ rwx_backing_store }}
-{%- elseif rwx_backing_style == "s3" %}
+{% elif rwx_backing_style == "s3" %}
       amazonSimpleStorageService:
          awsBucket: {{ rwx_backing_s3_bucket }}
          awsRegion: {{ aws_region }}
          awsCredentialsSecret: s3_storage_creds
-{%- endif %}
+{% endif %}
