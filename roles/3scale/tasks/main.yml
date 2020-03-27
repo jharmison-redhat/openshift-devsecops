@@ -10,7 +10,7 @@
       of an S3 bucket to use that the credentials can already access. It will
       not be created automatically.
   when:
-    - !(deploy_ocs|default(true))
+    - not (deploy_ocs|default(true))
     - rwx_backing_s3_bucket is not defined
 
 - name: Subscribe to 3scale-operator
