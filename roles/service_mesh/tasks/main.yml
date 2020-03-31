@@ -26,7 +26,6 @@
         name: servicemeshoperator
         source: redhat-operators
         sourceNamespace: openshift-marketplace
-        startingCSV: servicemeshoperator.v1.0.5
 
 - name: Deploy Service Mesh Control PLane
   k8s:

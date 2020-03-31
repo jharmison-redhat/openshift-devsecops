@@ -14,7 +14,6 @@
         name: jenkins-operator
         source: community-operators
         sourceNamespace: openshift-marketplace
-        startingCSV: jenkins-operator.v0.2.2
 
 - name: Allow Jenkins operator serviceaccount to create nonroot pods
   k8s:
