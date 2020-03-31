@@ -75,7 +75,7 @@
   retries: 10
   delay: 30
 
-- name: Wait for SonarQube pod to be created by the Operator
+- name: Retrieve SonarQube pod info (for name)
   k8s_info:
     kubeconfig: '{{ kubeconfig }}'
     api_version: v1
