@@ -2,22 +2,33 @@
 - name: Create secrets for every user account in Quay
   k8s:
     kubeconfig: '{{ kubeconfig }}'
-    definition: '{{ lookup("template", "quay_secrets.yml.j2") }}'
+    definition: '{{ lookup("template", "quay_secrets.yml.j2")|from_yaml }}'
+  register: quay_secrets
   when: deploy_quay|default(true)
 
-- name: Add EAP ImageStreams to every project
-  k8s:
+- name: Attach new secrets to pipeline service accounts
+  k8s_json_patch:
     kubeconfig: '{{ kubeconfig }}'
+    api_version: v1
+    kind: ServiceAccount
+    name: pipeline
     namespace: '{{ item[0] }}-{{ item[1] }}'
-    definition: '{{ lookup("url", eap_imagestream_source) }}'
+    patch:
+      - op: add
+        path: /secrets/-
+        value:
+          name: '{{ item[0] }}-{{ item[1] }}-quay-reg'
+  when:
+    - quay_secrets is defined
+    - quay_secrets.changed|bool
   with_nested:
-    - '{{ for username in workshop_users|json_query("[].username") }}'
-    - '{{ for project in projects|json_query("[].name") }}'
+    - '{{ workshop_users|json_query("[].username") }}'
+    - '{{ projects|json_query("[].name") }}'
 
 - name: Define necessary tasks
   k8s:
     kubeconfig: '{{ kubeconfig }}'
-    definition: '{{ lookup("template", "task_" + task + ".yml.j2") }}'
+    definition: '{{ lookup("template", "task_" + task + ".yml.j2")|from_yaml }}'
   loop:
     - mvn_build
   loop_control:
