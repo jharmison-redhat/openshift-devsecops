@@ -6,6 +6,7 @@ deploy_gitea: true
 deploy_sonarqube: true
 deploy_nexus: true
 deploy_3scale: true
+deploy_crw: true
 deploy_pipeline: true
 
 pipeline_style: tekton
