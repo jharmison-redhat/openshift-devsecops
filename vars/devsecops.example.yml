@@ -36,6 +36,7 @@ github_project: jharmison-redhat
 # deploy_sonarqube: no
 # deploy_nexus: no
 # deploy_3scale: no
+# deploy_crw: no
 # deploy_pipeline: no
 
 
