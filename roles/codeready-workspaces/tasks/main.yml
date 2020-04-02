@@ -1,0 +1,68 @@
+---
+- name: Ensure namespace exists
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: '{{ crw_project_name }}'
+        annotations:
+          openshift.io/display-name: '{{ crw_project_display }}'
+      spec: {}
+
+- name: Subscribe to CodeReady Workspaces
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "codeready-workspaces.yml.j2")|from_yaml }}'
+
+- name: Deploy CodeReady Workspaces via CR
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: org.eclipse.che/v1
+      kind: CheCluster
+      metadata:
+        name: codeready-workspaces
+        namespace: '{{ crw_project_name }}'
+      spec:
+        auth:
+          externalIdentityProvider: false
+          openShiftoAuth: true
+        database:
+          externalDb: false
+        k8s: {}
+        server:
+          cheFlavor: codeready
+          selfSignedCert: false
+          tlsSupport: false
+        storage:
+          preCreateSubPaths: true
+          pvcClaimSize: 1Gi
+          pvcStrategy: per-workspace
+  register: codeready_workspaces_deployment
+  until: not codeready_workspaces_deployment.failed
+  retries: 5
+  delay: 10
+
+- name: Wait for Codeready route to be created by the Operator
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    api_version: route.openshift.io/v1
+    kind: Route
+    namespace: '{{ crw_project_name }}'
+    name: codeready
+  register: codeready_route
+  until: codeready_route.resources|length > 0
+  retries: 10
+  delay: 30
+
+- name: Wait for Codeready route to begin answering requests
+  uri:
+    url: 'http://{{ codeready_route|json_query("resources[0].spec.host") }}/'
+    return_content: yes
+    validate_certs: no
+  register: codeready_endpoint
+  until: codeready_endpoint.status == 200
+  retries: 20
+  delay: 30
