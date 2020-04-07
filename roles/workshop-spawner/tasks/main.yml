@@ -1,0 +1,37 @@
+---
+- name: Ensure namespace exists
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: '{{ workshop_spawner_project_name }}'
+        annotations:
+          openshift.io/display-name: '{{ workshop_spawner_project_display }}'
+      spec: {}
+
+- name: Wait for KeyCloak to respond to requests
+  uri:
+    url: 'https://keycloak-{{ crw_project_name }}.{{ openshift_base_domain }}/'
+    return_content: yes
+    validate_certs: no
+  register: keycloak_endpoint
+  until: keycloak_endpoint.status == 200
+  retries: 10
+  delay: 30
+
+- name: Deploy workshop spawner
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "workshop-spawner.yml.j2")|from_yaml }}'
+
+- name: Wait for the Spawner to respond to requests
+  uri:
+    url: 'https://dashboard.{{ openshift_base_domain }}/'
+    return_content: yes
+    validate_certs: no
+  register: dashboard_endpoint
+  until: dashboard_endpoint.status == 200
+  retries: 20
+  delay: 5
