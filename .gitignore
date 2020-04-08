@@ -7,5 +7,4 @@ webpage/*-index.html
 vars/*
 !vars/*.example.yml
 .aws
-dashboard/renderer/node_modules/*
 
