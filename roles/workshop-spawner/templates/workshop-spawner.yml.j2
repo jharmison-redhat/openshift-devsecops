@@ -271,13 +271,15 @@ items:
           - name: OAUTH_CLIENT_SECRET
             value: 8e135d2ae856dadee4eb02ee005e4e78
           - name: KEYCLOAK_AUTH_URL
-            value: https://keycloak-{{ crw_project_name }}.{{ openshift_base_domain }}/auth
+            value: https://keycloak-{{ crw_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}/auth
           - name: KEYCLOAK_REALM
             value: codeready
           - name: KEYCLOAK_CLIENT_ID
             value: codeready-public
           - name: CRW_URL
-            value: https://codeready-{{ crw_project_name }}.{{ openshift_base_domain }}
+            value: https://codeready-{{ crw_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}
+          - name: API_SERVER
+            value: https://api.{{ cluster_name }}.{{ openshift_base_domain }}:6443
           livenessProbe:
             failureThreshold: 3
             httpGet:
