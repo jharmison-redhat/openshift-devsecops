@@ -2,11 +2,11 @@
 - apiVersion: operators.coreos.com/v1
   kind: OperatorGroup
   metadata:
-    name: codeready-workspaces-operatorgroup
+    name: {{ crw_project_name }}-operatorgroup
     namespace: {{ crw_project_name }}
   spec:
     targetNamespaces:
-    - devsecops
+    - {{ crw_project_name }}
 
 # Subscription to trigger OLM installation
 - apiVersion: operators.coreos.com/v1alpha1

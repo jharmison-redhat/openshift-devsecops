@@ -2,11 +2,11 @@
 - apiVersion: operators.coreos.com/v1
   kind: OperatorGroup
   metadata:
-    name: nexus-operatorgroup
+    name: {{ nexus_project_name }}-operatorgroup
     namespace: {{ nexus_project_name }}
   spec:
     targetNamespaces:
-    - devsecops
+    - {{ nexus_project_name }}
 
 # Subscription to trigger OLM installation
 - apiVersion: operators.coreos.com/v1alpha1
