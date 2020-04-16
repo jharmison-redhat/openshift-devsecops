@@ -38,6 +38,7 @@ github_project: jharmison-redhat
 # deploy_3scale: no
 # deploy_crw: no
 # deploy_pipeline: no
+# deploy_workshop: no
 
 
 # 3scale specific:
