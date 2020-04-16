@@ -35,7 +35,7 @@
         server:
           cheFlavor: codeready
           selfSignedCert: false
-          tlsSupport: false
+          tlsSupport: true
         storage:
           preCreateSubPaths: true
           pvcClaimSize: 1Gi
@@ -59,7 +59,7 @@
 
 - name: Wait for Codeready route to begin answering requests
   uri:
-    url: 'http://{{ codeready_route|json_query("resources[0].spec.host") }}/'
+    url: 'https://{{ codeready_route|json_query("resources[0].spec.host") }}/'
     return_content: yes
     validate_certs: no
   register: codeready_endpoint
