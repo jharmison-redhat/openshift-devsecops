@@ -6,3 +6,8 @@ workshop_spawner_image: quay.io/akrohg/workshop-spawner:latest
 workshop_dashboard_image: quay.io/akrohg/devsecops-workshop-dashboard:latest
 
 crw_project_name: devsecops
+
+keycloak_url: "https://keycloak-{{ crw_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}"
+spawner_redirect_uri: "https://dashboard.apps.{{ cluster_name }}.{{ openshift_base_domain }}/hub/oauth_callback"
+
+

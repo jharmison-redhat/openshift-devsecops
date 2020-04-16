@@ -38,3 +38,6 @@
   when:
     - deploy_pipeline
     - pipeline_style == 'jenkins'
+- include_role:
+    name: workshop-spawner
+  when: deploy_workshop

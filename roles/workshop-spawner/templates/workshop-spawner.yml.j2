@@ -271,7 +271,7 @@ items:
           - name: OAUTH_CLIENT_SECRET
             value: 8e135d2ae856dadee4eb02ee005e4e78
           - name: KEYCLOAK_AUTH_URL
-            value: https://keycloak-{{ crw_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}/auth
+            value: {{ keycloak_url }}/auth
           - name: KEYCLOAK_REALM
             value: codeready
           - name: KEYCLOAK_CLIENT_ID
@@ -388,7 +388,7 @@ items:
     name: external-keycloak-spawner
     namespace: {{ workshop_spawner_project_name }}
   spec:
-    host: dashboard.{{ openshift_base_domain }}
+    host: dashboard.apps.{{ cluster_name }}.{{ openshift_base_domain }}
     port:
       targetPort: 8080-tcp
     tls:
