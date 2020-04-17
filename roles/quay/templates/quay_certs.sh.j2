@@ -1,6 +1,6 @@
 #!/bin/bash
 export KUBECONFIG='{{ kubeconfig }}'
-oc='{{ tmp_dir }}/oc'
+oc='{{ oc_cli }}'
 admin_user='{{ workshop_admin.username }}'
 admin_password='{{ workshop_admin.password }}'
 if [ $($oc whoami) != "$admin_user" ]; then
