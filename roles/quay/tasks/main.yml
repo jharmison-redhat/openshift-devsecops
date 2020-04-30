@@ -1,4 +1,8 @@
 ---
+- name: Configure self signed certificate setting
+  set_fact:
+    use_real_certs: "{{ (AWS_ACCESS_KEY_ID is defined or ansible_env['AWS_ACCESS_KEY_ID'] is defined) | bool }}"
+
 - name: Download acme.sh
   git:
     repo: https://github.com/neilpang/acme.sh
@@ -16,6 +20,8 @@
   environment:
     AWS_ACCESS_KEY_ID: '{{ AWS_ACCESS_KEY_ID|default(ansible_env["AWS_ACCESS_KEY_ID"]) }}'
     AWS_SECRET_ACCESS_KEY: '{{ AWS_SECRET_ACCESS_KEY|default(ansible_env["AWS_SECRET_ACCESS_KEY"]) }}'
+  when:
+  - use_real_certs
 
 - name: Subscribe to Quay Enterprise
   k8s:
