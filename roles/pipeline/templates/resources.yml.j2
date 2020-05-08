@@ -1,0 +1,22 @@
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: source
+    namespace: {{ username }}-cicd
+  spec:
+    params:
+      - name: url
+        value: >-
+          https://gitea-server-devsecops.apps.{{cluster_name}}.{{openshift_base_domain}}/{{username}}/openshift-tasks.git
+    type: git
+
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: image
+    namespace: {{ username }}-cicd
+  spec:
+    params:
+      - name: url
+        value: quay.apps.{{cluster_name}}.{{openshift_base_domain}}/{{username}}/openshift-tasks
+    type: image
