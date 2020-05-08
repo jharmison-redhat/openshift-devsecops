@@ -61,6 +61,12 @@ _tmp_parent: '{{ "/".join([ playbook_dir, "../tmp" ])|realpath }}'
 full_cluster_name: '{{ ".".join([ cluster_name, openshift_base_domain ]) }}'
 tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
 
-# If you're not using the installer, this should be the path to the kubeconfig
-#   file for the cluster you're trying to install the workshop on.
+# The path to the kubeconfig file for the cluster you're using for the workshop 
+# The default value is what's configured if you're provisioning the workshop in AWS
+# kubeconfig: '~/.kube/config'
 kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+
+# The path to your 'oc' client - by default it's installed in the tmp_dir
+# if you created the cluster in AWS using 'provision'
+#oc_cli: '/usr/local/bin/oc'
+oc_cli: '{{ tmp_dir }}/oc'

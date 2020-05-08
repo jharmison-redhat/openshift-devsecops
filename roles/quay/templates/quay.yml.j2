@@ -52,6 +52,7 @@
     superuser-password: {{ quay_password }}
     superuser-email: quay@redhat.com
 
+{% if (use_real_certs|default(true)) %}
 # Secret to use cluster certs for Quay
 - apiVersion: v1
   kind: Secret
@@ -62,3 +63,4 @@
   data:
     ssl.cert: {{ lookup("file", certificate_path + "/quay-fullchain.pem")|b64encode }}
     ssl.key: {{ lookup("file", certificate_path + "/quay-key.pem")|b64encode }}
+{% endif %} 
