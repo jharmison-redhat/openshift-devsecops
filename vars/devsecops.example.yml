@@ -23,6 +23,11 @@ github_project: jharmison-redhat
 # Uncomment the following to change the pipeline workflow from Tekton to Jenkins
 # pipeline_style: jenkins
 
+# Uncomment the following to change the actions that occur before workshop deployment
+# create_users: no
+# letsencrypt: no
+# autoscale: no
+# adjust_console: no
 
 # NOTE: OCS will make your cluster much larger (and more expensive). Consider
 #   disabling OCS and 3scale (which requires RWX, so either OCS or its own S3
