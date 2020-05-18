@@ -59,7 +59,7 @@
   retries: 10
   delay: 30
 
-- name: Wait for Codeready route to begin answering requests
+- name: Wait for CodeReady Workspaces to respond to requests
   uri:
     url: 'https://{{ codeready_route|json_query("resources[0].spec.host") }}/'
     return_content: yes
@@ -68,3 +68,56 @@
   until: codeready_endpoint.status == 200
   retries: 20
   delay: 30
+
+- name: Wait for KeyCloak to respond to requests
+  uri:
+    url: '{{ keycloak_url }}'
+    return_content: yes
+    validate_certs: no
+  register: keycloak_endpoint
+  until: keycloak_endpoint.status == 200
+  retries: 10
+  delay: 30
+
+- name: Get Keycloak Deployment
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    api_version: v1
+    kind: Deployment
+    name: keycloak
+    namespace: "{{ crw_project_name }}"
+  register: sso_deployment
+
+- name: Save credentials from operated deployment
+  set_fact:
+    sso_admin_password: "{{ sso_deployment | json_query('resources[0].spec.template.spec.containers[?name==`keycloak`].env[]') | to_json | from_json | json_query('[?name==`SSO_ADMIN_PASSWORD`].value') | first }}"
+    sso_admin_user: "admin"
+
+- name: Get CodeReady SSO admin token
+  uri:
+    url: '{{ keycloak_url }}/auth/realms/master/protocol/openid-connect/token'
+    method: POST
+    body:
+      username: "{{ sso_admin_user }}"
+      password: "{{ sso_admin_password }}"
+      grant_type: "password"
+      client_id: "admin-cli"
+    body_format: form-urlencoded
+    status_code: 200,201,204
+  register: codeready_sso_admin_token
+
+- name: Increase CodeReady access token lifespans
+  uri:
+    url: '{{ keycloak_url }}/auth/admin/realms/codeready'
+    method: PUT
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ codeready_sso_admin_token.json.access_token }}"
+    body:
+      accessTokenLifespan: 28800
+      accessTokenLifespanForImplicitFlow: 28800
+      actionTokenGeneratedByUserLifespan: 28800
+      ssoSessionIdleTimeout: 28800
+      ssoSessionMaxLifespan: 28800
+    body_format: json
+    status_code: 204
