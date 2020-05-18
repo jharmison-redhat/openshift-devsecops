@@ -129,6 +129,10 @@ def resolve_path(obj, path):
         key = unmatched_path.pop(0)
         context = value
         value = None
+        if key == '-' and isinstance(context, list):
+            unmatched_path.insert(0, str(len(context)))
+            break
+
         if isinstance(context, dict):
             if key in context:
                 matched_path.append(key)
@@ -224,7 +228,10 @@ def process_patch_add(patch_operation, patched_obj):
         # Already present with desired value, nothing to do
         return None
     elif patch_operation.get('replace', True):
-        context[key] = value
+        if isinstance(context, list) and key == len(context):
+            context.append(value)
+        else:
+            context[key] = value
         processed_path = path_from_list(matched_path)
         return dict(op='replace', path=processed_path, value=value)
     else:
