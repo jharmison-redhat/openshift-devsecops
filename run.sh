@@ -128,4 +128,3 @@ fi
 for playbook in "${playbooks[@]}"; do
     ansible-playbook ${args} "${extra[@]}" "$playbook" || exit $?
 done
-

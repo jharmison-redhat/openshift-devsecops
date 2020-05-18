@@ -163,4 +163,3 @@ This mostly contains switches to enable or disable workshop services and infrast
 
 ## Contributing
 I welcome pull requests and issues. I want this to become a valuable tool for Red Hatters at all levels to explore or use for their work, and to be a valuable resource for our partners. If there's something that you think I should do that I'm not, or something that's not working the way you think it was intended, please either let me know or fix it, if you're able. I would love to have help, and as long as we're communicating well via GitHub Issues about the direction that something should go, I won't turn away that help. Please, follow the overall design goals if making a pull request.
-

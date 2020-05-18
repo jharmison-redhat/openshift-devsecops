@@ -9,7 +9,7 @@
 # k8s_json_patch nor normal k8s modules are working here... oc CLI is
 # note that this is NOT idempotent - if you run the pipeline role more than once
 # it will add the secret more than once which will cause the pipeline
-# runs to FAIL ! 
+# runs to FAIL !
 - name: Attach new secrets to pipeline service accounts
   shell: |
     export KUBECONFIG='{{ kubeconfig }}'
@@ -33,8 +33,6 @@
     - '{{ workshop_users|json_query("[].username") }}'
     - '{{ projects|json_query("[].name") }}'
 
-
-
 - name: Create necessary pipeline tasks, and resources
   block:
   - name: Define the build task
@@ -44,7 +42,6 @@
     loop: '{{ workshop_users|json_query("[].username") }}'
     loop_control:
       loop_var: username
-
 
   - name: Define pipeline resources
     k8s:

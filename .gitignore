@@ -7,4 +7,4 @@ webpage/*-index.html
 vars/*
 !vars/*.example.yml
 .aws
-
+.vscode

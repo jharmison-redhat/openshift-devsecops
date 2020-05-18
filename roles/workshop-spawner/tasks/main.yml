@@ -65,7 +65,7 @@
 
 - name: Add spawner_redirect_uri to list if missing
   set_fact:
-    client_representation: 
+    client_representation:
       redirectUris: "{{ redirect_uris + [ spawner_redirect_uri ] }}"
       clientId: codeready-public
       serviceAccountsEnabled: false
