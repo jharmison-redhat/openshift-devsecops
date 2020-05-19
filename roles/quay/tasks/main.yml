@@ -76,3 +76,6 @@
         name: container-security-operator
         source: community-operators
         sourceNamespace: openshift-marketplace
+
+- name: Install and configure Quay Bridge operator
+  include_tasks: quay_bridge.yml
