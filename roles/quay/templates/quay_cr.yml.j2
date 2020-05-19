@@ -8,7 +8,8 @@ spec:
     enabled: true
     imagePullSecretName: dummy-pull-secret
   quay:
-    hostname: {{ quay_route }}
+    externalAccess:
+      hostname: {{ quay_route }}
 {% if (use_real_certs|default(true)) %}
     sslCertificatesSecretName: quay-tls-certs
 {% endif %}
