@@ -13,6 +13,7 @@ spec:
 {% if (use_real_certs|default(true)) %}
       tls:
         secretName: quay-tls-certs
+        termination: passthrough
 {% endif %}
     imagePullSecretName: dummy-pull-secret
     superuserCredentialsSecretName: quay-superuser
