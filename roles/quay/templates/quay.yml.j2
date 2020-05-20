@@ -59,8 +59,8 @@
   metadata:
     name: quay-tls-certs
     namespace: quay-enterprise
-  type: Opaque
+  type: kubernetes.io/tls
   data:
-    tls.cert: {{ lookup("file", certificate_path + "/quay-fullchain.pem")|b64encode }}
+    tls.crt: {{ lookup("file", certificate_path + "/quay-fullchain.pem")|b64encode }}
     tls.key: {{ lookup("file", certificate_path + "/quay-key.pem")|b64encode }}
 {% endif %}
