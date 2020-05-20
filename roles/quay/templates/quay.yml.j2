@@ -61,6 +61,6 @@
     namespace: quay-enterprise
   type: Opaque
   data:
-    ssl.cert: {{ lookup("file", certificate_path + "/quay-fullchain.pem")|b64encode }}
-    ssl.key: {{ lookup("file", certificate_path + "/quay-key.pem")|b64encode }}
+    tls.cert: {{ lookup("file", certificate_path + "/quay-fullchain.pem")|b64encode }}
+    tls.key: {{ lookup("file", certificate_path + "/quay-key.pem")|b64encode }}
 {% endif %}
