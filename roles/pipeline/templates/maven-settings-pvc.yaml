@@ -1,0 +1,14 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: maven-settings-pvc
+  namespace: user1-cicd
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 107374182400m
+  volumeName: maven-settings-workspace-pvc
+  storageClassName: ocs-storagecluster-cephfs
+  volumeMode: Filesystem

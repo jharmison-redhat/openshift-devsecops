@@ -8,6 +8,8 @@
       - name: url
         value: >-
           https://gitea-server-devsecops.apps.{{cluster_name}}.{{openshift_base_domain}}/{{username}}/openshift-tasks.git
+      - name: revision
+        value: 'eap-7'
     type: git
 
 - apiVersion: tekton.dev/v1alpha1

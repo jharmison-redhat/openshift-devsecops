@@ -1,0 +1,112 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: maven-java8
+spec:
+  inputs:
+    params:
+    - default:
+      - package
+      description: maven goals to run
+      name: GOALS
+      type: array
+    - default: ""
+      description: The Maven bucketrepo- mirror
+      name: MAVEN_MIRROR_URL
+      type: string
+    - default: ""
+      description: The username for the proxy server
+      name: PROXY_USER
+      type: string
+    - default: ""
+      description: The password for the proxy server
+      name: PROXY_PASSWORD
+      type: string
+    - default: ""
+      description: Port number for the proxy server
+      name: PROXY_PORT
+      type: string
+    - default: ""
+      description: Proxy server Host
+      name: PROXY_HOST
+      type: string
+    - default: ""
+      description: Non proxy server host
+      name: PROXY_NON_PROXY_HOSTS
+      type: string
+    - default: http
+      description: Protocol for the proxy ie http or https
+      name: PROXY_PROTOCOL
+      type: string
+    resources:
+    - name: source
+      targetPath: /
+      type: git
+  steps:
+  - image: registry.access.redhat.com/ubi8/ubi-minimal:latest
+    name: mvn-settings
+    resources: {}
+    script: |
+      #!/usr/bin/env bash
+
+      [[ -f $(workspaces.maven-settings.path)/settings.xml ]] && \
+      echo 'using existing $(workspaces.maven-settings.path)/settings.xml' && \
+      cat $(workspaces.maven-settings.path)/settings.xml && exit 0
+
+      cat > $(workspaces.maven-settings.path)/settings.xml <<EOF
+      <settings>
+        <mirrors>
+          <!-- The mirrors added here are generated from environment variables. Don't change. -->
+          <!-- ### mirrors from ENV ### -->
+        </mirrors>
+        <proxies>
+          <!-- The proxies added here are generated from environment variables. Don't change. -->
+          <!-- ### HTTP proxy from ENV ### -->
+        </proxies>
+      </settings>
+      EOF
+
+      xml=""
+      if [ -n "$(inputs.params.PROXY_HOST)" -a -n "$(inputs.params.PROXY_PORT)" ]; then
+        xml="<proxy>\
+          <id>genproxy</id>\
+          <active>true</active>\
+          <protocol>$(inputs.params.PROXY_PROTOCOL)</protocol>\
+          <host>$(inputs.params.PROXY_HOST)</host>\
+          <port>$(inputs.params.PROXY_PORT)</port>"
+        if [ -n "$(inputs.params.PROXY_USER)" -a -n "$(inputs.params.PROXY_PASSWORD)" ]; then
+          xml="$xml\
+              <username>$(inputs.params.PROXY_USER)</username>\
+              <password>$(inputs.params.PROXY_PASSWORD)</password>"
+        fi
+        if [ -n "$(inputs.params.PROXY_NON_PROXY_HOSTS)" ]; then
+          xml="$xml\
+              <nonProxyHosts>$(inputs.params.PROXY_NON_PROXY_HOSTS)</nonProxyHosts>"
+        fi
+        xml="$xml\
+            </proxy>"
+        sed -i "s|<!-- ### HTTP proxy from ENV ### -->|$xml|" $(workspaces.maven-settings.path)/settings.xml
+      fi
+
+      if [ -n "$(inputs.params.MAVEN_MIRROR_URL)" ]; then
+        xml="    <mirror>\
+          <id>mirror.default</id>\
+          <url>$(inputs.params.MAVEN_MIRROR_URL)</url>\
+          <mirrorOf>central</mirrorOf>\
+        </mirror>"
+        sed -i "s|<!-- ### mirrors from ENV ### -->|$xml|" $(workspaces.maven-settings.path)/settings.xml
+      fi
+
+      [[ -f $(workspaces.maven-settings.path)/settings.xml ]] && cat $(workspaces.maven-settings.path)/settings.xml
+      [[ -f $(workspaces.maven-settings.path)/settings.xml ]] || echo skipping settings
+  - args:
+    - -s
+    - $(workspaces.maven-settings.path)/settings.xml
+    - $(inputs.params.GOALS)
+    command:
+    - /usr/bin/mvn
+    image: gcr.io/cloud-builders/mvn:3.5.0-jdk-8
+    name: mvn-goals
+    resources: {}
+  workspaces:
+  - name: maven-settings

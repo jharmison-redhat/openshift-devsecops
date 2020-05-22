@@ -1,0 +1,79 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: maven-build-pipeline
+  namespace: user1-cicd
+spec:
+  resources:
+    - name: app-git
+      type: git
+  tasks:
+    - name: build-app-with-maven
+      params:
+        - name: GOALS
+          value:
+            - install
+            - '-DskipTests=true'
+            - '-s configuration/cicd-settings-nexus3.xml'
+      resources:
+        inputs:
+          - name: source
+            resource: app-git
+      taskRef:
+        kind: Task
+        name: maven-java8
+      workspaces:
+        - name: maven-settings
+          workspace: local-maven-settings
+    - name: test-app-with-maven
+      params:
+        - name: GOALS
+          value:
+            - test
+            - '-s configuration/cicd-settings-nexus3.xml'
+      resources:
+        inputs:
+          - name: source
+            resource: app-git
+      taskRef:
+        kind: Task
+        name: maven-java8
+      workspaces:
+        - name: maven-settings
+          workspace: local-maven-settings
+    - name: code-analysis
+      params:
+        - name: GOALS
+          value:
+            - 'sonar:sonar'
+            - '-DskipTests=true'
+            - '-Dsonar.host.url=http://sonarqube.devsecops.svc.cluster.local:9000'
+      resources:
+        inputs:
+          - name: source
+            resource: app-git
+      taskRef:
+        kind: Task
+        name: maven-java8
+      workspaces:
+        - name: maven-settings
+          workspace: local-maven-settings
+    - name: archive-app
+      params:
+        - name: GOALS
+          value:
+            - deploy
+            - '-DskipTests=true'
+            - '-Pnexus3'
+      resources:
+        inputs:
+          - name: source
+            resource: app-git
+      taskRef:
+        kind: Task
+        name: maven-java8
+      workspaces:
+        - name: maven-settings
+          workspace: local-maven-settings
+  workspaces:
+    - name: local-maven-settings

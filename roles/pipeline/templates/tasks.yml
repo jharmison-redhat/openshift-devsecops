@@ -137,34 +137,38 @@
         type: string
       
     steps:
-    - name: create-maven-settings
-      image: 'registry.access.redhat.com/ubi8/ubi-minimal:latest'
-      script: |-
+    - name: save maven settings
+      image: registry.access.redhat.com/ubi8/ubi-minimal:latest
+      script: |
         #!/usr/bin/env bash
-
         cat > $(workspaces.maven-settings.path)/settings.xml <<EOF
-        <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                 xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
             <profiles>
-                <profile>
-                    <id>default-redhat</id>
-                    <repositories>
-                        <repository>
-                            <id>jboss-ga-repository</id>
-                            <url>$(inputs.params.REPO_URL)</url>
-                            <releases>
-                                <enabled>true</enabled>
-                            </releases>
-                            <snapshots>
-                                <enabled>false</enabled>
-                            </snapshots>
-                        </repository>
-                    </repositories>
-                </profile>
+              <profile>
+                <id>default-redhat</id>
+                <repositories>
+                  <repository>
+                    <id>jboss-ga-repository</id>
+                    <url>$(inputs.params.REPO_URL)</url>
+                    <releases>
+                      <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                      <enabled>false</enabled>
+                    </snapshots>
+                  </repository>
+                  </repositories>
+              
+              </profile>
             </profiles>
+
             <activeProfiles>
-                <activeProfile>default-redhat</activeProfile>
+              <activeProfile>default-redhat</activeProfile>
             </activeProfiles>
-        </settings>
-        EOF
+
+          </settings>
+          EOF
+
