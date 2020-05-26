@@ -77,5 +77,8 @@
         source: community-operators
         sourceNamespace: openshift-marketplace
 
-- name: Install and configure Quay Bridge operator
-  include_tasks: quay_bridge.yml
+# Disabled for now until Quay API becomes more useful for automating Bridge
+#   setup/prerequisites.
+#
+# - name: Install and configure Quay Bridge operator
+#   include_tasks: quay_bridge.yml
