@@ -9,5 +9,6 @@ deploy_3scale: true
 deploy_crw: true
 deploy_pipeline: true
 deploy_workshop: true
+deploy_bookinfo: false
 
 pipeline_style: tekton
