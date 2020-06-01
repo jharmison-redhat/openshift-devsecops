@@ -1,0 +1,42 @@
+---
+- name: Create bookinfo Project
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      - apiVersion: project.openshift.io/v1
+        kind: Project
+        metadata:
+          name: bookinfo
+          labels:
+            name: bookinfo
+          annotations:
+            openshift.io/display-name: 'BookInfo Service Mesh Application'
+
+- name: Add bookinfo to ServiceMeshMemberRoll
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition:
+      - apiVersion: maistra.io/v1
+        kind: ServiceMeshMemberRoll
+        metadata:
+          name: default
+          namespace: istio-system
+        spec:
+          members:
+          - bookinfo
+
+- name: Create bookinfo application
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    namespace: bookinfo
+    definition: '{{ lookup("url", bookinfo.url, split_lines=False) }}'
+  loop:
+    - name: application
+      url: '{{ maistra_sample_url }}/bookinfo/platform/kube/bookinfo.yaml'
+    - name: ingress gateway
+      url: '{{ maistra_sample_url }}/bookinfo/networking/bookinfo-gateway.yaml'
+    - name: mTLS destination rules
+      url: '{{ maistra_sample_url }}/bookinfo/networking/destination-rule-all-mtls.yaml'
+  loop_control:
+    loop_var: bookinfo
+    label: '{{ bookinfo.name }}'
