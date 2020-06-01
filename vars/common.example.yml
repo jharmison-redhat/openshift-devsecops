@@ -61,7 +61,7 @@ _tmp_parent: '{{ "/".join([ playbook_dir, "../tmp" ])|realpath }}'
 full_cluster_name: '{{ ".".join([ cluster_name, openshift_base_domain ]) }}'
 tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
 
-# The path to the kubeconfig file for the cluster you're using for the workshop 
+# The path to the kubeconfig file for the cluster you're using for the workshop
 # The default value is what's configured if you're provisioning the workshop in AWS
 # kubeconfig: '~/.kube/config'
 kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'

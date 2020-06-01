@@ -8,7 +8,7 @@ provision_included: yes
 
 # The OpenShift version to install
 # MUST BE 4.X!!!
-openshift_version: "4.3"
+openshift_version: "4.4"
 
 # The AWS region (i.e. `us-east-1`)
 # Current options:

@@ -12,11 +12,24 @@
 - apiVersion: operators.coreos.com/v1alpha1
   kind: Subscription
   metadata:
-    name: nexus-operator-hub
+    name: nexus-operator-m88i
     namespace: {{ nexus_project_name }}
   spec:
     channel: alpha
     installPlanApproval: Automatic
-    name: nexus-operator-hub
+    name: nexus-operator-m88i
     source: community-operators
     sourceNamespace: openshift-marketplace
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: nexus-operator-edit
+    namespace: {{ nexus_project_name }}
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: nexus-operator
