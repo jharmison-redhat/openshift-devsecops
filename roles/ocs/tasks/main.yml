@@ -37,7 +37,7 @@
                 - ReadWriteOnce
                 resources:
                   requests:
-                    storage: 2Ti
+                    storage: 512Gi
                 storageClassName: gp2
                 volumeMode: Block
             name: ocs-deviceset
