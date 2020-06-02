@@ -24,34 +24,3 @@
   until: not control_plane_deployment.failed
   retries: 5
   delay: 10
-
-- name: Retrieve current Service Mesh ConfigMap
-  k8s_info:
-    kubeconfig: '{{ kubeconfig }}'
-    api_version: v1
-    namespace: '{{ sm_namespace }}'
-    kind: ConfigMap
-    name: istio
-  register: istio_config_map
-  until: istio_config_map.resources|length > 0
-  retries: 10
-  delay: 30
-
-- name: Enforce policy by default
-  k8s:
-    kubeconfig: '{{ kubeconfig }}'
-    definition:
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        namespace: istio-system
-        name: istio
-      data:
-        mesh: |
-          {% for line in (istio_config_map|json_query("resources[0].data.mesh")).split('\n') %}
-          {% if line.startswith('disablePolicyChecks:') -%}
-            disablePolicyChecks: false
-          {% else -%}
-            {{ line }}
-          {% endif %}
-          {% endfor %}
