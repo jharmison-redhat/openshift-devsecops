@@ -24,3 +24,7 @@
   until: not control_plane_deployment.failed
   retries: 5
   delay: 10
+
+- name: Configure 3scale istio adapter
+  import_tasks: 3scale_adapter.yml
+  when: deploy_3scale|default(true)
