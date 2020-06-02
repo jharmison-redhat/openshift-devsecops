@@ -11,24 +11,25 @@
         disablePolicyChecks: false
       gateways:
         istio-egressgateway:
-          autoscaleEnabled: true
+          autoscaleEnabled: {{ sm_production_style }}
         istio-ingressgateway:
-          autoscaleEnabled: true
+          autoscaleEnabled: {{ sm_production_style }}
       grafana:
         enabled: true
       kiali:
         enabled: true
       mixer:
         policy:
-          autoscaleEnabled: true
+          autoscaleEnabled: {{ sm_production_style }}
         telemetry:
-          autoscaleEnabled: true
+          autoscaleEnabled: {{ sm_production_style }}
       pilot:
-        autoscaleEnabled: true
-        traceSampling: 10
+        autoscaleEnabled: {{ sm_production_style }}
+        traceSampling: {% if sm_production_style %}10{% else %}100{% endif %}
       tracing:
         enabled: true
         jaeger:
+{%- if sm_production_style %}
           template: production-elasticsearch
           elasticsearch:
             nodeCount: 3
@@ -39,6 +40,9 @@
               limits:
                 cpu: "1"
                 memory: "16Gi"
+{%- else %}
+          template: all-in-one
+{%- endif %}
       threescale:
         enabled: true
     template: default
