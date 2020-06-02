@@ -32,7 +32,9 @@
     kind: ServiceMeshMemberRoll
     name: default
   register: smm_roll
-  until: '"bookinfo" in (smm_roll.resources|first).status.configuredMembers'
+  until:
+    - (smm_roll.resources|first).status.configuredMembers is defined
+    - '"bookinfo" in (smm_roll.resources|first).status.configuredMembers'
   retries: 5
   delay: 10
 
