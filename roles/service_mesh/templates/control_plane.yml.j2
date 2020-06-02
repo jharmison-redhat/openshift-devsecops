@@ -26,11 +26,17 @@
           autoscaleEnabled: {{ sm_production_style }}
       pilot:
         autoscaleEnabled: {{ sm_production_style }}
-        traceSampling: {% if sm_production_style %}10{% else %}100{% endif %}
+        traceSampling:
+{%- if sm_production_style %}
+ 10
+{%- else %}
+ 100
+{%- endif %}
+
       tracing:
         enabled: true
         jaeger:
-{%- if sm_production_style %}
+{% if sm_production_style %}
           template: production-elasticsearch
           elasticsearch:
             nodeCount: 3
@@ -41,9 +47,9 @@
               limits:
                 cpu: "1"
                 memory: "16Gi"
-{%- else %}
+{% else %}
           template: all-in-one
-{%- endif %}
+{% endif %}
       threescale:
         enabled: true
     template: default
