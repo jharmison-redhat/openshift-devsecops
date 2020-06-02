@@ -11,24 +11,32 @@
         disablePolicyChecks: false
       gateways:
         istio-egressgateway:
-          autoscaleEnabled: false
+          autoscaleEnabled: true
         istio-ingressgateway:
-          autoscaleEnabled: false
-          ior_enabled: false
+          autoscaleEnabled: true
       grafana:
         enabled: true
       kiali:
         enabled: true
       mixer:
         policy:
-          autoscaleEnabled: false
+          autoscaleEnabled: true
         telemetry:
-          autoscaleEnabled: false
+          autoscaleEnabled: true
       pilot:
-        autoscaleEnabled: false
-        traceSampling: 100
+        autoscaleEnabled: true
+        traceSampling: 10
       tracing:
         enabled: true
         jaeger:
-          template: all-in-one
+          template: production-elasticsearch
+          elasticsearch:
+            nodeCount: 3
+            resources:
+              requests:
+                cpu: "1"
+                memory: "16Gi"
+              limits:
+                cpu: "1"
+                memory: "16Gi"
     template: default
