@@ -50,6 +50,8 @@
 {% else %}
           template: all-in-one
 {% endif %}
+{% if deploy_3scale|default(true) %}
       threescale:
         enabled: true
+{% endif %}
     template: default
