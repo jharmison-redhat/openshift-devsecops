@@ -30,6 +30,16 @@
     source: redhat-operators
     sourceNamespace: openshift-marketplace
 
+# 3scale registry authentication secret required to pull images
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: threescale-registry-auth
+    namespace: 3scale
+  type: kubernetes.io/dockerconfigjson
+  stringData:
+    .dockerconfigjson: {{ cloud_redhat_com_pull_secret }}
+
 {% if rwx_backing_style == "s3" %}
 # Secrets are necessary to allow 3scale to use RWX storage from S3
 - apiVersion: v1
