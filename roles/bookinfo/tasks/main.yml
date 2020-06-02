@@ -25,6 +25,17 @@
           members:
           - bookinfo
 
+- name: Wait for bookinfo to show as configured
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    namespace: istio-system
+    kind: ServiceMeshMemberRoll
+    name: default
+  register: smm_roll
+  until: '"bookinfo" in (smm_roll.resources|first).status.configuredMembers'
+  retries: 5
+  delay: 10
+
 - name: Create bookinfo application
   k8s:
     kubeconfig: '{{ kubeconfig }}'
