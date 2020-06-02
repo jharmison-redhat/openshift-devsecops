@@ -11,9 +11,6 @@
     name: quay
   when: deploy_quay
 - include_role:
-    name: service_mesh
-  when: deploy_service_mesh
-- include_role:
     name: gitea
   when: deploy_gitea
 - include_role:
@@ -25,6 +22,9 @@
 - include_role:
     name: 3scale
   when: deploy_3scale
+- include_role:
+    name: service_mesh
+  when: deploy_service_mesh
 - include_role:
     name: bookinfo
   when: deploy_bookinfo
