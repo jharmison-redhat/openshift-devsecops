@@ -35,8 +35,8 @@
   until:
     - (smm_roll.resources|first).status.configuredMembers is defined
     - '"bookinfo" in (smm_roll.resources|first).status.configuredMembers'
-  retries: 5
-  delay: 10
+  retries: 10
+  delay: 30
 
 - name: Create bookinfo application
   k8s:
