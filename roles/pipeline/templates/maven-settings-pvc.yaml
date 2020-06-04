@@ -8,7 +8,6 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: 107374182400m
-  volumeName: maven-settings-workspace-pvc
+      storage: 10m
   storageClassName: ocs-storagecluster-cephfs
   volumeMode: Filesystem

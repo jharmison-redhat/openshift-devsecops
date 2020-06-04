@@ -11,6 +11,6 @@ spec:
         name: source
   serviceAccountName: pipeline
   workspaces:
-  - name: local-maven-repo
+  - name: local-maven-settings
     persistentVolumeClaim:
       claimName: maven-settings-pvc
