@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1alpha1
 kind: Pipeline
 metadata:
   name: maven-build-pipeline
-  namespace: user1-cicd
+
 spec:
   resources:
     - name: app-git
@@ -14,7 +14,6 @@ spec:
           value:
             - install
             - '-DskipTests=true'
-            - '-s configuration/cicd-settings-nexus3.xml'
       resources:
         inputs:
           - name: source
@@ -22,29 +21,25 @@ spec:
       taskRef:
         kind: Task
         name: maven-java8
-      workspaces:
-        - name: maven-settings
-          workspace: local-maven-settings
     - name: test-app-with-maven
       params:
         - name: GOALS
           value:
             - test
-            - '-s configuration/cicd-settings-nexus3.xml'
       resources:
         inputs:
           - name: source
             resource: app-git
+      runAfter:
+        - build-app-with-maven
       taskRef:
         kind: Task
         name: maven-java8
-      workspaces:
-        - name: maven-settings
-          workspace: local-maven-settings
     - name: code-analysis
       params:
         - name: GOALS
           value:
+            - package
             - 'sonar:sonar'
             - '-DskipTests=true'
             - '-Dsonar.host.url=http://sonarqube.devsecops.svc.cluster.local:9000'
@@ -52,12 +47,11 @@ spec:
         inputs:
           - name: source
             resource: app-git
+      runAfter:
+        - test-app-with-maven
       taskRef:
         kind: Task
         name: maven-java8
-      workspaces:
-        - name: maven-settings
-          workspace: local-maven-settings
     - name: archive-app
       params:
         - name: GOALS
@@ -69,11 +63,8 @@ spec:
         inputs:
           - name: source
             resource: app-git
+      runAfter:
+        - code-analysis
       taskRef:
         kind: Task
         name: maven-java8
-      workspaces:
-        - name: maven-settings
-          workspace: local-maven-settings
-  workspaces:
-    - name: local-maven-settings
