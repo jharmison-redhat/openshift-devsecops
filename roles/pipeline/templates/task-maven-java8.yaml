@@ -28,3 +28,5 @@ spec:
       name: mvn-goals
       resources: {}
       workingDir: /workspace/source
+  workspaces:
+    - name: maven-repo

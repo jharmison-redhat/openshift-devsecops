@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1alpha1
 kind: Pipeline
 metadata:
   name: maven-build-pipeline
-
+  namespace: user1-cicd
 spec:
   resources:
     - name: app-git
@@ -21,6 +21,9 @@ spec:
       taskRef:
         kind: Task
         name: maven-java8
+      workspaces:
+        - name: maven-repo
+          workspace: local-maven-repo
     - name: test-app-with-maven
       params:
         - name: GOALS
@@ -35,6 +38,9 @@ spec:
       taskRef:
         kind: Task
         name: maven-java8
+      workspaces:
+        - name: maven-repo
+          workspace: local-maven-repo
     - name: code-analysis
       params:
         - name: GOALS
@@ -52,6 +58,9 @@ spec:
       taskRef:
         kind: Task
         name: maven-java8
+      workspaces:
+        - name: maven-repo
+          workspace: local-maven-repo
     - name: archive-app
       params:
         - name: GOALS
@@ -68,3 +77,8 @@ spec:
       taskRef:
         kind: Task
         name: maven-java8
+      workspaces:
+        - name: maven-repo
+          workspace: local-maven-repo
+  workspaces:
+    - name: local-maven-repo

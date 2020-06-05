@@ -1,7 +1,10 @@
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineRun
 metadata:
-  generateName: pipeline-maven-run-
+  labels:
+    tekton.dev/pipeline: maven-build-pipeline
+  generateName: maven-build-pipeline-
+  namespace: user1-cicd
 spec:
   pipelineRef:
     name: maven-build-pipeline
@@ -10,7 +13,8 @@ spec:
       resourceRef:
         name: source
   serviceAccountName: pipeline
+  timeout: 1h0m0s
   workspaces:
-  - name: local-maven-settings
-    persistentVolumeClaim:
-      claimName: maven-settings-pvc
+    - name: local-maven-repo
+      persistentVolumeClaim:
+        claimName: maven-local-repo-pvc
