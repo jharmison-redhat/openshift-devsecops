@@ -24,10 +24,10 @@
     name: quay-enterprise
     namespace: quay-enterprise
   spec:
-    channel: stable
+    channel: quay-v3.3
     installPlanApproval: Automatic
-    name: quay
-    source: community-operators
+    name: quay-operator
+    source: redhat-operators
     sourceNamespace: openshift-marketplace
 
 # Secret required to pull from quay.io
