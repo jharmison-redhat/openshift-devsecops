@@ -1,5 +1,10 @@
 ---
-- name: Create secrets for every user account in Quay
+- name: Create registry secrets for every user account for registry.redhat.io
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "registry_secrets.yml.j2")|from_yaml }}'
+
+- name: Create registry secrets for every user account in Quay
   k8s:
     kubeconfig: '{{ kubeconfig }}'
     definition: '{{ lookup("template", "quay_secrets.yml.j2")|from_yaml }}'
@@ -32,6 +37,12 @@
   with_nested:
     - '{{ workshop_users|json_query("[].username") }}'
     - '{{ projects|json_query("[].name") }}'
+
+- name: Set up access to registry.redhat.io
+  include_tasks: registry_service_accounts.yml
+  loop: '{{ workshop_users|json_query("[].username") }}'
+  loop_control:
+    loop_var: username  
 
 - name: Create necessary pipeline tasks, and resources
   block:
