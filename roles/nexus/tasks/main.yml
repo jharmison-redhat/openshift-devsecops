@@ -109,6 +109,19 @@
   register: nexus_password
   changed_when: false
 
+- name: Add deployment user to Nexus instance
+  shell: >-
+    devsecops-api nexus add-user
+    http://{{ nexus_route|json_query("resources[0].spec.host") }}
+    --login-username admin --login-password '{{ nexus_password.stdout }}'
+    --usernames 'deployment'
+    --passwords 'deployment123'
+  register: deployment_user
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: deployment_user.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+  failed_when: deployment_user.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or deployment_user.rc != 0
+
 - name: Add users to Nexus instance
   shell: >-
     devsecops-api nexus add-user
@@ -133,3 +146,29 @@
   # to_json|from_json| is a terrible hack but here we are
   changed_when: nexus_repos.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
   failed_when: nexus_repos.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or nexus_repos.rc != 0
+
+- name: Create a new proxy repository for redhat-ga
+  shell: >-
+    devsecops-api nexus add-proxy-repository
+    http://{{ nexus_route|json_query("resources[0].spec.host") }}
+    --login-username admin --login-password '{{ nexus_password.stdout }}'
+    --repository-name 'redhat-ga-proxy'
+    --remote-repo-url 'https://maven.repository.redhat.com/ga/'
+  register: redhat_ga_proxy
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: redhat_ga_proxy.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+  failed_when: redhat_ga_proxy.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or redhat_ga_proxy.rc != 0
+
+- name: Update maven-public repo with redhat-ga proxy repo
+  shell: >-
+    devsecops-api nexus update-group-repo
+    http://{{ nexus_route|json_query("resources[0].spec.host") }}
+    --login-username admin --login-password '{{ nexus_password.stdout }}'
+    --group-repository-name 'maven-public'
+    --member-repository-names 'maven-releases,maven-snapshots,maven-central,redhat-ga-proxy'
+  register: maven_public_repo
+  # https://github.com/ansible/ansible/issues/27299
+  # to_json|from_json| is a terrible hack but here we are
+  changed_when: maven_public_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` added`)]")|length > 0
+  failed_when: maven_public_repo.stdout_lines|to_json|from_json|json_query("[?ends_with(@, ` failed`)]")|length > 0 or maven_public_repo.rc != 0

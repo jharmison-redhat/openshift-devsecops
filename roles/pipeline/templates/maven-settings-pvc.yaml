@@ -13,16 +13,16 @@
     storageClassName: ocs-storagecluster-cephfs
     volumeMode: Filesystem
 
-- kind: PersistentVolumeClaim
-  apiVersion: v1
-  metadata:
-    name: maven-buildDir-pvc
-    namespace: user1-cicd
-  spec:
-    accessModes:
-      - ReadWriteMany
-    resources:
-      requests:
-        storage: 100m
-    storageClassName: ocs-storagecluster-cephfs
-    volumeMode: Filesystem
+# - kind: PersistentVolumeClaim
+#   apiVersion: v1
+#   metadata:
+#     name: maven-buildDir-pvc
+#     namespace: user1-cicd
+#   spec:
+#     accessModes:
+#       - ReadWriteMany
+#     resources:
+#       requests:
+#         storage: 100m
+#     storageClassName: ocs-storagecluster-cephfs
+#     volumeMode: Filesystem

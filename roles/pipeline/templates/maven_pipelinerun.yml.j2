@@ -1,0 +1,41 @@
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineRun
+  metadata:
+    labels:
+      tekton.dev/pipeline: maven-build-pipeline
+    name: maven-build-pipeline-1
+    namespace: {{ username }}-cicd
+  spec:
+    pipelineRef:
+      name: maven-build-pipeline
+    resources:
+      - name: app-git
+        resourceRef:
+          name: source
+    serviceAccountName: pipeline
+    timeout: 1h0m0s
+    workspaces:
+      - name: local-maven-repo
+        persistentVolumeClaim:
+          claimName: maven-repo-pvc
+
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineRun
+  metadata:
+    labels:
+      tekton.dev/pipeline: app-build
+    name: app-build-1
+    namespace: {{ username }}-cicd
+  spec:
+    pipelineRef:
+      name: app-build
+    resources:
+      - name: app-git
+        resourceRef:
+          name: source
+      - name: app-image
+        resourceRef:
+          name: image
+    serviceAccountName: pipeline
+    timeout: 1h0m0s
+
