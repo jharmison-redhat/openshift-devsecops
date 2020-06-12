@@ -62,6 +62,8 @@
       - s2i
       - build
       - $(inputs.params.PATH_CONTEXT)
+      # This could also use something like image-registry.openshift-image-registry.svc.cluster.local:5000/openshift/jboss-eap72-openshift:1.1
+      # from the built in registry
       - registry.redhat.io/jboss-eap-7/eap72-openshift:1.2
       - --image-scripts-url
       - image:///usr/local/s2i
@@ -144,12 +146,101 @@
     steps:
       - args:
           - $(inputs.params.GOALS)
-          - '-s/workspace/source/$(inputs.params.settings-path)'
+          - '-s$(inputs.resources.source.path)/$(inputs.params.settings-path)'
         command:
           - /usr/bin/mvn
         image: 'gcr.io/cloud-builders/mvn:3.5.0-jdk-8'
         name: mvn-goals
         resources: {}
-        workingDir: /workspace/source
+    workspaces:
+      - name: maven-repo
+
+- apiVersion: tekton.dev/v1alpha1
+  kind: Task
+  metadata:
+    name: build-jboss-app
+    namespace: {{ username }}-cicd
+  spec:
+    inputs:
+      params:
+        - default: tasks
+          description: The name of the app
+          name: app_name
+          type: string
+        - default: {{ username }}-dev
+          description: The name dev project
+          name: dev_project
+          type: string
+      resources:
+        - name: source
+          type: git
+    steps:
+      - args:
+          - >-
+            echo "Creating new build config" 
+
+
+            # This allows the new build to be created whether it exists or not
+
+            oc new-build -o yaml --name=$(inputs.params.app_name)
+            --image-stream=jboss-eap72-openshift:1.1  --binary=true -n
+            $(inputs.params.dev_project) | oc apply -n
+            $(inputs.params.dev_project) -f - 
+        command:
+          - /bin/sh
+          - '-c'
+        image: 'quay.io/openshift/origin-cli:latest'
+        name: create-build-config
+        resources: {}
+      - args:
+          - >-
+            echo "Start the openshift build"  && 
+
+
+            rm -rf $(inputs.resources.source.path)/oc-build && mkdir -p
+            $(inputs.resources.source.path)/oc-build/deployments && 
+
+
+            cp
+            $(workspaces.maven-repo.path)/org/jboss/quickstarts/eap/jboss-tasks-rs/7.0.0-SNAPSHOT/jboss-tasks-rs-7.0.0-SNAPSHOT.war
+            $(inputs.resources.source.path)/oc-build/deployments/ROOT.war && 
+
+
+            oc start-build $(inputs.params.app_name)
+            --from-dir=$(inputs.resources.source.path)/oc-build -n
+            $(inputs.params.dev_project) --wait=true
+        command:
+          - /bin/sh
+          - '-c'
+        image: 'quay.io/openshift/origin-cli:latest'
+        name: build-app-image
+        resources: {}
+      - args:
+          - >-
+            echo "Create new app from tasks image stream in
+            $(inputs.params.dev_project) project"   &&
+
+            oc new-app --image-stream=$(inputs.params.app_name):latest -n
+            $(inputs.params.dev_project) --as-deployment-config=true -o yaml | oc
+            apply -n $(inputs.params.dev_project)  -f - && 
+
+            oc delete route $(inputs.params.app_name) -n
+            $(inputs.params.dev_project) && oc expose svc
+            $(inputs.params.app_name) -n $(inputs.params.dev_project)  && 
+
+            echo "Setting manual triggers on deployment $(inputs.params.app_name)"
+            && 
+
+            oc set triggers dc/$(inputs.params.app_name) --manual=true -n
+            $(inputs.params.dev_project) && 
+
+            echo "Rolling out dc  dc/$(inputs.params.app_name)" &&  oc rollout
+            latest dc/$(inputs.params.app_name) -n $(inputs.params.dev_project)
+        command:
+          - /bin/sh
+          - '-c'
+        image: 'quay.io/openshift/origin-cli:latest'
+        name: deploy-app-from-image
+        resources: {}
     workspaces:
       - name: maven-repo

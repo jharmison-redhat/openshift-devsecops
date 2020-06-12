@@ -40,7 +40,9 @@
           - name: GOALS
             value:
               - install
+              - '-f$(inputs.resources.source.path)/pom.xml'
               - '-DskipTests=true'
+              - '-Dmaven.repo.local=$(workspaces.maven-repo.path)'
         resources:
           inputs:
             - name: source
@@ -56,6 +58,8 @@
           - name: GOALS
             value:
               - test
+              - '-f$(inputs.resources.source.path)/pom.xml'
+              - '-Dmaven.repo.local=$(workspaces.maven-repo.path)'
         resources:
           inputs:
             - name: source
@@ -74,8 +78,10 @@
             value:
               - package
               - 'sonar:sonar'
+              - '-f$(inputs.resources.source.path)/pom.xml'
               - '-DskipTests=true'
               - '-Dsonar.host.url=http://sonarqube.devsecops.svc.cluster.local:9000'
+              - '-Dmaven.repo.local=$(workspaces.maven-repo.path)'
         resources:
           inputs:
             - name: source
@@ -93,8 +99,10 @@
           - name: GOALS
             value:
               - deploy
+              - '-f$(inputs.resources.source.path)/pom.xml'
               - '-DskipTests=true'
               - '-Pnexus3'
+              - '-Dmaven.repo.local=$(workspaces.maven-repo.path)'
         resources:
           inputs:
             - name: source
@@ -104,6 +112,23 @@
         taskRef:
           kind: Task
           name: maven-java8
+        workspaces:
+          - name: maven-repo
+            workspace: local-maven-repo
+      - name: build-taskr-app
+        params:
+          - name: app_name
+            value: tasks
+          - 
+        resources:
+          inputs:
+            - name: source
+              resource: app-git
+        runAfter:
+          - archive-app
+        taskRef:
+          kind: Task
+          name: build-jboss-app
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo

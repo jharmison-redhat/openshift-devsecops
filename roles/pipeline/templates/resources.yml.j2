@@ -23,6 +23,18 @@
         value: quay.apps.{{cluster_name}}.{{openshift_base_domain}}/{{username}}/openshift-tasks
     type: image
 
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: internal-reg-image
+    namespace: {{ username }}-cicd
+  spec:
+    params:
+      - name: url
+        value: >-
+          image-registry.openshift-image-registry.svc.cluster.local:5000/{{ username }}-cicd/openshift-tasks:latest
+    type: image
+
 - kind: PersistentVolumeClaim
   apiVersion: v1
   metadata:
