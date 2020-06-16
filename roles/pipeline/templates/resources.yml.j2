@@ -8,6 +8,8 @@
       - name: url
         value: >-
           https://gitea-server-devsecops.apps.{{cluster_name}}.{{openshift_base_domain}}/{{username}}/openshift-tasks.git
+      - name: revision
+        value: 'dso4'
     type: git
 
 - apiVersion: tekton.dev/v1alpha1
@@ -20,3 +22,17 @@
       - name: url
         value: quay.apps.{{cluster_name}}.{{openshift_base_domain}}/{{username}}/openshift-tasks
     type: image
+
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: maven-repo-pvc
+    namespace: {{ username }}-cicd
+  spec:
+    accessModes:
+      - ReadWriteMany
+    resources:
+      requests:
+        storage: 1G
+    storageClassName: ocs-storagecluster-cephfs
+    volumeMode: Filesystem

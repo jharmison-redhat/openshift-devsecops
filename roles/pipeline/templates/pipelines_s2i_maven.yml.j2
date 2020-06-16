@@ -1,0 +1,111 @@
+- apiVersion: tekton.dev/v1alpha1
+  kind: Pipeline
+  metadata:
+    name: app-build
+    namespace: {{username}}-cicd
+  spec:
+    resources:
+      - name: app-git
+        type: git
+      - name: app-image
+        type: image
+    tasks:
+      - name: build-app
+        params:
+          - name: TLSVERIFY
+            value: 'false'
+        taskRef:
+          name: s2i-eap-7
+          kind: Task
+        resources:
+          inputs:
+            - name: source
+              resource: app-git
+          outputs:
+            - name: image
+              resource: app-image
+
+- apiVersion: tekton.dev/v1alpha1
+  kind: Pipeline
+  metadata:
+    name: maven-build-pipeline
+    namespace: {{username}}-cicd
+  spec:
+    resources:
+      - name: app-git
+        type: git
+    tasks:
+      - name: build-app-with-maven
+        params:
+          - name: GOALS
+            value:
+              - install
+              - '-DskipTests=true'
+        resources:
+          inputs:
+            - name: source
+              resource: app-git
+        taskRef:
+          kind: Task
+          name: maven-java8
+        workspaces:
+          - name: maven-repo
+            workspace: local-maven-repo
+      - name: test-app-with-maven
+        params:
+          - name: GOALS
+            value:
+              - test
+        resources:
+          inputs:
+            - name: source
+              resource: app-git
+        runAfter:
+          - build-app-with-maven
+        taskRef:
+          kind: Task
+          name: maven-java8
+        workspaces:
+          - name: maven-repo
+            workspace: local-maven-repo
+      - name: code-analysis
+        params:
+          - name: GOALS
+            value:
+              - package
+              - 'sonar:sonar'
+              - '-DskipTests=true'
+              - '-Dsonar.host.url=http://sonarqube.devsecops.svc.cluster.local:9000'
+        resources:
+          inputs:
+            - name: source
+              resource: app-git
+        runAfter:
+          - test-app-with-maven
+        taskRef:
+          kind: Task
+          name: maven-java8
+        workspaces:
+          - name: maven-repo
+            workspace: local-maven-repo
+      - name: archive-app
+        params:
+          - name: GOALS
+            value:
+              - deploy
+              - '-DskipTests=true'
+              - '-Pnexus3'
+        resources:
+          inputs:
+            - name: source
+              resource: app-git
+        runAfter:
+          - code-analysis
+        taskRef:
+          kind: Task
+          name: maven-java8
+        workspaces:
+          - name: maven-repo
+            workspace: local-maven-repo
+    workspaces:
+      - name: local-maven-repo

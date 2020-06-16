@@ -61,3 +61,12 @@ github_project: jharmison-redhat
 #   in environment, in case you were provisioning with different accesses):
 # AWS_ACCESS_KEY_ID: <key>
 # AWS_SECRET_ACCESS_KEY: <secret>
+
+# The registry.redhat.io service account pull secret
+# This is needed to access the authenticated Red Hat registry (e.g. to pull JBoss images)
+# To get a service account, to go registry.redhat.io, login with your redhat creds
+# Then go to Service Accounts (upper right corner) and create a new service account
+# Copy the token into this value
+# It is recommended to generate a new service account before a workshop and deleting it after, 
+# as this token is available in each of the users' projects (and can be used in the future if the service account isn't deleted)
+reg_rhio_pull_token : <registry.redhat.io service account token> 

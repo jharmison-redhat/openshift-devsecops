@@ -8,7 +8,7 @@
       Authorization: token {{ user.token }}
     body: |
       {
-        "clone_addr": "https://github.com/{{ github_project }}/{{ repo }}.git",
+        "clone_addr": "https://github.com/{{ tasks_github_project }}/{{ repo }}.git",
         "uid": {{ user.uid|int }},
         "repo_name": "openshift-tasks"
       }

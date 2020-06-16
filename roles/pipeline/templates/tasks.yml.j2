@@ -62,7 +62,7 @@
       - s2i
       - build
       - $(inputs.params.PATH_CONTEXT)
-      - registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift
+      - registry.redhat.io/jboss-eap-7/eap72-openshift:1.2
       - --image-scripts-url
       - image:///usr/local/s2i
       - --as-dockerfile
@@ -120,3 +120,36 @@
       name: gen-source
     - emptyDir: {}
       name: envparams
+
+- apiVersion: tekton.dev/v1alpha1
+  kind: Task
+  metadata:
+    name: maven-java8
+    namespace: {{ username }}-cicd
+  spec:
+    inputs:
+      params:
+        - default:
+            - package
+          description: maven goals to run
+          name: GOALS
+          type: array
+        - default: configuration/cicd-settings-nexus3.xml
+          description: location of the settings file
+          name: settings-path
+          type: string
+      resources:
+        - name: source
+          type: git
+    steps:
+      - args:
+          - $(inputs.params.GOALS)
+          - '-s/workspace/source/$(inputs.params.settings-path)'
+        command:
+          - /usr/bin/mvn
+        image: 'gcr.io/cloud-builders/mvn:3.5.0-jdk-8'
+        name: mvn-goals
+        resources: {}
+        workingDir: /workspace/source
+    workspaces:
+      - name: maven-repo
