@@ -42,7 +42,7 @@
   include_tasks: registry_service_accounts.yml
   loop: '{{ workshop_users|json_query("[].username") }}'
   loop_control:
-    loop_var: username  
+    loop_var: username
 
 - name: Create necessary pipeline tasks, and resources
   block:
@@ -70,7 +70,7 @@
     loop_control:
       loop_var: username
 
-  - name: Kick off maven pipeline runs 
+  - name: Kick off maven pipeline runs
     k8s:
       kubeconfig: '{{ kubeconfig }}'
       definition: '{{ lookup("template", "maven_pipelinerun.yml.j2")|from_yaml }}'
