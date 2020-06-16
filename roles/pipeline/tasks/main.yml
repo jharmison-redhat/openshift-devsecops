@@ -12,9 +12,6 @@
   when: deploy_quay|default(true)
 
 # k8s_json_patch nor normal k8s modules are working here... oc CLI is
-# note that this is NOT idempotent - if you run the pipeline role more than once
-# it will add the secret more than once which will cause the pipeline
-# runs to FAIL !
 - name: Attach new secrets to pipeline service accounts
   shell: |
     export KUBECONFIG='{{ kubeconfig }}'
@@ -26,10 +23,18 @@
     fi
     user={{ item[0] }}
     project={{ item[1] }}
-    $oc patch sa/pipeline -n $user-$project --type=json -p='[
-      {"op":"add",
-       "path":"/secrets/-",
-       "value":{"name":"'"$user-$project"'-quay-reg"}}]' || exit 2
+    existing_secrets=$($oc get sa/pipeline -n $user-$project -o jsonpath='{.secrets[*].name}')
+    if ! echo "$existing_secrets" | grep -qF "$user-$project-quay-reg"; then
+      $oc patch sa/pipeline -n $user-$project --type=json -p='[
+        {"op":"add",
+          "path":"/secrets/-",
+          "value":{"name":"'"$user-$project"'-quay-reg"}
+        }
+      ]' || exit 2
+      echo changed
+    else
+      echo ok
+    fi
   when:
     - quay_secrets is defined
     - quay_secrets.changed|bool
@@ -37,6 +42,8 @@
   with_nested:
     - '{{ workshop_users|json_query("[].username") }}'
     - '{{ projects|json_query("[].name") }}'
+  register: quay_pipeline_secrets
+  changed_when: "'changed' in quay_pipeline_secrets.stdout_lines"
 
 - name: Set up access to registry.redhat.io
   include_tasks: registry_service_accounts.yml
