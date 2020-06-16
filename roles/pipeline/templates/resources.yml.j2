@@ -1,3 +1,4 @@
+{% for username in workshop_users|json_query("[].username") %}
 - apiVersion: tekton.dev/v1alpha1
   kind: PipelineResource
   metadata:
@@ -36,3 +37,4 @@
         storage: 1G
     storageClassName: ocs-storagecluster-cephfs
     volumeMode: Filesystem
+{% endfor %}
