@@ -21,13 +21,13 @@
 - apiVersion: operators.coreos.com/v1alpha1
   kind: Subscription
   metadata:
-    name: quay-enterprise
+    name: quay-operator
     namespace: quay-enterprise
   spec:
-    channel: stable
+    channel: quay-v3.3
     installPlanApproval: Automatic
-    name: quay
-    source: community-operators
+    name: quay-operator
+    source: redhat-operators
     sourceNamespace: openshift-marketplace
 
 # Secret required to pull from quay.io
@@ -59,8 +59,8 @@
   metadata:
     name: quay-tls-certs
     namespace: quay-enterprise
-  type: Opaque
+  type: kubernetes.io/tls
   data:
-    ssl.cert: {{ lookup("file", certificate_path + "/quay-fullchain.pem")|b64encode }}
-    ssl.key: {{ lookup("file", certificate_path + "/quay-key.pem")|b64encode }}
+    tls.crt: {{ lookup("file", certificate_path + "/quay-fullchain.pem")|b64encode }}
+    tls.key: {{ lookup("file", certificate_path + "/quay-key.pem")|b64encode }}
 {% endif %}
