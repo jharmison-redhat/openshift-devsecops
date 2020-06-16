@@ -41,3 +41,8 @@
 - include_role:
     name: workshop-spawner
   when: deploy_workshop
+- include_role:
+    name: pipeline
+  when:
+    - deploy_pipeline
+    - pipeline_style == 'tekton'
