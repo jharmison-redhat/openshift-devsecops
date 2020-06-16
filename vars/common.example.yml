@@ -2,19 +2,66 @@
 # This tells the playbooks to not try to include default-named vars files
 common_included: yes
 
-# Uncomment the following to disable customizations that can be made on clusters
-# create_users: no    # Creates users listed below and removes kubeadmin
-# letsencrypt: no     # Creates a LetsEncrypt wildcard and api certificate and makes it the default (ONLY WORKS IF YOU PROVIDE AWS CREDS)
-# autoscale: no       # Enables cluster auto-scaling using the limits listed below
-# adjust_console: no  # Adjusts the console route to be just "console.apps" instead of "console-openshift-console.apps"
+
+################################################################################
+# The following variables are especially important to pay attention to if you're
+# using an RHPDS-provisioned cluster and some of it needs to be updated every
+# time you provision a cluster to match information from the email you receive.
+################################################################################
+
+# Pull secret, acquired from:
+# https://cloud.redhat.com/openshift/install/pull-secret
+cloud_redhat_com_pull_secret: '{"auths":{"cloud.openshift.com":{"auth":"b3B=","email":"foo@example.com"},"quay.io":{"auth":"b3B=","email":"foo@example.com"},"registry.connect.redhat.com":{"auth":"NTI=","email":"foo@example.com"},"registry.redhat.io":{"auth":"NTI=","email":"foo@example.com"}}}'
+
+# Uncomment the following for RHPDS-provisioned clusters because right now we
+#   require AWS creds, though this may change in the future. RHPDS provides an
+#   option to do letsencrypt on the api and default router certs, but doesn't
+#   give us the ability to do it for follow-on tasks that won't use the router
+#   cert.
+# letsencrypt: no     # Creates a LetsEncrypt wildcard and api certificate and makes it the default
 
 # The name of the cluster.
-# This value will be in your DNS entries and should conform to valid DNS characters.
+# IF PROVISIONING:
+#   This value will be in your DNS entries and should conform to valid DNS characters.
+# IF RHPDS:
+#   This should be the first part of your cluster's base address
+#   e.g. for cluster-nisky-c592.nisky-c592.example.opentlc.com, this would be
+#         cluster-nisky-c592
 cluster_name: openshift
 
 # The base subdomain to use for your cluster.
-# Example: If you set this to `example.com`, a DNS entry for `<cluster_name>.example.com` will be created)
+# IF PROVISIONING:
+#   Example: If you set this to `example.com`, a DNS entry for `<cluster_name>.example.com` will be created
+# IF RHPDS:
+#   This should be the rest of your cluster's base address
 openshift_base_domain: example.com
+
+################################################################################
+# DO NOT CHANGE OR COMMENT THESE FOR ANY REASON - they're used heavily
+#   throughout all the various roles
+_tmp_parent: '{{ "/".join([ playbook_dir, "../tmp" ])|realpath }}'
+full_cluster_name: '{{ ".".join([ cluster_name, openshift_base_domain ]) }}'
+tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
+################################################################################
+
+# The path to the kubeconfig file for the cluster you're using for the workshop.
+#   The default value is what's configured if you're provisioning the workshop
+#   in AWS, RHPDS clusters should use your user's kubeconfig after caching login
+#   credentials with oc.
+# kubeconfig: '~/.kube/config'
+kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
+
+# The path to your 'oc' client - the provisioner puts it in {{ tmp_dir }},
+#   for RHPDS clusters you should specify the absolute path of your oc client.
+# oc_cli: '/usr/local/bin/oc'
+oc_cli: '{{ tmp_dir }}/oc'
+
+
+################################################################################
+# The remaining variables are to customize your deployment configuration beyond
+#   what is required for the workshop to function. You should read through and
+#   understand them, but they aren't necessary to minimally deploy.
+################################################################################
 
 # A list of manually created users:
 manual_users:
@@ -55,18 +102,3 @@ cluster_max_nodes_total: 15
 # cluster_max_cores: 100
 # cluster_min_ram_gb: 32
 # cluster_max_ram_gb: 256
-
-# You should not really change or comment these
-_tmp_parent: '{{ "/".join([ playbook_dir, "../tmp" ])|realpath }}'
-full_cluster_name: '{{ ".".join([ cluster_name, openshift_base_domain ]) }}'
-tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
-
-# The path to the kubeconfig file for the cluster you're using for the workshop
-# The default value is what's configured if you're provisioning the workshop in AWS
-# kubeconfig: '~/.kube/config'
-kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
-
-# The path to your 'oc' client - by default it's installed in the tmp_dir
-# if you created the cluster in AWS using 'provision'
-#oc_cli: '/usr/local/bin/oc'
-oc_cli: '{{ tmp_dir }}/oc'

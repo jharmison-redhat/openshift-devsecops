@@ -1,3 +1,4 @@
+{% for username in workshop_users|json_query("[].username") %}
 - apiVersion: tekton.dev/v1alpha1
   kind: PipelineRun
   metadata:
@@ -38,4 +39,4 @@
           name: image
     serviceAccountName: pipeline
     timeout: 1h0m0s
-
+{% endfor %}
