@@ -37,8 +37,8 @@
     name: threescale-registry-auth
     namespace: 3scale
   type: kubernetes.io/dockerconfigjson
-  stringData:
-    .dockerconfigjson: '{{ cloud_redhat_com_pull_secret }}'
+  data:
+    .dockerconfigjson: {{ reg_rhio_pull_token }}
 
 {% if rwx_backing_style == "s3" %}
 # Secrets are necessary to allow 3scale to use RWX storage from S3
