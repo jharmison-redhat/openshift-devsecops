@@ -7,11 +7,9 @@ common_included: yes
 # The following variables are especially important to pay attention to if you're
 # using an RHPDS-provisioned cluster and some of it needs to be updated every
 # time you provision a cluster to match information from the email you receive.
+#
+# NOTE: IF A VARIABLE IS COMMENTED, IT LIKELY DEFAULTS TO THE OPPOSITE
 ################################################################################
-
-# Pull secret, acquired from:
-# https://cloud.redhat.com/openshift/install/pull-secret
-cloud_redhat_com_pull_secret: '{"auths":{"cloud.openshift.com":{"auth":"b3B=","email":"foo@example.com"},"quay.io":{"auth":"b3B=","email":"foo@example.com"},"registry.connect.redhat.com":{"auth":"NTI=","email":"foo@example.com"},"registry.redhat.io":{"auth":"NTI=","email":"foo@example.com"}}}'
 
 # Uncomment the following for RHPDS-provisioned clusters because right now we
 #   require AWS creds, though this may change in the future. RHPDS provides an
@@ -48,6 +46,7 @@ tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
 #   The default value is what's configured if you're provisioning the workshop
 #   in AWS, RHPDS clusters should use your user's kubeconfig after caching login
 #   credentials with oc.
+# NOTE: Do not use ~ or other shell-expandable variables
 # kubeconfig: '{{ ansible_env["HOME"] }}/.kube/config'
 kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
 
