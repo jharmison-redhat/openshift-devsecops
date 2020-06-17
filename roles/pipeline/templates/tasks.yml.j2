@@ -208,7 +208,17 @@
 
             oc start-build $(inputs.params.app_name)
             --from-dir=$(inputs.resources.source.path)/oc-build -n
-            $(inputs.params.dev_project) --wait=true
+            $(inputs.params.dev_project) --wait=true && 
+
+            appRevision=$(inputs.resources.source.revision) && 
+
+            oc tag $(inputs.params.app_name):latest
+            $(inputs.params.app_name):$appRevision -n $(inputs.params.dev_project)
+            && 
+
+            echo "Successfully created container image
+            $(inputs.params.dev_project)/$(inputs.params.app_name):$(inputs.resources.source.revision)"
+
         command:
           - /bin/sh
           - '-c'
@@ -225,7 +235,7 @@
             apply -n $(inputs.params.dev_project)  -f - && 
 
             oc delete route $(inputs.params.app_name) -n
-            $(inputs.params.dev_project) && oc expose svc
+            $(inputs.params.dev_project) || oc expose svc
             $(inputs.params.app_name) -n $(inputs.params.dev_project)  && 
 
             echo "Setting manual triggers on deployment $(inputs.params.app_name)"
@@ -244,3 +254,59 @@
         resources: {}
     workspaces:
       - name: maven-repo
+
+- apiVersion: tekton.dev/v1alpha1
+  kind: Task
+  metadata:
+    name: deploy-app-to-stage
+    namespace: {{ username }}-cicd
+  spec:
+    inputs:
+      params:
+        - default: tasks
+          description: The name of the app
+          name: app_name
+          type: string
+        - default: {{ username }}-dev
+          description: The name dev project
+          name: dev_project
+        - default: {{ username }}-stage
+          description: The name dev project
+          name: stage_project
+          type: string
+        - description: The name dev project
+          name: app_revision
+          type: string
+    steps:
+      - args:
+          - >-
+            echo "Tagging image stream in $(inputs.params.stage_project)/$(inputs.params.app_name):$(inputs.params.app_revision) " &&
+
+            oc tag $(inputs.params.dev_project)/task$(inputs.params.app_name)s:$(inputs.params.app_revision) $(inputs.params.stage_project)/$(inputs.params.app_name):$(inputs.params.app_revision)
+
+            if oc get dc/$(inputs.params.app_name) -n $(inputs.params.stage_project) ; then echo "Tasks dc exists, deleting resources " && oc delete dc/tasks svc/tasks route/tasks -n $(inputs.params.stage_project); else echo "Tasks doesn't exist"; fi && 
+
+
+        command:
+          - /bin/sh
+          - '-c'
+        image: 'quay.io/openshift/origin-cli:latest'
+        name: cleanup-stage-project
+        resources: {}
+
+      - args:
+          - >-
+            oc new-app --image-stream=$(inputs.params.app_name):$(inputs.params.app_revision) -n $(inputs.params.stage_project) --as-deployment-config=true -o yaml | oc
+            apply -n $(inputs.params.dev_project)  -f - && 
+
+            oc delete route $(inputs.params.app_name) -n
+            $(inputs.params.stage_project) || oc expose svc
+            $(inputs.params.app_name) -n $(inputs.params.stage_project)  && 
+
+
+        command:
+          - /bin/sh
+          - '-c'
+        image: 'quay.io/openshift/origin-cli:latest'
+        name: deploy-new-version-to-stage
+        resources: {}
