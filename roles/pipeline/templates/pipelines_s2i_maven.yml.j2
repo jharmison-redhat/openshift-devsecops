@@ -1,8 +1,9 @@
+{% for username in workshop_users|json_query("[].username") %}
 - apiVersion: tekton.dev/v1alpha1
   kind: Pipeline
   metadata:
     name: app-build
-    namespace: {{username}}-cicd
+    namespace: {{ username }}-cicd
   spec:
     resources:
       - name: app-git
@@ -29,7 +30,7 @@
   kind: Pipeline
   metadata:
     name: maven-build-pipeline
-    namespace: {{username}}-cicd
+    namespace: {{ username }}-cicd
   spec:
     resources:
       - name: app-git
@@ -133,3 +134,4 @@
             workspace: local-maven-repo
     workspaces:
       - name: local-maven-repo
+{% endfor %}

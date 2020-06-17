@@ -1,3 +1,4 @@
+{% for username in workshop_users|json_query("[].username") %}
 - apiVersion: tekton.dev/v1alpha1
   kind: Task
   metadata:
@@ -310,3 +311,4 @@
         image: 'quay.io/openshift/origin-cli:latest'
         name: deploy-new-version-to-stage
         resources: {}
+{% endfor %}

@@ -11,7 +11,9 @@ spec:
     externalAccess:
       hostname: {{ quay_route }}
 {% if (use_real_certs|default(true)) %}
-    sslCertificatesSecretName: quay-tls-certs
+      tls:
+        secretName: quay-tls-certs
+        termination: passthrough
 {% endif %}
     imagePullSecretName: dummy-pull-secret
     superuserCredentialsSecretName: quay-superuser
