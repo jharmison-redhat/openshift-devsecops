@@ -2,7 +2,7 @@
 - apiVersion: tekton.dev/v1alpha1
   kind: Pipeline
   metadata:
-    name: app-build
+    name: app-s2i-build
     namespace: {{ username }}-cicd
   spec:
     resources:
@@ -29,14 +29,14 @@
 - apiVersion: tekton.dev/v1alpha1
   kind: Pipeline
   metadata:
-    name: maven-build-pipeline
+    name: build-test-deploy-app-to-dev
     namespace: {{ username }}-cicd
   spec:
     resources:
       - name: app-git
         type: git
     tasks:
-      - name: build-app-with-maven
+      - name: build-app
         params:
           - name: GOALS
             value:
@@ -54,7 +54,7 @@
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo
-      - name: test-app-with-maven
+      - name: run-unit-tests
         params:
           - name: GOALS
             value:
@@ -66,14 +66,14 @@
             - name: source
               resource: app-git
         runAfter:
-          - build-app-with-maven
+          - build-app
         taskRef:
           kind: Task
           name: maven-java8
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo
-      - name: code-analysis
+      - name: code-quality-analysis
         params:
           - name: GOALS
             value:
@@ -88,14 +88,14 @@
             - name: source
               resource: app-git
         runAfter:
-          - test-app-with-maven
+          - run-unit-tests
         taskRef:
           kind: Task
           name: maven-java8
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo
-      - name: archive-app
+      - name: archive-app-to-nexus
         params:
           - name: GOALS
             value:
@@ -109,14 +109,14 @@
             - name: source
               resource: app-git
         runAfter:
-          - code-analysis
+          - code-quality-analysis
         taskRef:
           kind: Task
           name: maven-java8
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo
-      - name: build-taskr-app
+      - name: deploy-to-openshift
         params:
           - name: app_name
             value: tasks
@@ -125,13 +125,40 @@
             - name: source
               resource: app-git
         runAfter:
-          - archive-app
+          - archive-app-to-nexus
         taskRef:
           kind: Task
-          name: build-jboss-app
+          name: deploy-jboss-app-to-dev
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo
     workspaces:
       - name: local-maven-repo
+
+- apiVersion: tekton.dev/v1alpha1
+  kind: Pipeline
+  metadata:
+    name: deploy-app-to-stage
+    namespace: {{ username }}-cicd
+  spec:
+    params:
+      - default: ''
+        description: App version to deploy
+        name: app_version
+        type: string
+    tasks:
+      - name: deploy-app-to-stage
+        params:
+          - name: app_name
+            value: tasks
+          - name: dev_project
+            value: {{username}}-dev
+          - name: stage_project
+            value: {{username}}-stage
+          - name: app_revision
+            value: $(params.app_version)
+        taskRef:
+          kind: Task
+          name: deploy-app-to-stage
+
 {% endfor %}

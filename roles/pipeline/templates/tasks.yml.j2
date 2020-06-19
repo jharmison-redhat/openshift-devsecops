@@ -159,7 +159,7 @@
 - apiVersion: tekton.dev/v1alpha1
   kind: Task
   metadata:
-    name: build-jboss-app
+    name: deploy-jboss-app-to-dev
     namespace: {{ username }}-cicd
   spec:
     inputs:
@@ -176,90 +176,123 @@
         - name: source
           type: git
     steps:
-      - args:
-          - >-
-            echo "Creating new build config" 
+    - image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest'
+      name: extract-git-rev
+      resources: {}
+      script: >
+        #!/bin/sh
+        
+        set -e -o pipefail
+
+        # get git sha
+
+        git rev-parse --verify --short HEAD | tee $(inputs.resources.source.path)/$(inputs.params.app_name)-gitsha.txt
+      workingDir: $(inputs.resources.source.path)
+    - args:
+        - >-
+          echo "Creating new build config"  &&
+
+          GITSHA=$(cat $(inputs.resources.source.path)/$(inputs.params.app_name)-gitsha.txt)   && 
+
+          echo "Extracted git revision from previous step $GITSHA" &&
+
+          # This allows the new build to be created whether it exists or not
+
+          oc new-build -o yaml --name=$(inputs.params.app_name)
+          --image-stream=jboss-eap72-openshift:1.1  --binary=true -n
+          $(inputs.params.dev_project) | oc apply -n
+          $(inputs.params.dev_project) -f - 
+      command:
+        - /bin/sh
+        - '-c'
+      image: 'quay.io/openshift/origin-cli:latest'
+      name: create-build-config
+      resources: {}
+    - args:
+        - >-
+          echo "Start the openshift build"  && 
 
 
-            # This allows the new build to be created whether it exists or not
-
-            oc new-build -o yaml --name=$(inputs.params.app_name)
-            --image-stream=jboss-eap72-openshift:1.1  --binary=true -n
-            $(inputs.params.dev_project) | oc apply -n
-            $(inputs.params.dev_project) -f - 
-        command:
-          - /bin/sh
-          - '-c'
-        image: 'quay.io/openshift/origin-cli:latest'
-        name: create-build-config
-        resources: {}
-      - args:
-          - >-
-            echo "Start the openshift build"  && 
+          rm -rf $(inputs.resources.source.path)/oc-build && mkdir -p
+          $(inputs.resources.source.path)/oc-build/deployments && 
 
 
-            rm -rf $(inputs.resources.source.path)/oc-build && mkdir -p
-            $(inputs.resources.source.path)/oc-build/deployments && 
+          cp
+          $(workspaces.maven-repo.path)/org/jboss/quickstarts/eap/jboss-tasks-rs/7.0.0-SNAPSHOT/jboss-tasks-rs-7.0.0-SNAPSHOT.war
+          $(inputs.resources.source.path)/oc-build/deployments/ROOT.war && 
 
 
-            cp
-            $(workspaces.maven-repo.path)/org/jboss/quickstarts/eap/jboss-tasks-rs/7.0.0-SNAPSHOT/jboss-tasks-rs-7.0.0-SNAPSHOT.war
-            $(inputs.resources.source.path)/oc-build/deployments/ROOT.war && 
+          oc start-build $(inputs.params.app_name)
+          --from-dir=$(inputs.resources.source.path)/oc-build -n
+          $(inputs.params.dev_project) --wait=true && 
+
+          GITSHA=$(cat $(inputs.resources.source.path)/$(inputs.params.app_name)-gitsha.txt)  &&
+
+          oc tag $(inputs.params.app_name):latest
+          $(inputs.params.app_name):$GITSHA -n $(inputs.params.dev_project)
+          && 
+
+          echo "Successfully created container image
+          $(inputs.params.dev_project)/$(inputs.params.app_name):$GITSHA"
+      command:
+        - /bin/sh
+        - '-c'
+      image: 'quay.io/openshift/origin-cli:latest'
+      name: build-app-image
+      resources: {}
+    - args:
+        - >-
+          echo "Create new app from tasks image stream in
+          $(inputs.params.dev_project) project"   &&
+
+          GITSHA=$(cat $(inputs.resources.source.path)/$(inputs.params.app_name)-gitsha.txt)  &&
+
+          oc new-app --image-stream=$(inputs.params.app_name):$GITSHA -n
+          $(inputs.params.dev_project) --as-deployment-config=true -o yaml | oc
+          apply -n $(inputs.params.dev_project)  -f - && 
+
+          oc delete route $(inputs.params.app_name) -n
+          $(inputs.params.dev_project) || oc expose svc
+          $(inputs.params.app_name) -n $(inputs.params.dev_project)  && 
+
+          echo "Setting manual triggers on deployment $(inputs.params.app_name)"
+          && 
+
+          oc set triggers dc/$(inputs.params.app_name) --manual=true -n
+          $(inputs.params.dev_project) && 
+
+          echo "Rolling out dc  dc/$(inputs.params.app_name)" &&  oc rollout
+          latest dc/$(inputs.params.app_name) -n $(inputs.params.dev_project)
+      command:
+        - /bin/sh
+        - '-c'
+      image: 'quay.io/openshift/origin-cli:latest'
+      name: deploy-app-from-image
+      resources: {}
+
+    - name: announce-success
+      image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest'
+      resources: {}
+      script: >
+        #!/bin/sh
+
+        set -e -o pipefail
 
 
-            oc start-build $(inputs.params.app_name)
-            --from-dir=$(inputs.resources.source.path)/oc-build -n
-            $(inputs.params.dev_project) --wait=true && 
+        GITSHA=$(cat $(inputs.resources.source.path)/$(inputs.params.app_name)-gitsha.txt)  &&
+        
+        echo "Successfully build application $(inputs.params.app_name)"
 
-            appRevision=$(inputs.resources.source.revision) && 
+        echo "After testing the app, run the deploy-app-to-stage pipeline with $GITSHA as the app_version parameter"
 
-            oc tag $(inputs.params.app_name):latest
-            $(inputs.params.app_name):$appRevision -n $(inputs.params.dev_project)
-            && 
-
-            echo "Successfully created container image
-            $(inputs.params.dev_project)/$(inputs.params.app_name):$(inputs.resources.source.revision)"
-
-        command:
-          - /bin/sh
-          - '-c'
-        image: 'quay.io/openshift/origin-cli:latest'
-        name: build-app-image
-        resources: {}
-      - args:
-          - >-
-            echo "Create new app from tasks image stream in
-            $(inputs.params.dev_project) project"   &&
-
-            oc new-app --image-stream=$(inputs.params.app_name):latest -n
-            $(inputs.params.dev_project) --as-deployment-config=true -o yaml | oc
-            apply -n $(inputs.params.dev_project)  -f - && 
-
-            oc delete route $(inputs.params.app_name) -n
-            $(inputs.params.dev_project) || oc expose svc
-            $(inputs.params.app_name) -n $(inputs.params.dev_project)  && 
-
-            echo "Setting manual triggers on deployment $(inputs.params.app_name)"
-            && 
-
-            oc set triggers dc/$(inputs.params.app_name) --manual=true -n
-            $(inputs.params.dev_project) && 
-
-            echo "Rolling out dc  dc/$(inputs.params.app_name)" &&  oc rollout
-            latest dc/$(inputs.params.app_name) -n $(inputs.params.dev_project)
-        command:
-          - /bin/sh
-          - '-c'
-        image: 'quay.io/openshift/origin-cli:latest'
-        name: deploy-app-from-image
-        resources: {}
+      workingDir: $(inputs.resources.source.path)
     workspaces:
       - name: maven-repo
 
 - apiVersion: tekton.dev/v1alpha1
   kind: Task
   metadata:
-    name: deploy-app-to-stage
+    name: deploy-jboss-app-to-stage
     namespace: {{ username }}-cicd
   spec:
     inputs:
@@ -268,10 +301,11 @@
           description: The name of the app
           name: app_name
           type: string
-        - default: {{ username }}-dev
+        - default: user1-dev
           description: The name dev project
           name: dev_project
-        - default: {{ username }}-stage
+          type: string
+        - default: user1-stage
           description: The name dev project
           name: stage_project
           type: string
@@ -279,36 +313,51 @@
           name: app_revision
           type: string
     steps:
-      - args:
-          - >-
-            echo "Tagging image stream in $(inputs.params.stage_project)/$(inputs.params.app_name):$(inputs.params.app_revision) " &&
+    - args:
+        - >-
+          echo "Tagging image stream in 
+          $(inputs.params.stage_project)/$(inputs.params.app_name):$(inputs.params.app_revision)"
+          &&
 
-            oc tag $(inputs.params.dev_project)/task$(inputs.params.app_name)s:$(inputs.params.app_revision) $(inputs.params.stage_project)/$(inputs.params.app_name):$(inputs.params.app_revision)
+          oc tag
+          $(inputs.params.dev_project)/$(inputs.params.app_name):$(inputs.params.app_revision)
+          $(inputs.params.stage_project)/$(inputs.params.app_name):$(inputs.params.app_revision)
+          && 
 
-            if oc get dc/$(inputs.params.app_name) -n $(inputs.params.stage_project) ; then echo "Tasks dc exists, deleting resources " && oc delete dc/tasks svc/tasks route/tasks -n $(inputs.params.stage_project); else echo "Tasks doesn't exist"; fi && 
+          if oc get dc/$(inputs.params.app_name) -n
+          $(inputs.params.stage_project) ; then echo "Tasks dc exists, deleting
+          resources " && oc delete dc/tasks svc/tasks route/tasks -n || echo
+          "Some resources didn't clean up as expected"
+          $(inputs.params.stage_project); else echo "Tasks dc doesn't exist, no
+          cleanup needed"; fi
+      command:
+        - /bin/sh
+        - '-c'
+      image: 'quay.io/openshift/origin-cli:latest'
+      name: cleanup-stage-project
+      resources: {}
+    - args:
+        - >-
+          echo "Deploying new version into $(inputs.params.stage_project)
+          project "  &&
 
+          oc new-app
+          --image-stream=$(inputs.params.app_name):$(inputs.params.app_revision)
+          -n $(inputs.params.stage_project) --as-deployment-config=true -o yaml
+          | oc apply -n $(inputs.params.stage_project)  -f -  && 
 
-        command:
-          - /bin/sh
-          - '-c'
-        image: 'quay.io/openshift/origin-cli:latest'
-        name: cleanup-stage-project
-        resources: {}
+          if oc get route $(inputs.params.app_name) -n
+          $(inputs.params.stage_project); then echo "Cleaning up route" && oc
+          delete route $(inputs.params.app_name) -n
+          $(inputs.params.stage_project) ; else echo "Route didn't require clean
+          up"; fi && 
 
-      - args:
-          - >-
-            oc new-app --image-stream=$(inputs.params.app_name):$(inputs.params.app_revision) -n $(inputs.params.stage_project) --as-deployment-config=true -o yaml | oc
-            apply -n $(inputs.params.dev_project)  -f - && 
-
-            oc delete route $(inputs.params.app_name) -n
-            $(inputs.params.stage_project) || oc expose svc
-            $(inputs.params.app_name) -n $(inputs.params.stage_project)  && 
-
-
-        command:
-          - /bin/sh
-          - '-c'
-        image: 'quay.io/openshift/origin-cli:latest'
-        name: deploy-new-version-to-stage
-        resources: {}
+          oc expose svc $(inputs.params.app_name) -n
+          $(inputs.params.stage_project) 
+      command:
+        - /bin/sh
+        - '-c'
+      image: 'quay.io/openshift/origin-cli:latest'
+      name: deploy-new-version-to-stage
+      resources: {}
 {% endfor %}
