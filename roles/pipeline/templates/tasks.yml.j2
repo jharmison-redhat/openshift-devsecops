@@ -181,7 +181,7 @@
       resources: {}
       script: >
         #!/bin/sh
-        
+
         set -e -o pipefail
 
         # get git sha
@@ -259,10 +259,7 @@
           && 
 
           oc set triggers dc/$(inputs.params.app_name) --manual=true -n
-          $(inputs.params.dev_project) && 
-
-          echo "Rolling out dc  dc/$(inputs.params.app_name)" &&  oc rollout
-          latest dc/$(inputs.params.app_name) -n $(inputs.params.dev_project)
+          $(inputs.params.dev_project) 
       command:
         - /bin/sh
         - '-c'
@@ -292,7 +289,7 @@
 - apiVersion: tekton.dev/v1alpha1
   kind: Task
   metadata:
-    name: deploy-jboss-app-to-stage
+    name: deploy-app-to-stage
     namespace: {{ username }}-cicd
   spec:
     inputs:
