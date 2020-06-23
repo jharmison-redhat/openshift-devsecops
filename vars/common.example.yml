@@ -48,7 +48,7 @@ tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
 #   The default value is what's configured if you're provisioning the workshop
 #   in AWS, RHPDS clusters should use your user's kubeconfig after caching login
 #   credentials with oc.
-# kubeconfig: '~/.kube/config'
+# kubeconfig: '{{ ansible_env["HOME"] }}/.kube/config'
 kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
 
 # The path to your 'oc' client - the provisioner puts it in {{ tmp_dir }},
