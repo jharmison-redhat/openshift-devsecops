@@ -55,6 +55,8 @@ github_project: jharmison-redhat
 # deploy_pipeline: no
 # deploy_workshop: no
 
+# Uncomment this line to deploy the bookinfo application to Service Mesh and 3scale
+# deploy_bookinfo: yes
 
 # 3scale specific:
 #   3scale requires RWX storage to deploy. If you deploy OCS and 3scale in the

@@ -1,0 +1,57 @@
+- apiVersion: maistra.io/v1
+  kind: ServiceMeshControlPlane
+  metadata:
+    name: basic-install
+    namespace: {{ sm_namespace }}
+  spec:
+    istio:
+      global:
+        mtls:
+          enabled: true
+        disablePolicyChecks: false
+      gateways:
+        istio-egressgateway:
+          autoscaleEnabled: {{ sm_production_style }}
+        istio-ingressgateway:
+          autoscaleEnabled: {{ sm_production_style }}
+          ior_enabled: true
+      grafana:
+        enabled: true
+      kiali:
+        enabled: true
+      mixer:
+        policy:
+          autoscaleEnabled: {{ sm_production_style }}
+        telemetry:
+          autoscaleEnabled: {{ sm_production_style }}
+      pilot:
+        autoscaleEnabled: {{ sm_production_style }}
+        traceSampling:
+{%- if sm_production_style %}
+ 10
+{%- else %}
+ 100
+{%- endif %}
+
+      tracing:
+        enabled: true
+        jaeger:
+{% if sm_production_style %}
+          template: production-elasticsearch
+          elasticsearch:
+            nodeCount: 3
+            resources:
+              requests:
+                cpu: "1"
+                memory: "16Gi"
+              limits:
+                cpu: "1"
+                memory: "16Gi"
+{% else %}
+          template: all-in-one
+{% endif %}
+{% if deploy_3scale|default(true) %}
+      threescale:
+        enabled: true
+{% endif %}
+    template: default
