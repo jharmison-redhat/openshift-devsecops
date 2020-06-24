@@ -323,9 +323,8 @@
 
           if oc get dc/$(inputs.params.app_name) -n
           $(inputs.params.stage_project) ; then echo "Tasks dc exists, deleting
-          resources " && oc delete dc/tasks svc/tasks route/tasks -n || echo
-          "Some resources didn't clean up as expected"
-          $(inputs.params.stage_project); else echo "Tasks dc doesn't exist, no
+          resources " && oc delete dc/tasks svc/tasks route/tasks -n $(inputs.params.stage_project) || echo
+          "Some resources didn't clean up as expected"; else echo "Tasks dc doesn't exist, no
           cleanup needed"; fi
       command:
         - /bin/sh
