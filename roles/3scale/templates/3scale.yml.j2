@@ -24,11 +24,21 @@
     name: 3scale-operator
     namespace: 3scale
   spec:
-    channel: threescale-2.7
+    channel: threescale-2.8
     installPlanApproval: Automatic
     name: 3scale-operator
     source: redhat-operators
     sourceNamespace: openshift-marketplace
+
+# 3scale registry authentication secret required to pull images
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: threescale-registry-auth
+    namespace: 3scale
+  type: kubernetes.io/dockerconfigjson
+  data:
+    .dockerconfigjson: {{ reg_rhio_pull_token }}
 
 {% if rwx_backing_style == "s3" %}
 # Secrets are necessary to allow 3scale to use RWX storage from S3

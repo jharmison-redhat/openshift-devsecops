@@ -4,12 +4,16 @@ devsecops_included: yes
 
 
 # The registry.redhat.io service account pull secret
-# This is needed to access the authenticated Red Hat registry (e.g. to pull JBoss images)
-# To get a service account, to go registry.redhat.io, login with your redhat creds
-# Then go to Service Accounts (upper right corner) and create a new service account
-# Copy the token into this value
-# It is recommended to generate a new service account before a workshop and deleting it after,
-# as this token is available in each of the users' projects (and can be used in the future if the service account isn't deleted)
+# This is needed to access the authenticated Red Hat registry (e.g. to pull
+#   JBoss images). To get a service account, to go:
+#     https://access.redhat.com/terms-based-registry/
+#   login with your Red Hat credentials, then go to Service Accounts (upper
+#   right corner) and create a new service account. Click on the name of the
+#   service account, go to the 'OpenShift Secret' tab, click 'view its
+#   contents,' and then copy value after `.dockerconfigjson` into this var.
+# It is recommended to generate a new service account before a workshop and
+#   delete it after, as this token is available in each of the users' projects
+#   (and can be used in the future if the service account isn't deleted)
 reg_rhio_pull_token : <registry.redhat.io service account token>
 
 
@@ -25,26 +29,27 @@ projects:
     disp: CI/CD
 
 
-# The project from which custom Operators will be pulled
+# The project from which custom Operators and other tooling will be pulled
 github_project: jharmison-redhat
 # NOTE: If the operators themselves still point to another image on Quay, the
 #   operator coming from this repo won't affect the images themselves.
 
 
 # Uncomment the following to change the pipeline workflow from Tekton to Jenkins
+# NOTE: Not really implemented yet....
 # pipeline_style: jenkins
 
 # Uncomment the following to change the actions that occur before workshop deployment
-# create_users: no
-# autoscale: no
-# adjust_console: no
+# create_users: no      # You should only do this if you're not trying to deploy much of anything
+# autoscale: no         # You should only do this if you know your workload will fit on your cluster as is
+# adjust_console: no    # This changes the route for the console to `console.apps.<cluster_name>.<base_domain>` which is much shorter than the default.
 
 # NOTE: OCS will make your cluster much larger (and more expensive). Consider
 #   disabling OCS and 3scale (which requires RWX, so either OCS or its own S3
 #   bucket) if you are price sensitive.
-# You can disable these by uncommenting the lines below.
-
 # deploy_ocs: no  # This OCS deployment only _currently_ works on AWS. It should theoretically work without AWS creds on AWS (for example, RHPDS-provisioned clusters on AWS)
+
+# You can disable these by uncommenting the lines below. They all default to YES.
 # deploy_quay: no
 # deploy_service_mesh: no
 # deploy_gitea: no
@@ -55,6 +60,8 @@ github_project: jharmison-redhat
 # deploy_pipeline: no
 # deploy_workshop: no
 
+# Uncomment this line to deploy the bookinfo application to Service Mesh and 3scale (it defaults to NO)
+# deploy_bookinfo: yes
 
 # 3scale specific:
 #   3scale requires RWX storage to deploy. If you deploy OCS and 3scale in the

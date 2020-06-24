@@ -2,10 +2,6 @@
 # This tells the playbooks to not try to include default-named vars files
 provision_included: yes
 
-# Uncomment the following to NOT install openshift
-# install_openshift: no
-# kubeconfig: /path/to/your/kubeconfig
-
 # The OpenShift version to install
 # MUST BE 4.X!!!
 openshift_version: "4.4"

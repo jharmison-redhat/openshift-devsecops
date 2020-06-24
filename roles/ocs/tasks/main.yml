@@ -28,18 +28,21 @@
         name: ocs-storagecluster
         namespace: openshift-storage
       spec:
-        manageNodes: false
         storageDeviceSets:
-          - count: 1
+          - config: {}
+            count: 1
             dataPVCTemplate:
+              metadata:
+                creationTimestamp: null
               spec:
                 accessModes:
                 - ReadWriteOnce
                 resources:
                   requests:
-                    storage: 2Ti
+                    storage: 512Gi
                 storageClassName: gp2
                 volumeMode: Block
+              status: {}
             name: ocs-deviceset
             placement: {}
             portable: true
