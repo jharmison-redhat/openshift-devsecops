@@ -8,6 +8,9 @@ spec:
     enabled: true
     imagePullSecretName: dummy-pull-secret
   quay:
+{% if (enable_quay_repo_mirroring|default(false)) %}
+    enableRepoMirroring: true
+{% endif %}
     externalAccess:
       hostname: {{ quay_route }}
 {% if (use_real_certs|default(true)) %}
