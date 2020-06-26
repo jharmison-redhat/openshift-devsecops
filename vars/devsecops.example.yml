@@ -60,6 +60,9 @@ github_project: jharmison-redhat
 # deploy_pipeline: no
 # deploy_workshop: no
 
+# Change quay config definition to allow mirroring of image repositories
+enable_quay_repo_mirroring: yes
+
 # Uncomment this line to deploy the bookinfo application to Service Mesh and 3scale (it defaults to NO)
 # deploy_bookinfo: yes
 
