@@ -69,6 +69,16 @@ You can, of course, use the cluster name command line option to define multiple 
 
 Do note that the containers run, in a `podman` environment, as your user - without relabelling or remapping them - but on a `docker` environment they are running fully priveleged. This is more privilege than containers normally get in either environment. This is to ensure that the repository files are mappable and editable by the container process as it executes.
 
+Additionally, if you would like to work on just one cluster using the container workflow, you can do any portion of the following the following to skip having to specify these variables or be prompted for them:
+
+```shell
+export DEVSECOPS_CLUSTER=rhpds                                                   # The cluster name for vars directory and container image name
+export AWS_ACCESS_KEY_ID=<YOUR ACTUAL AWS_ACCESS_KEY_ID>                         # Your actual AWS_ACCESS_KEY_ID, which you would otherwise be prompted for if provisioning/destroying a cluster
+export AWS_SECRET_ACCESS_KEY=<YOUR ACTUAL AWS_SECRET_ACCESS_KEY>                 # Your actual AWS_SECRET_ACCESS_KEY, which you would otherwise be prompted for if provisioning/destroying a cluster
+./run-container.sh provision devsecops
+#                    ^---------^----these are just playbook names, like you would normally pass to `run.sh`
+```
+
 ## Basic operation
 
 ### Deployment of an OpenShift cluster
