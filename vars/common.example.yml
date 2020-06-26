@@ -46,13 +46,16 @@ tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
 #   The default value is what's configured if you're provisioning the workshop
 #   in AWS, RHPDS clusters should use your user's kubeconfig after caching login
 #   credentials with oc.
-# NOTE: Do not use ~ or other shell-expandable variables
+#   NOTE: Do not use ~ or other shell-expandable variables
 # kubeconfig: '{{ ansible_env["HOME"] }}/.kube/config'
+#   NOTE: IF YOU ARE USING run-container.sh:
+# *** DO NOT CHANGE THIS - IT WILL BE PUT HERE BY THE RUN SCRIPT ***
 kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
 
 # The path to your 'oc' client - the provisioner puts it in {{ tmp_dir }},
 #   for RHPDS clusters, or those being used with the container workflow, you
-#   should specify the absolute path of your oc client.
+#   should specify the absolute path of the oc client. The value commented out
+#   below is the location inside the container for that workflow.
 # oc_cli: '/usr/local/bin/oc'
 oc_cli: '{{ tmp_dir }}/oc'
 
