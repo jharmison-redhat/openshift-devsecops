@@ -110,17 +110,17 @@ fi
 
 if which podman &>/dev/null; then
     runtime=podman
-    run_args="-it --rm -v ./tmp:/app/tmp:shared -v ./vars/$DEVSECOPS_CLUSTER:/app/vars:shared --label=disable --privileged"
+    run_args="-it --rm -v ./tmp:/app/tmp:shared -v ./vars/$DEVSECOPS_CLUSTER:/app/vars:shared,ro --label=disable --privileged"
 elif which docker &>/dev/null; then
     runtime=docker
-    run_args="-it --rm -v ./tmp:/app/tmp -v ./vars/$DEVSECOPS_CLUSTER:/app/vars --security-opt label=disabled --privileged"
+    run_args="-it --rm -v ./tmp:/app/tmp -v ./vars/$DEVSECOPS_CLUSTER:/app/vars:ro --security-opt label=disabled --privileged"
 else
     echo "A container runtime is necessary to execute these playbooks." >&2
     echo "Please install podman or docker." >&2
     exit 1
 fi
 
-if echo "${playbooks[*]}" | grep -qF provision; then
+if echo "${playbooks[*]}" | grep -qF provision || echo "${playbooks[*]}" | grep -qF destroy; then
     if [ -z "$AWS_ACCESS_KEY_ID" ]; then
         read -p "Enter your AWS_ACCESS_KEY_ID: " AWS_ACCESS_KEY_ID
     fi
