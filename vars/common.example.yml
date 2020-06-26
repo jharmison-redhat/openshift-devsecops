@@ -51,7 +51,8 @@ tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
 kubeconfig: '{{ tmp_dir }}/auth/kubeconfig'
 
 # The path to your 'oc' client - the provisioner puts it in {{ tmp_dir }},
-#   for RHPDS clusters you should specify the absolute path of your oc client.
+#   for RHPDS clusters, or those being used with the container workflow, you
+#   should specify the absolute path of your oc client.
 # oc_cli: '/usr/local/bin/oc'
 oc_cli: '{{ tmp_dir }}/oc'
 

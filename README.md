@@ -16,14 +16,27 @@ Several design goals were set in place before this started, and they have evolve
 ## Supported Operating Systems
 Right now, `run.sh` is the primary mechanism for executing the playbooks. It provides the appropriate context and control for chaining playbooks together locally, as well as ensuring that prerequisites for the roles and playbooks are implemented on your system. You can use `run.sh` on unsupported platforms by ensuring the dependencies are met before running it, or you can use it on a supported platform to have it do the work for you.
 
-`run.sh` was developed on Fedora 30 and 31. All modern testing of it has been done on Fedora 31. The most important part of satisfying dependencies automatically is that you have `dnf` available and a Fedora-like package naming convention. This means that it should operate as expected on RHEL 8, but this has not been tested for validity.
+`run.sh` was developed on Fedora 30 and 31. All modern testing of it has been done on Fedora 32. The most important part of satisfying dependencies automatically is that you have `dnf` available and a Fedora-like package naming convention. This means that it should operate as expected on RHEL 8, but this has not been tested for validity.
 
 The requirements for running the playbooks and roles have been mostly consolidated into `runreqs.json` and the hashmap should be relatively self-explanitory. If the binaries listed are in your `$PATH`, `run.sh` will not attempt to install them. If they are not, `run.sh` will attempt to install them using `dnf` with `sudo`. This enables running on arbitrary alternative \*NIX platforms, if the binaries are in your path. The absolute most basic requirements are `python` and `jq`, and they are not included in `runreqs.json` as they will not be changing based on the workshop content, but must exist prior to other dependency setup. `run.sh` will attempt to install them both, as well as `pip` in user mode, if they are not available in `$PATH`.
 
 To run the playbooks yourself, using `ansible-playbook` and without `run.sh`, `jq` is not required but the other binaries in the `dnf` key as well as the Python libraries in the `pip` key of `runreqs.json` are all required.
 
+## Alternative, container-based usage
+`run-container.sh` has been developed to use the Dockerfile present to run the playbooks inside a RHEL 8 UBI container image. This means you can use run-container.sh to package a new container image on the fly with your changes to the repository, satisfying dependencies, and then map tmp and vars in to the container. In order to enable multiple clusters being run with multiple containers, `run-container.sh` requires some alternative variables to be set.
+
+```shell
+usage: run-container.sh [-h|--help] | [-v|--verbose] [(-e |--extra=)VARS] \
+  (-c |--cluster=)CLUSTER [-k |--kubeconfig=)FILE \
+  [[path/to/]PLAY[.yml]] [PLAY[.yml]]...
+```
+
+You should specify `-c CLUSTER` or `--cluster=CLUSTER` to define a container-managed cluster with a friendly name of CLUSTER. In this case, the container images will be tagged as `devsecops-CLUSTER:latest` and when executed, vars will be mapped in from `vars/CLUSTER/`, expecting to be their default names of `common.yml`, `devsecops.yml`, etc. as needed. In this configuration, if you have a local `~/.kube/config` that you have a cached login (for example, as `opentlc-mgr`, you should pass the path to that file with `-k ~/.kube/config` or `--kubeconfig=~/.kube/config`. `run-container.sh` will copy that file into the `tmp/` directory in the appropriate place for your cluster, and `kubeconfig` should _**not be changed**_ from the DEFAULT of `{{ tmp_dir }}/auth/kubeconfig` in `vars/CLUSTER/common.yml`. Because `run-container.sh` stages the kubeconfig in this way, the cached logins from the playbooks will not back-propogate to your local `~/.kube/config`, so follow-on execution of `oc` or `kubectl` on your host system will not 
+
 ## Basic operation
+
 ### Deployment of an OpenShift cluster
+
 1. For easiest operation, you should create a file at the project root named `.aws` with the following content:
    ```shell
    export AWS_ACCESS_KEY_ID=<your actual access key ID>

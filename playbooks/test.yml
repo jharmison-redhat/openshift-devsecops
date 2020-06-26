@@ -15,7 +15,7 @@
     - include_vars:
         file: ../vars/common.yml
 # Try to demonstrate vars were read
-    - debug: var=openshift_base_domain
+    - debug: var=full_cluster_name
 # Try to write to tmp for persistence
     - file:
         state: directory
@@ -29,3 +29,4 @@
       changed_when: false
       register: oc_path
     - debug: var=oc_path
+    - debug: var=oc_cli
