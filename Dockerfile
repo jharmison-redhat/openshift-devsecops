@@ -1,5 +1,8 @@
 FROM registry.access.redhat.com/ubi8/ubi
 
+ENV AWS_ACCESS_KEY_ID ""
+ENV AWS_SECRET_ACCESS_KEY ""
+
 RUN dnf -y --setopt=tsflags=nodocs update && \
     dnf -y --setopt=tsflags=nodocs install python3 python3-pip gnupg2 httpd-tools git && \
     dnf -y clean all --enablerepo='*' && \
