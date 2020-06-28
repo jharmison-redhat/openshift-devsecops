@@ -13,6 +13,14 @@
         {
             "pkg": "httpd-tools",
             "bin": "htpasswd"
+        },
+        {
+            "pkg": "openssh-clients",
+            "bin": "ssh-agent"
+        },
+        {
+            "pkg": "git",
+            "bin": "git"
         }
     ]
 }
