@@ -9,6 +9,7 @@
 
 - name: Register the keypair with the SSH agent
   shell: |
+    eval "$(ssh-agent)"
     if ! ssh-add -l | grep -qF '{{ workshop_admin.username }}@{{ full_cluster_name }}'; then
         ssh-add {{ key_pair_path }} &>/dev/null && echo changed || echo failed
     else
