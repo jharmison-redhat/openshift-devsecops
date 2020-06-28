@@ -110,10 +110,10 @@ fi
 
 if which podman &>/dev/null; then
     runtime=podman
-    run_args="-e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -it --rm -v ./tmp:/app/tmp:shared -v ./vars/$DEVSECOPS_CLUSTER:/app/vars:shared,ro --label=disable --privileged"
+    run_args="-v ./tmp:/app/tmp:shared -v ./vars/$DEVSECOPS_CLUSTER:/app/vars:shared,ro --label=disable"
 elif which docker &>/dev/null; then
     runtime=docker
-    run_args="-e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -it --rm -v ./tmp:/app/tmp -v ./vars/$DEVSECOPS_CLUSTER:/app/vars:ro --security-opt label=disabled --privileged"
+    run_args="-v ./tmp:/app/tmp -v ./vars/$DEVSECOPS_CLUSTER:/app/vars:ro --security-opt label=disabled"
 else
     echo "A container runtime is necessary to execute these playbooks." >&2
     echo "Please install podman or docker." >&2
@@ -139,5 +139,7 @@ if [ "$cluster_kubeconfig" ]; then
 fi
 
 for playbook in "${playbooks[@]}"; do
-    $runtime run ${run_args} devsecops-$DEVSECOPS_CLUSTER ${args} "${extra[@]}" "$playbook" || exit $?
+    $runtime run  -it --rm -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY \
+        --privileged ${run_args} devsecops-$DEVSECOPS_CLUSTER \
+        ${args} "${extra[@]}" "$playbook" || exit $?
 done
