@@ -136,11 +136,30 @@ fi
 # This builds the container image with the current codebase but no bind mounts
 $runtime build . -t devsecops-$DEVSECOPS_CLUSTER
 
+# Now it's time to figure out things about your bind mounts
+cluster_name=$(awk '/^cluster_name:/{print $2}' vars/$DEVSECOPS_CLUSTER/common.yml)
+openshift_base_domain=$(awk '/^openshift_base_domain:/{print $2}' vars/$DEVSECOPS_CLUSTER/common.yml)
+full_cluster_name="$cluster_name.$openshift_base_domain"
+mkdir -p tmp/$full_cluster_name/auth
+
+# Try to fix a borked kubeconfig for container runs
+sed -i 's/^kubeconfig:.*$/kubeconfig: '"'"'\{\{ tmp_dir \}\}\/auth\/kubeconfig'"'" vars/$DEVSECOPS_CLUSTER/common.yml &>/dev/null ||:
+# Try to fix a borked oc_cli for container runs
+sed -i 's/^oc_cli:.*$/oc_cli: '"'"'\/usr\/local\/bin\/oc'"'" vars/$DEVSECOPS_CLUSTER/common.yml &>/dev/null ||:
+
 if [ "$cluster_kubeconfig" ]; then
-    cluster_name=$(awk '/^cluster_name:/{print $2}' vars/$DEVSECOPS_CLUSTER/common.yml)
-    openshift_base_domain=$(awk '/^openshift_base_domain:/{print $2}' vars/$DEVSECOPS_CLUSTER/common.yml)
-    mkdir -p tmp/$cluster_name.$openshift_base_domain/auth
-    cp "$cluster_kubeconfig" "tmp/$cluster_name.$openshift_base_domain/auth/kubeconfig"
+    # If you specified a kubeconfig to use, just wholesale bring it over
+    cp "$cluster_kubeconfig" "tmp/$full_cluster_name/auth/kubeconfig"
+elif [ -r "tmp/$full_cluster_name/auth/kubeconfig" ]; then
+    # Everything is wonderful now (maybe)
+elif echo "${playbooks[*]}" | grep -qF provision; then
+    # We'll make our own kubeconfig
+elif [ -r ~/.kube/config ]; then
+    echo "[WARN] No KUBECONFIG specified, not provisioning cluster. Grabbing default from $(realpath ~/.kube/config)." >&2
+    cp "$(realpath ~/.kube/config)" "tmp/$full_cluster_name/auth/kubeconfig"
+else
+    echo -e "No KUBECONFIG specified, none in default location. Cowardly aborting.\n$usage" >&2
+    exit 2
 fi
 
 # Serially iterate over every playbook specified
