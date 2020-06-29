@@ -154,8 +154,10 @@ if [ "$cluster_kubeconfig" ]; then
     cp "$cluster_kubeconfig" "tmp/$full_cluster_name/auth/kubeconfig"
 elif [ -r "tmp/$full_cluster_name/auth/kubeconfig" ]; then
     # Everything is wonderful now (maybe)
+    echo >/dev/null
 elif echo "${playbooks[*]}" | grep -qF provision; then
     # We'll make our own kubeconfig
+    echo >/dev/null
 elif [ -r ~/.kube/config ]; then
     echo "[WARN] No KUBECONFIG specified, not provisioning cluster. Grabbing default from $(realpath ~/.kube/config)." >&2
     cp "$(realpath ~/.kube/config)" "tmp/$full_cluster_name/auth/kubeconfig"
