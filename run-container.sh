@@ -113,7 +113,7 @@ if which podman &>/dev/null; then
     run_args="-v ./tmp:/app/tmp:shared -v ./vars/$DEVSECOPS_CLUSTER:/app/vars:shared,ro --label=disable"
 elif which docker &>/dev/null; then
     runtime=docker
-    run_args="-v ./tmp:/app/tmp -v ./vars/$DEVSECOPS_CLUSTER:/app/vars:ro --security-opt label=disabled"
+    run_args="-v $PWD/tmp:/app/tmp -v $PWD/vars/$DEVSECOPS_CLUSTER:/app/vars:ro --security-opt label=disabled"
 else
     echo "A container runtime is necessary to execute these playbooks." >&2
     echo "Please install podman or docker." >&2
