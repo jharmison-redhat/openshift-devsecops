@@ -85,8 +85,10 @@ done
 # You have to specify a cluster name, either via export or arg
 if [ -z "$DEVSECOPS_CLUSTER" ]; then
     echo -e "Error: You must specify a cluster.\n$usage" >&2
+    exit 2
 elif [ ! -d "vars/$DEVSECOPS_CLUSTER" ]; then
     echo -e "Error: You must create a subdirectory in $PWD/vars named $cluster with common.yml, devsecops.yml, and provision.yml in it (as needed by your playbooks) to pass into the container.\n$usage" >&2
+    exit 3
 fi
 
 args="$verbose_flag"
@@ -159,7 +161,7 @@ elif [ -r ~/.kube/config ]; then
     cp "$(realpath ~/.kube/config)" "tmp/$full_cluster_name/auth/kubeconfig"
 else
     echo -e "No KUBECONFIG specified, none in default location. Cowardly aborting.\n$usage" >&2
-    exit 2
+    exit 4
 fi
 
 # Serially iterate over every playbook specified
