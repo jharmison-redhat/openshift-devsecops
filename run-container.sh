@@ -1,7 +1,6 @@
 #!/bin/bash
 
-thisdir=$(dirname $(realpath $0))
-cd "$thisdir"
+cd $(dirname $(realpath $0))
 
 verbose_flag=''
 cluster_kubeconfig=''
