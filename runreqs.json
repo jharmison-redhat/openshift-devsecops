@@ -2,6 +2,7 @@
     "pip": [
         "ansible",
         "openshift",
+        "jmespath",
         "git+https://github.com/jharmison-redhat/devsecops-api-script.git"
     ],
     "dnf": [
