@@ -19,6 +19,7 @@
       jenkinsPipelineStrategy:
         jenkinsfile: |-
           def version, mvnCmd = "mvn -s configuration/cicd-settings-nexus3.xml"
+          def appName = "jp-tasks"
 
           pipeline {
             agent {
@@ -64,7 +65,7 @@
                   expression {
                     openshift.withCluster() {
                       openshift.withProject(env.DEV_PROJECT) {
-                        return !openshift.selector("bc", "tasks").exists();
+                        return !openshift.selector("bc", "$appName").exists();
                       }
                     }
                   }
@@ -73,7 +74,7 @@
                   script {
                     openshift.withCluster() {
                       openshift.withProject(env.DEV_PROJECT) {
-                        openshift.newBuild("--name=tasks", "--image-stream=jboss-eap70-openshift:1.5", "--binary=true")
+                        openshift.newBuild("--name=$appName", "--image-stream=jboss-eap70-openshift:1.5", "--binary=true")
                       }
                     }
                   }
@@ -87,7 +88,7 @@
                   script {
                     openshift.withCluster() {
                       openshift.withProject(env.DEV_PROJECT) {
-                        openshift.selector("bc", "tasks").startBuild("--from-dir=oc-build", "--wait=true")
+                        openshift.selector("bc", "$appName").startBuild("--from-dir=oc-build", "--wait=true")
                       }
                     }
                   }
@@ -98,7 +99,7 @@
                   expression {
                     openshift.withCluster() {
                       openshift.withProject(env.DEV_PROJECT) {
-                        return !openshift.selector('dc', 'tasks').exists()
+                        return !openshift.selector('dc', '$appName').exists()
                       }
                     }
                   }
@@ -107,14 +108,14 @@
                   script {
                     openshift.withCluster() {
                       openshift.withProject(env.DEV_PROJECT) {
-                        def app = openshift.newApp("tasks:latest")
+                        def app = openshift.newApp("$appName:latest")
                         app.narrow("svc").expose();
 
-                        def dc = openshift.selector("dc", "tasks")
+                        def dc = openshift.selector("dc", "$appName")
                         while (dc.object().spec.replicas != dc.object().status.availableReplicas) {
                             sleep 10
                         }
-                        openshift.set("triggers", "dc/tasks", "--manual")
+                        openshift.set("triggers", "dc/$appName", "--manual")
                       }
                     }
                   }
@@ -125,7 +126,7 @@
                   script {
                     openshift.withCluster() {
                       openshift.withProject(env.DEV_PROJECT) {
-                        openshift.selector("dc", "tasks").rollout().latest();
+                        openshift.selector("dc", "$appName").rollout().latest();
                       }
                     }
                   }
@@ -139,7 +140,7 @@
 
                   script {
                     openshift.withCluster() {
-                      openshift.tag("${env.DEV_PROJECT}/tasks:latest", "${env.STAGE_PROJECT}/tasks:${version}")
+                      openshift.tag("${env.DEV_PROJECT}/$appName:latest", "${env.STAGE_PROJECT}/$appName:${version}")
                     }
                   }
                 }
@@ -149,13 +150,13 @@
                   script {
                     openshift.withCluster() {
                       openshift.withProject(env.STAGE_PROJECT) {
-                        if (openshift.selector('dc', 'tasks').exists()) {
-                          openshift.selector('dc', 'tasks').delete()
-                          openshift.selector('svc', 'tasks').delete()
-                          openshift.selector('route', 'tasks').delete()
+                        if (openshift.selector('dc', '$appName').exists()) {
+                          openshift.selector('dc', '$appName').delete()
+                          openshift.selector('svc', '$appName').delete()
+                          openshift.selector('route', '$appName').delete()
                         }
 
-                        openshift.newApp("tasks:${version}").narrow("svc").expose()
+                        openshift.newApp("$appName:${version}").narrow("svc").expose()
                       }
                     }
                   }
