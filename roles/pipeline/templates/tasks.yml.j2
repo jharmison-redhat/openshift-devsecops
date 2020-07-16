@@ -64,7 +64,7 @@
       - $(inputs.params.PATH_CONTEXT)
       # This could also use something like image-registry.openshift-image-registry.svc.cluster.local:5000/openshift/jboss-eap72-openshift:1.1
       # from the built in registry
-      - registry.redhat.io/jboss-eap-7/eap72-openshift:1.2
+      - image-registry.openshift-image-registry.svc.cluster.local:5000/openshift/jboss-eap72-openshift:1.1
       - --image-scripts-url
       - image:///usr/local/s2i
       - --as-dockerfile
@@ -170,6 +170,10 @@
         description: The name dev project
         name: dev_project
         type: string
+      - description: binary artifact path in the local artifact repo
+        # something like org/jboss/quickstarts/eap/jboss-tasks-rs/7.0.0-SNAPSHOT/jboss-tasks-rs-7.0.0-SNAPSHOT.war
+        type: string
+        name: artifact_path
     resources:
       inputs:
         - name: source
@@ -219,8 +223,7 @@
           rm -rf $(inputs.resources.source.path)/oc-build && mkdir -p $(inputs.resources.source.path)/oc-build/deployments 
 
 
-          cp $(workspaces.maven-repo.path)/org/jboss/quickstarts/eap/jboss-tasks-rs/7.0.0-SNAPSHOT/jboss-tasks-rs-7.0.0-SNAPSHOT.war
-          $(inputs.resources.source.path)/oc-build/deployments/ROOT.war 
+          cp $(workspaces.maven-repo.path)/$(inputs.params.artifact_path) $(inputs.resources.source.path)/oc-build/deployments/ROOT.war 
 
 
           oc start-build $(inputs.params.app_name) --from-dir=$(inputs.resources.source.path)/oc-build -n   $(inputs.params.dev_project) --wait=true 

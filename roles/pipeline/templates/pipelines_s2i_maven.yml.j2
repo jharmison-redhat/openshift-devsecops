@@ -12,12 +12,12 @@
         type: image
     tasks:
       - name: build-app
-        params:
-          - name: TLSVERIFY
-            value: 'false'
         taskRef:
           name: s2i-eap-7
           kind: Task
+        params:
+          - name: TLSVERIFY
+            value: 'false'
         resources:
           inputs:
             - name: source
@@ -37,6 +37,9 @@
         type: git
     tasks:
       - name: build-app
+        taskRef:
+          kind: Task
+          name: maven-java8
         params:
           - name: GOALS
             value:
@@ -48,13 +51,14 @@
           inputs:
             - name: source
               resource: app-git
-        taskRef:
-          kind: Task
-          name: maven-java8
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo
+
       - name: run-unit-tests
+        taskRef:
+          kind: Task
+          name: maven-java8
         params:
           - name: GOALS
             value:
@@ -65,15 +69,16 @@
           inputs:
             - name: source
               resource: app-git
-        runAfter:
-          - build-app
-        taskRef:
-          kind: Task
-          name: maven-java8
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo
+        runAfter:
+          - build-app
+
       - name: code-quality-analysis
+        taskRef:
+          kind: Task
+          name: maven-java8
         params:
           - name: GOALS
             value:
@@ -87,15 +92,16 @@
           inputs:
             - name: source
               resource: app-git
-        runAfter:
-          - build-app
-        taskRef:
-          kind: Task
-          name: maven-java8
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo
+        runAfter:
+          - build-app
+
       - name: archive-app-to-nexus
+        taskRef:
+          kind: Task
+          name: maven-java8
         params:
           - name: GOALS
             value:
@@ -108,31 +114,32 @@
           inputs:
             - name: source
               resource: app-git
-        runAfter:
-          - run-unit-tests
-          - code-quality-analysis
-        taskRef:
-          kind: Task
-          name: maven-java8
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo
+        runAfter:
+          - run-unit-tests
+          - code-quality-analysis
+
       - name: deploy-to-openshift
+        taskRef:
+          kind: Task
+          name: deploy-jboss-app-to-dev
         params:
           - name: app_name
             value: tasks
+          - name: artifact_path
+            value: org/jboss/quickstarts/eap/jboss-tasks-rs/7.0.0-SNAPSHOT/jboss-tasks-rs-7.0.0-SNAPSHOT.war
         resources:
           inputs:
             - name: source
               resource: app-git
-        runAfter:
-          - archive-app-to-nexus
-        taskRef:
-          kind: Task
-          name: deploy-jboss-app-to-dev
         workspaces:
           - name: maven-repo
             workspace: local-maven-repo
+        runAfter:
+          - archive-app-to-nexus
+
     workspaces:
       - name: local-maven-repo
 
@@ -149,6 +156,9 @@
         type: string
     tasks:
       - name: deploy-app-to-stage
+        taskRef:
+          kind: Task
+          name: deploy-app-to-stage
         params:
           - name: app_name
             value: tasks
@@ -158,8 +168,5 @@
             value: {{username}}-stage
           - name: app_revision
             value: $(params.app_version)
-        taskRef:
-          kind: Task
-          name: deploy-app-to-stage
 
 {% endfor %}
