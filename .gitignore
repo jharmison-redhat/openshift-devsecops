@@ -10,3 +10,4 @@ vars/*
 .vscode
 playbooks/quay.yml
 11009103_ak-dso-tekton1-secret.yaml
+dashboard/workshop/tekton-content/images/tekton-pipeline.xcf
