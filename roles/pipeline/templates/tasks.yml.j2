@@ -1,39 +1,38 @@
 {% for username in workshop_users|json_query("[].username") %}
-- apiVersion: tekton.dev/v1alpha1
+- apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
     name: s2i-eap-7
     namespace: {{ username }}-cicd
   spec:
-    inputs:
-      params:
-      - default: .
-        description: The location of the path to run s2i from
-        name: PATH_CONTEXT
-        type: string
-      - default: "true"
-        description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
-        name: TLSVERIFY
-        type: string
-      - default: ""
-        description: Additional Maven arguments
-        name: MAVEN_ARGS_APPEND
-        type: string
-      - default: "false"
-        description: Remove the Maven repository after the artifact is built
-        name: MAVEN_CLEAR_REPO
-        type: string
-      - default: ""
-        description: The base URL of a mirror used for retrieving artifacts
-        name: MAVEN_MIRROR_URL
-        type: string
-      resources:
+    params:
+    - default: .
+      description: The location of the path to run s2i from
+      name: PATH_CONTEXT
+      type: string
+    - default: "true"
+      description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
+      name: TLSVERIFY
+      type: string
+    - default: ""
+      description: Additional Maven arguments
+      name: MAVEN_ARGS_APPEND
+      type: string
+    - default: "false"
+      description: Remove the Maven repository after the artifact is built
+      name: MAVEN_CLEAR_REPO
+      type: string
+    - default: ""
+      description: The base URL of a mirror used for retrieving artifacts
+      name: MAVEN_MIRROR_URL
+      type: string
+    resources:
+      inputs:
       - name: source
         type: git
-    outputs:
-      resources:
-      - name: image
-        type: image
+      outputs:
+        - name: image
+          type: image
     steps:
     - args:
       - |-
@@ -124,24 +123,24 @@
     - emptyDir: {}
       name: envparams
 
-- apiVersion: tekton.dev/v1alpha1
+- apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
     name: maven-java8
     namespace: {{ username }}-cicd
   spec:
-    inputs:
-      params:
-        - default:
-            - package
-          description: maven goals to run
-          name: GOALS
-          type: array
-        - default: configuration/cicd-settings-nexus3.xml
-          description: location of the settings file
-          name: settings-path
-          type: string
-      resources:
+    params:
+      - default:
+          - package
+        description: maven goals to run
+        name: GOALS
+        type: array
+      - default: configuration/cicd-settings-nexus3.xml
+        description: location of the settings file
+        name: settings-path
+        type: string
+    resources:
+      inputs:
         - name: source
           type: git
     steps:
@@ -156,23 +155,23 @@
     workspaces:
       - name: maven-repo
 
-- apiVersion: tekton.dev/v1alpha1
+- apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
     name: deploy-jboss-app-to-dev
     namespace: {{ username }}-cicd
   spec:
-    inputs:
-      params:
-        - default: tasks
-          description: The name of the app
-          name: app_name
-          type: string
-        - default: {{ username }}-dev
-          description: The name dev project
-          name: dev_project
-          type: string
-      resources:
+    params:
+      - default: tasks
+        description: The name of the app
+        name: app_name
+        type: string
+      - default: {{ username }}-dev
+        description: The name dev project
+        name: dev_project
+        type: string
+    resources:
+      inputs:
         - name: source
           type: git
     steps:
@@ -278,29 +277,28 @@
     workspaces:
       - name: maven-repo
 
-- apiVersion: tekton.dev/v1alpha1
+- apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
     name: deploy-app-to-stage
     namespace: {{ username }}-cicd
   spec:
-    inputs:
-      params:
-        - default: tasks
-          description: The name of the app
-          name: app_name
-          type: string
-        - default: user1-dev
-          description: The name dev project
-          name: dev_project
-          type: string
-        - default: user1-stage
-          description: The name dev project
-          name: stage_project
-          type: string
-        - description: The name dev project
-          name: app_revision
-          type: string
+    params:
+      - default: tasks
+        description: The name of the app
+        name: app_name
+        type: string
+      - default: user1-dev
+        description: The name dev project
+        name: dev_project
+        type: string
+      - default: user1-stage
+        description: The name dev project
+        name: stage_project
+        type: string
+      - description: The name dev project
+        name: app_revision
+        type: string
     steps:
     - name: cleanup-stage-project
       script: >
