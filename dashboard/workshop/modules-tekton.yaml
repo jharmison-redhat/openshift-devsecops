@@ -1,0 +1,14 @@
+---
+modules:
+  index:
+    name: DevSecOps Workshop - Secure Software Factory
+  lab01:
+    name: Lab 01 - Welcome to OpenShift
+  lab02:
+    name: Lab 02 - Trusted Software Supply Chain
+  lab03:
+    name: Lab 03 - DevSecOps Project overview
+  lab04:
+    name: Lab 04 - Pipelines Walkthrough
+  lab05:
+    name: Lab 05 - Tekton Overview
