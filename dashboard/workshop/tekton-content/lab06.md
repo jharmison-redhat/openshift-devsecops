@@ -103,7 +103,7 @@ Then, the Tasks application is built using Maven, so we will need to find a cont
 
 The first place we can look is the Cluster Task catalog that exists in OpenShift. 
 
-![Maven Cluster Task](images/../maven_clustertask.png)
+![Maven Cluster Task](images/maven_clustertask.png)
 
 So, let's see what this ClusterTask is all about. 
 ```bash

@@ -14,3 +14,5 @@ modules:
     name: Lab 05 - Tekton Overview
   lab06:
     name: Lab 06 - Tekton Exploration
+  lab07:
+    name: Lab 07 - Level Up our Tasks

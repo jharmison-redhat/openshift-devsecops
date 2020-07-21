@@ -5,7 +5,29 @@ OpenShift Pipelines is supported in OpenShift using an operator. When the operat
 
 ![Pipeline Operator](images/pipelines_integrated.png)
 
-# Review pre-built pipelines
+# Review App Source Code
+From the "Project" dropdown, select the `devsecops` project
+View your Gitea pod and click select the route (https://gitea-server...) to log into your gitea server. Click the `Sign-In` button and use the user name and password given to you by your instructor.
+
+![Gitea Route](images/gitea_route.png)
+
+Click on the `user1/openshift-tasks` project to see the project structure, and then choose the `dso4` branch to select the branch we're working with
+
+
+![Gitea OpenShift Tasks source](images/gitea_openshift_tasks.png)
+
+# Maven Refresher
+Maven install will run through the [Maven lifecycle][1] and skip the tests.  We will execute tests later in the pipeline.
+
+- validate - validate the project is correct and all necessary information is available
+- compile - compile the source code of the project
+- test - test the compiled source code using a suitable unit testing framework. These tests should not require the code be packaged or deployed
+- package - take the compiled code and package it in its distributable format, such as a JAR.
+- verify - run any checks on results of integration tests to ensure quality criteria are met
+- install - install the package into the local repository, for use as a dependency in other projects locally
+- deploy - done in the build environment, copies the final package to the remote repository for sharing with other developers and projects.
+
+# Review pre-existing pipelines
 
 Go into your CI/CD project and review the pipelines that the workshop has pre-provisioned in the cluster. Observe how the pipeline visualizes the parallel execution of tasks. 
 
@@ -96,3 +118,5 @@ spec:
 ```
 
 You have all the ability to take any container into a task into your pipeline, make it reusable with parameters, and plug it into your pipelines. If one of the ClusterTasks doesn't quite quite work the way you like, you can just copy it into  your task and change it to your liking. 
+
+[1]: https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
