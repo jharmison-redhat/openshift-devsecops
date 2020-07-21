@@ -12,3 +12,5 @@ modules:
     name: Lab 04 - Pipelines Walkthrough
   lab05:
     name: Lab 05 - Tekton Overview
+  lab06:
+    name: Lab 06 - Tekton Exploration
