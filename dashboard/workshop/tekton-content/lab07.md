@@ -1,6 +1,6 @@
 # Introduction
 
-In this lab we will explore the steps necessary to level-up our game in working with Tekton Tasks. 
+In this lab we will explore the steps necessary to level-up our game in working with Tekton Tasks. When we're all done, we will have the `Build` stage of our DevSecOps pipeline. 
 
 
 # Review the simple-maven Task
