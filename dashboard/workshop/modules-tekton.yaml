@@ -22,3 +22,5 @@ modules:
     name: Lab 09 -  Static Application Security Testing
   lab10:
     name: Lab 10 -  Archive App
+  lab11:
+    name: Lab 11 -  Create Image
