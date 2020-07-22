@@ -62,6 +62,15 @@ Flags:
   -n, --namespace string    namespace to use (default: from $KUBECONFIG)
   -C, --nocolour            disable colouring (default: false)
 ```
+
+Before we create the new Pipeline Resource, let's get the URL of the gitea server instance:
+```bash
+oc get route -n devsecops gitea-server
+NAME           HOST/PORT                                                                       PATH   SERVICES       PORT    TERMINATION     WILDCARD
+gitea-server   gitea-server-devsecops.apps.cluster-nisky-0450.nisky-0450.example.opentlc.com          gitea-server   <all>   edge/Redirect   None
+
+```
+
 So, the command we need is `create`. Then, let's create a new resource:
 ```bash
 $ tkn resource create
@@ -74,7 +83,7 @@ $ tkn resource create
   pullRequest
   storage
 ? Select a resource type to create : git
-? Enter a value for url :  https://gitea-server-devsecops.apps.cluster-nisky-5dc3.nisky-5dc3.example.opentlc.com/user1/openshift-tasks.git
+? Enter a value for url :  https://<your-gitea-server-route>/user1/openshift-tasks.git
 ? Enter a value for revision :  dso4
 New git resource "tasks-source" has been created
 ```
@@ -89,7 +98,7 @@ spec:
   params:
     - name: url
       value: >-
-        https://gitea-server-devsecops.apps.cluster-nisky-5dc3.nisky-5dc3.example.opentlc.com/user1/openshift-tasks.git
+        https://<gitea-server-route-url>/user1/openshift-tasks.git
     - name: revision
       value: dso4
   type: git

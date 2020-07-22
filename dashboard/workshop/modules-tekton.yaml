@@ -15,4 +15,10 @@ modules:
   lab06:
     name: Lab 06 - Tekton Exploration
   lab07:
-    name: Lab 07 - Level Up our Tasks
+    name: Lab 07 - Tasks Parametrization, Build Stage
+  lab08:
+    name: Lab 08 - Unit Test Stage
+  lab09:
+    name: Lab 09 -  Static Application Security Testing
+  lab10:
+    name: Lab 10 -  Archive App

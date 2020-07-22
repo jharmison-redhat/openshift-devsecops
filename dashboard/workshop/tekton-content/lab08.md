@@ -1,6 +1,8 @@
 # Introduction  
 
-In this lab, we will add the `Test` stage of the DevSecOps pipeline
+In this lab, we will add the `Unit Test` stage of the DevSecOps pipeline
+
+![Unit Test Stage](images/openshift-pipeline-unittest.png)
 
 # Add New Task to the Pipeline 
 
