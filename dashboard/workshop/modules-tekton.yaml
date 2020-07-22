@@ -24,3 +24,5 @@ modules:
     name: Lab 10 -  Archive App
   lab11:
     name: Lab 11 -  Create Image
+  lab12:
+    name: Lab 12 -  Deploy to Dev
