@@ -28,3 +28,5 @@ modules:
     name: Lab 12 -  Deploy to Dev
   lab13:
     name: Lab 13 -  Promote to Stage
+  lab14:
+    name: Lab 14 - Trigger the Software Supply Chain
