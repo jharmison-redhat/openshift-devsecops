@@ -315,10 +315,10 @@ We've already done this work, so we can easily jump into creating a new task and
       - description: The name dev project
         name: dev_project
         type: string
-      - description: The name dev project
+      - description: The name stage project
         name: stage_project
         type: string
-      - description: The name dev project
+      - description: The app revision/gitsha to send to Stage
         name: app_revision
         type: string
     steps:
