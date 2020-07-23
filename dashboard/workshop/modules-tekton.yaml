@@ -26,3 +26,5 @@ modules:
     name: Lab 11 -  Create Image
   lab12:
     name: Lab 12 -  Deploy to Dev
+  lab13:
+    name: Lab 13 -  Promote to Stage

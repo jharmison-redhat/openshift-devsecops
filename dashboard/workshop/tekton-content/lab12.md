@@ -101,7 +101,7 @@ Now that we have the actions that need to occur, we can proceed to create a new 
 
 We can test the successful execution of the task from the command line (remember to replace the <user#> token with your username):
 ```bash
-tkn task start --inputresource source=tasks-source --param app_name=tekton-tasks  --param dev_project=user1-dev deploy-to-dev --showlog
+tkn task start --inputresource source=tasks-source git-version --showlog 
 ```
 
 We can experiment with this Task to make sure that it succeeds under different conditions of failure
