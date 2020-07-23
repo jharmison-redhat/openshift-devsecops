@@ -54,7 +54,7 @@ metadata:
   name: dev-tekton-tasks-trigger-binding
 spec: {}
 ```
-* We will create the `EventListener` below. As soon as this is created, Tekton creates a service named `el-<event-listener-name>` and a related pod to serve requests to this service. For the `dev-tekton-event-listener` below, the service will be named `el-dev-tekton-event-listener`. 
+* We will create the `EventListener` below. As soon as this is created, Tekton creates a service named `el-<event-listener-name>` and a related pod to serve requests to this service. For the `dev-tekton-event-listener` below, the service will be named `el-dev-tekton-event-listener`. Note that we are using a trivial secret check using an interceptor to only allow incoming requests with the provided value to trigger our pipeline
   
 ```yaml
 apiVersion: triggers.tekton.dev/v1alpha1
@@ -67,6 +67,9 @@ spec:
     - name: gitea-event
       bindings:
         - name: dev-tekton-tasks-trigger-binding
+      interceptors:
+        - cel:
+            filter: body.secret == "secret1234"
       template:
         name: dev-tekton-tasks-trigger-template
 ```
@@ -96,7 +99,7 @@ $ oc get route el-dev-tekton-event-listener
 NAME                           HOST/PORT                                                                                        PATH   SERVICES                       PORT            TERMINATION   WILDCARD
 el-dev-tekton-event-listener   el-dev-tekton-event-listener-user1-cicd.apps.cluster-nisky-0450.nisky-0450.example.opentlc.com          el-dev-tekton-event-listener   http-listener                 None
 ```
-* Click on the `Add Webhook` button and choose `Gitea` as the webhook type. On the resulting page, fill in the `el-dev-tekton-event-listener` route URL in the `Target URL` field and leave everything else as defaults. Click the `Add Webhook` button to save.  
+* Click on the `Add Webhook` button and choose `Gitea` as the webhook type. On the resulting page, fill in the `el-dev-tekton-event-listener` route URL in the `Target URL` field and `secret1234` in the `Secret` field - everything else can stay as default. Click the `Add Webhook` button to save.  
 
 ![Gitea webhook definition](images/gitea_add_webhook_details.png)
 
@@ -161,6 +164,9 @@ spec:
     - name: curl-event
       bindings:
         - name: stage-tekton-tasks-trigger-binding
+      interceptors:
+        - cel:
+            filter: body.secret == "secret1234"
       template:
         name: stage-tekton-tasks-trigger-template
 ```
@@ -181,9 +187,9 @@ In order to simulate that a new app version was created, we will simply tag the 
 $ oc tag tekton-tasks:latest tekton-tasks:foobar1 -n <user#>-dev
 ```
 
-Now, trigger the webhook passing `foobar1` as the `app_ver` parameter and observe that the `stage-tekton-tasks` pipeline is running:
+Now, trigger the webhook passing `foobar1` as the `app_ver` parameter and observe that the `stage-tekton-tasks` pipeline is running. Note that if you don't include the `secret` value in the body or include a different value, the webhook will not trigger the pipeline. 
 ```bash
-$curl -X POST -d '{"app_ver":"foobar1"}' http://el-stage-tekton-event-listener-user1-cicd.apps.cluster-nisky-0450.nisky-0450.example.opentlc.com/
+$curl -X POST -d '{"app_ver":"foobar1", "secret":"secret1234"}' http://el-stage-tekton-event-listener-user1-cicd.apps.cluster-nisky-0450.nisky-0450.example.opentlc.com/
 ```
 ![Stage pipeline webhook](images/webhook_stage_pipeline.png)
 
@@ -191,7 +197,7 @@ $curl -X POST -d '{"app_ver":"foobar1"}' http://el-stage-tekton-event-listener-u
 
 In this lab we went over the simplest possible setup to allow the triggering and integration of our pipelines with external tools using Webhooks. For the Dev pipeline, it will be triggered on each commit in our Gitea repository. For the Stage pipeline, we expose a webhook that can be invoked with a parameter - possibly from a custom tool that processes the approval of promotions between stages. 
 
-Note that the examples above are probably the simplest one possible, and do not account for the additional details needed to make these webhooks properly secured, authenticated, etc. 
+Note that the examples above are probably the simplest one possible, and uses a trivial security mechanism to validate the incoming requests that trigger the pipelines. 
 
 
 
