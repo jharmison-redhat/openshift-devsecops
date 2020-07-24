@@ -1,10 +1,10 @@
 Before moving forward, it is important to understand the difference between [Continuous Integration (CI), Continuous Delivery (CD), and Continuous Deployment][1].
 
-Also, a part of this lab we’ll be using using [OpenShift Pipelines][2] for CI/CD, which gives you control over building, deploying, and promoting your applications on OpenShift. OpenShift Pipelines is directly integrated in OpenShift and allows users to build extensible pipelines using familiar cloud native constructs (such as containers) based on the Tekton upstream project. We will dive into further details on Tekton in a follow-on lab. 
+Also, a part of this lab we’ll be using [OpenShift Pipelines][2] for CI/CD, which gives you control over building, deploying, and promoting your applications on OpenShift. OpenShift Pipelines is directly integrated in OpenShift and allows users to build extensible pipelines using familiar cloud native constructs (such as containers) based on the Tekton upstream project. We will dive into further details on Tekton in a follow-on lab. 
 
 OK, let’s go ahead and start building an OpenShift CI/CD Pipeline using In the OpenShift Console.
 
-First, click on the [user#]-devsecops project from the list of projects
+First, click on the %username%-devsecops project from the list of projects
 
 <img src="images/ocp_devsecops.png" width="900"><br/>
 
@@ -35,14 +35,14 @@ Below are the main steps of the "Deploy to Dev" stage of the pipeline:
 - Analyze the source code is analyzed for vulnerabilities, bugs, and bad patterns using SonarQube
 - Package the application as a WAR file, then pushes the WAR artifact to the Nexus Repository manager
 - Create a container image based the JBoss EAP runtime image and the content of the WAR artifact, then tag the newly created container image with the git SHA of the revision that was built
-- Deploy the newly created container image into the <user#>-dev project
+- Deploy the newly created container image into the %username%-dev project
 
 At this point, the first part of the pipeline stops to allow for the opportunity to test the application that is deployed. The verification of the deployed application can involve many different aspects : manual verification, execution of some integration tests against the running system, etc. 
 
 When the verification is complete, the "Deploy to Stage" part of the pipeline will perform the following steps:
-- Tag the container created in the "Dev" stage of the pipeline and make it available in the <user#>-stage project
+- Tag the container created in the "Dev" stage of the pipeline and make it available in the %username%-stage project
 - Clean up the artifacts from the previous version of the application
-- Deploy a new version of the application based on the newly tagged image into the <user#>-stage project
+- Deploy a new version of the application based on the newly tagged image into the %username%-stage project
 
 <br>
 <img src="images/openshift-pipeline.png" width="900"><br/>
