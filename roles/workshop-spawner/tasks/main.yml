@@ -21,17 +21,17 @@
   retries: 10
   delay: 30
 
-- name: Get Keycloak Deployment
+- name: Get Che Identity Secret
   k8s_info:
     kubeconfig: '{{ kubeconfig }}'
     api_version: v1
-    kind: Deployment
-    name: keycloak
+    kind: Secret
+    name: che-identity-secret
     namespace: "{{ crw_project_name }}"
-  register: sso_deployment
+  register: che_identity_secret
 
 - set_fact:
-    sso_admin_password: "{{ sso_deployment | json_query('resources[0].spec.template.spec.containers[?name==`keycloak`].env[]') | to_json | from_json | json_query('[?name==`SSO_ADMIN_PASSWORD`].value') | first }}"
+    sso_admin_password: "{{ che_identity_secret | json_query('resources[0].data.password') | b64decode }}"
     sso_admin_user: "admin"
 
 - name: Get Keycloak admin token

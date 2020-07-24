@@ -58,6 +58,8 @@ github_project: jharmison-redhat
 # deploy_3scale: no
 # deploy_crw: no
 # deploy_pipeline: no
+
+# This will fail if deploy_crw=no, since the workshop dashboard depends on CodeReady Workspaces
 # deploy_workshop: no
 
 # Change quay config definition to allow mirroring of image repositories
