@@ -171,7 +171,7 @@ $ tkn taskrun logs simple-maven-run-pcfx7 -f -n user1-cicd
 Downloaded: http://nexus.devsecops.svc.cluster.local:8081/repository/maven-public/org/jboss/bom/jboss-eap-javaee7/7.0.1.GA/jboss-eap-javaee7-7.0.1.GA.pom (24 kB at 57 kB/s)
 ```
 
-Or, if I wanted to specify a different settings file, I could pass it as an additional param (of course, the example below would fail because the cicd-settings.xml file doesn't contain the correct configuration for a build):
+Or, if we wanted to specify a different settings file, we could pass it as an additional param (of course, the example below would fail because the cicd-settings.xml file doesn't contain the correct configuration for a build):
 ```bash
 tkn task start --inputresource source=tasks-source --param GOALS=clean  --param SETTINGS_PATH=configuration/cicd-settings.xml simple-maven
 
@@ -232,7 +232,7 @@ spec:
       image: gcr.io/cloud-builders/mvn:3.5.0-jdk-8
 ```
 
-With this definition, we can test that we can run our Task from the command line. Note that I am using the `--showlog` command line option in Tekton so that I can see the logs from executing the task right away and don't have to run a second command to get them:
+With this definition, we can test that we can run our Task from the command line. Note that we are using the `--showlog` command line option in Tekton so that we can see the logs from executing the task right away and don't have to run a second command to get them:
 ```bash
 tkn task start --inputresource source=tasks-source --param GOALS=clean  --param SETTINGS_PATH=configuration/cicd-settings-nexus3.xml --workspace name=maven-repo,emptyDir='' simple-maven --showlog
 ```
@@ -285,7 +285,7 @@ Downloaded: http://nexus.devsecops.svc.cluster.local:8081/repository/maven-publi
 
 ```
 
-If I run that same command again, the output is much shorter - just the results of the requested goal and none of the download output:
+If we run that same command again, the output is much shorter - just the results of the requested goal and none of the download output:
 ```bash
 tkn task start --inputresource source=tasks-source --param GOALS=clean  --param SETTINGS_PATH=configuration/cicd-settings-nexus3.xml --workspace name=maven-repo,claimName=maven-repo-pvc simple-maven --showlog
 Taskrun started: simple-maven-run-8562d
