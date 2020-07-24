@@ -48,9 +48,6 @@ Since our goal is to make this task as re-usable as possible (so that we can cal
 
 When we talk about task parameters (the same applies to Pipeline parameters), Tekton is pretty simple - everythign is either a String or an array of Strings. Now, since we want to pass multiple goals to Maven, we will use an array. Additionally, since we want our Maven task to be as simple as possible to use, we will give this parameter a default value that is meaningful and simple - if you call Maven without passing a goals parameter, we would want Maven to execute the `package` goal. 
 
-A few more things to note:
-* There seems to be 
-
 With that, this is what our task would look like:  
 ```yaml
 apiVersion: tekton.dev/v1alpha1
@@ -158,7 +155,7 @@ spec:
       image: gcr.io/cloud-builders/mvn:3.5.0-jdk-8
 ```
 
-With this updated task definition, I can run my new task in exactly the same way as before (e.g. if I didn't wanto to specify a different settings file than the default):
+With this updated task definition, we can run the new task in exactly the same way as before (e.g. if I didn't wanto to specify a different settings file than the default):
 ```bash
 tkn task start --inputresource source=tasks-source --param GOALS=clean,compile simple-maven
 ```
