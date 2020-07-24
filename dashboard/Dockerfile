@@ -1,8 +1,9 @@
 FROM quay.io/akrohg/workshop-dashboard-crw:latest
+ARG PIPELINE_STYLE
 
 USER root
 
-COPY . /tmp/src
+COPY ./$PIPELINE_STYLE /tmp/src
 
 RUN rm -rf /tmp/src/.git* && \
     chown -R 1001 /tmp/src && \

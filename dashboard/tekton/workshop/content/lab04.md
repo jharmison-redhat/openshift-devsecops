@@ -11,7 +11,7 @@ View your Gitea pod and click select the route (https://gitea-server...) to log 
 
 ![Gitea Route](images/gitea_route.png)
 
-Click on the `user1/openshift-tasks` project to see the project structure, and then choose the `dso4` branch to select the branch we're working with
+Click on the `%username%/openshift-tasks` project to see the project structure, and then choose the `dso4` branch to select the branch we're working with
 
 
 ![Gitea OpenShift Tasks source](images/gitea_openshift_tasks.png)
@@ -49,7 +49,7 @@ apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
   name: maven-java8
-  namespace: user3-cicd
+  namespace: %username%-cicd
 spec:
   params:
     - default:
