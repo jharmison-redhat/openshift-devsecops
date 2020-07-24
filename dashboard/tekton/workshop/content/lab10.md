@@ -1,12 +1,12 @@
 # Introduction
 
-This lab will add the "Archive" stage to your pipeline
+This lab will add the "Archive" stage to the pipeline
 
 ![Archive App Stage](images/openshift-pipeline-archive.png)
 
 # Add Archive Stage
 
-Archiving the built and tested application into a trusted repository is important to making sure you are building with trusted parts.  You assume this application is built properly and all the previous stages have passed.  With that confidence, your built and tested application should be immutable in a trusted repository.  The repository will version or audit any changes to the application, configuration, and dependencies.
+Archiving the built and tested application into a trusted repository is important to making sure we are building with trusted parts.  We assume this application is built properly and all the previous stages have passed.  With that confidence, our built and tested application should be immutable in a trusted repository.  The repository will version or audit any changes to the application, configuration, and dependencies.
 
 We leveraged the maven nexus plugin for this deployment.  The mvn deploy step is the last step in the maven lifecycle.  The built application is archived into the nexus repository.  We can see it later once we run the pipeline.
 
