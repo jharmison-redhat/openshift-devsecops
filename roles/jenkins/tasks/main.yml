@@ -2,18 +2,10 @@
 - name: Subscribe to Jenkins operator
   k8s:
     kubeconfig: '{{ kubeconfig }}'
-    definition:
-      apiVersion: operators.coreos.com/v1alpha1
-      kind: Subscription
-      metadata:
-        name: jenkins-operator
-        namespace: openshift-operators
-      spec:
-        channel: alpha
-        installPlanApproval: Automatic
-        name: jenkins-operator
-        source: community-operators
-        sourceNamespace: openshift-marketplace
+    definition: '{{ lookup("template", "jenkins_subscription.yml.j2")|from_yaml }}'      
+  loop: '{{ workshop_users|json_query("[].username") }}'
+  loop_control:
+    loop_var: username
 
 - name: Allow Jenkins operator serviceaccount to create nonroot pods
   k8s:
@@ -24,8 +16,12 @@
       kind: SecurityContextConstraints
       metadata:
         name: nonroot
+        namespace: "{{ username }}-cicd"
       users:
-      - system:serviceaccount:openshift-operators:jenkins-operator
+      - "system:serviceaccount:{{username}}-cicd:jenkins-operator"
+  loop: '{{ workshop_users|json_query("[].username") }}'
+  loop_control:
+    loop_var: username
 
 - name: Create a Jenkins instance for each user
   k8s:
@@ -35,3 +31,11 @@
   until: not jenkins_deployment.failed
   retries: 5
   delay: 10
+
+- name: Create end-to-end pipeline definitions  
+  k8s:
+    kubeconfig: '{{ kubeconfig }}'
+    definition: '{{ lookup("template", "jenkins_pipelines.yml.j2")|from_yaml }}'      
+  loop: '{{ workshop_users|json_query("[].username") }}'
+  loop_control:
+    loop_var: username

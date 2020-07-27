@@ -3,12 +3,12 @@
   kind: PipelineRun
   metadata:
     labels:
-      tekton.dev/pipeline: maven-build-pipeline
-    name: maven-build-pipeline-1
+      tekton.dev/pipeline: build-test-deploy-app-to-dev
+    name: build-test-deploy-app-to-dev-1
     namespace: {{ username }}-cicd
   spec:
     pipelineRef:
-      name: maven-build-pipeline
+      name: build-test-deploy-app-to-dev
     resources:
       - name: app-git
         resourceRef:
@@ -24,19 +24,19 @@
   kind: PipelineRun
   metadata:
     labels:
-      tekton.dev/pipeline: app-build
-    name: app-build-1
+      tekton.dev/pipeline: app-s2i-build
+    name: app-s2i-build-1
     namespace: {{ username }}-cicd
   spec:
     pipelineRef:
-      name: app-build
+      name: app-s2i-build
     resources:
       - name: app-git
         resourceRef:
           name: source
       - name: app-image
         resourceRef:
-          name: image
+          name: internal-reg-image
     serviceAccountName: pipeline
     timeout: 1h0m0s
 {% endfor %}

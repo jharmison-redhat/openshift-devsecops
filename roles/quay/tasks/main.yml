@@ -71,10 +71,10 @@
         name: container-security-operator
         namespace: openshift-operators
       spec:
-        channel: alpha
+        channel: quay-v3.3
         installPlanApproval: Automatic
         name: container-security-operator
-        source: community-operators
+        source: redhat-operators
         sourceNamespace: openshift-marketplace
 
 # Disabled for now until Quay API becomes more useful for automating Bridge

@@ -53,7 +53,7 @@
 
 - name: Create necessary pipeline tasks, and resources
   block:
-  - name: Define the build task
+  - name: Define the build and deploy tasks
     k8s:
       kubeconfig: '{{ kubeconfig }}'
       definition: '{{ lookup("template", "tasks.yml.j2")|from_yaml }}'

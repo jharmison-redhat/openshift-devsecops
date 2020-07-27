@@ -1,0 +1,39 @@
+---
+modules:
+  index:
+    name: DevSecOps Workshop - Secure Software Factory
+  lab01:
+    name: Lab 01 - Welcome to OpenShift
+  lab02:
+    name: Lab 02 - Trusted Software Supply Chain
+  lab03:
+    name: Lab 03 - DevSecOps Project overview
+  lab04:
+    name: Lab 04 - Pipelines Walkthrough
+  lab05:
+    name: Lab 05 - Tekton Overview
+  lab06:
+    name: Lab 06 - Tekton Exploration
+  lab07:
+    name: Lab 07 - Tasks Parametrization, Build Stage
+  lab08:
+    name: Lab 08 - Unit Test Stage
+  lab09:
+    name: Lab 09 -  Static Application Security Testing
+  lab10:
+    name: Lab 10 -  Archive App
+  lab11:
+    name: Lab 11 -  Create Image
+  lab12:
+    name: Lab 12 -  Deploy to Dev
+  lab13:
+    name: Lab 13 -  Promote to Stage
+  lab14:
+    name: Lab 14 - Trigger the Software Supply Chain
+  lab15:
+    name: Lab 15 - Clair Vulnerability Scan
+  lab16:
+    name: Lab 16 - OpenSCAP DISA STIG Scan
+  Fin:
+    name: Fin
+

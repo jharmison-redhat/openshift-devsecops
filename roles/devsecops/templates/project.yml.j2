@@ -43,3 +43,35 @@
 {% endif %}
 {% endfor %}
 {% endfor %}
+
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: 'devsecops'
+    annotations:
+      openshift.io/display-name: 'DevSecOps Common Resources'
+  spec: {}
+
+- kind: Group
+  apiVersion: user.openshift.io/v1
+  metadata:
+    name: devsecops-project-users
+    namespace: devsecops
+  users:
+  {% for username in workshop_users|json_query("[].username") %}
+    - "{{username}}"
+  {% endfor %}
+
+- kind: RoleBinding
+  apiVersion: rbac.authorization.k8s.io/v1
+  metadata:
+    name: devsecops-project-viewers
+    namespace: devsecops
+  subjects:
+    - kind: Group
+      apiGroup: rbac.authorization.k8s.io
+      name: devsecops-project-users
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: view

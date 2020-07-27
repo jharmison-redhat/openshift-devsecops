@@ -4,6 +4,7 @@
   metadata:
     annotations:
       jenkins.io/openshift-mode: 'true'
+      serviceaccounts.openshift.io/oauth-redirectreference.jenkins: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"user1-jenkins"}}'
     generation: 1
     name: {{ username }}-jenkins
     namespace: {{ username }}-cicd
@@ -14,7 +15,8 @@
       interval: 0
       makeBackupBeforePodDeletion: false
     configurationAsCode:
-      configurations: null
+      #configurations: 
+      #- name: jenkins-configuration-as-code
       secret:
         name: ''
     groovyScripts:
@@ -45,6 +47,9 @@
             - '-main'
             - /usr/libexec/s2i/run
           env:
+            # Read the configuration-as-code from the ConfigMap
+            #- name: CASC_JENKINS_CONFIG
+            #  value: /var/jenkins_config/configuration-as-code.yaml
             - name: OPENSHIFT_ENABLE_OAUTH
               value: 'true'
             - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
@@ -56,9 +61,9 @@
             - name: KUBERNETES_TRUST_CERTIFICATES
               value: 'true'
             - name: JENKINS_SERVICE_NAME
-              value: jenkins-operator-http-{{ username }}
+              value: jenkins-operator-http-{{ username }}-jenkins
             - name: JNLP_SERVICE_NAME
-              value: jenkins-operator-slave-{{ username }}
+              value: jenkins-operator-slave-{{ username }}-jenkins
             - name: JENKINS_UC_INSECURE
               value: 'false'
             - name: JENKINS_HOME
@@ -70,6 +75,9 @@
                 -Djenkins.install.runSetupWizard=false -Djava.awt.headless=true
           image: 'quay.io/openshift/origin-jenkins:latest'
           imagePullPolicy: Always
+          #volumeMounts:
+          #  - name: jenkins-configuration-as-code
+          #    mountPath: /var/jenkins_config
           livenessProbe:
             httpGet:
               path: /login
@@ -94,6 +102,11 @@
             requests:
               cpu: 500m
               memory: 3Gi
+      #volumes:
+      # The configuration-as-code ConfigMap
+      #- name: jenkins-configuration-as-code
+      #  configMap:
+      #    name: jenkins-configuration-as-code
     restore:
       action: {}
       containerName: ''
@@ -103,27 +116,6 @@
     slaveService:
       port: 50000
       type: ClusterIP
-
-- apiVersion: route.openshift.io/v1
-  kind: Route
-  metadata:
-    labels:
-      app: jenkins-operator
-      jenkins-cr: {{ username }}-jenkins
-    name: {{ username }}-jenkins
-    namespace: {{ username }}-cicd
-  spec:
-    host: {{ username }}-jenkins.apps.{{ full_cluster_name }}
-    port:
-      targetPort: 8080
-    tls:
-      insecureEdgeTerminationPolicy: Redirect
-      termination: edge
-    to:
-      kind: Service
-      name: jenkins-operator-http-{{ username }}-jenkins
-      weight: 100
-    wildcardPolicy: None
 
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
@@ -145,5 +137,5 @@
     name: jenkins-operator-{{ username }}-jenkins
     namespace: '{{ username }}-cicd'
     annotations:
-      serviceaccounts.openshift.io/oauth-redirectreference.primary: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"{{ username }}-jenkins"}}'
+      serviceaccounts.openshift.io/oauth-redirectreference.primary: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"{{ username }}-jenkins-{{ username }}-cicd"}}'
 {% endfor %}
