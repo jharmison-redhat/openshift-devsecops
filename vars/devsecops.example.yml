@@ -35,19 +35,15 @@ github_project: jharmison-redhat
 #   operator coming from this repo won't affect the images themselves.
 
 
-# Uncomment the following to change the pipeline workflow from Tekton to Jenkins
+# Change the following to `jenkins` for alternate style pipelines
 # NOTE: Not really implemented yet....
-# pipeline_style: jenkins
+pipeline_style: tekton
 
 # Uncomment the following to change the actions that occur before workshop deployment
 # create_users: no      # You should only do this if you're not trying to deploy much of anything
 # autoscale: no         # You should only do this if you know your workload will fit on your cluster as is
 # adjust_console: no    # This changes the route for the console to `console.apps.<cluster_name>.<base_domain>` which is much shorter than the default.
-
-# NOTE: OCS will make your cluster much larger (and more expensive). Consider
-#   disabling OCS and 3scale (which requires RWX, so either OCS or its own S3
-#   bucket) if you are price sensitive.
-# deploy_ocs: no  # This OCS deployment only _currently_ works on AWS. It should theoretically work without AWS creds on AWS (for example, RHPDS-provisioned clusters on AWS)
+# deploy_ocs: no        # This OCS deployment only _currently_ works on AWS. The Tekton pipeline depends on it.
 
 # You can disable these by uncommenting the lines below. They all default to YES.
 # deploy_quay: no
@@ -62,24 +58,11 @@ github_project: jharmison-redhat
 # This will fail if deploy_crw=no, since the workshop dashboard depends on CodeReady Workspaces
 # deploy_workshop: no
 
+# Uncomment this line to completely deploy the pipeline resources and kick off a deployment
+# deploy_automated_build: yes
+
 # Change quay config definition to allow mirroring of image repositories
 enable_quay_repo_mirroring: yes
 
 # Uncomment this line to deploy the bookinfo application to Service Mesh and 3scale (it defaults to NO)
 # deploy_bookinfo: yes
-
-# 3scale specific:
-#   3scale requires RWX storage to deploy. If you deploy OCS and 3scale in the
-#     provisioner, it will user RWX storage provided by OCS's CephFS file type.
-#     If you don't deploy OCS, you will need to include the following variables:
-# rwx_backing_style: s3
-# aws_region: us-east-1
-# rwx_backing_s3_bucket: bucket_name
-
-# If using AWS S3 to back 3scale, ensure the AWS credentials you intend for
-#   3scale, which are already configured with read/write access to the bucket
-#   above (which should also be already created!), are either in the environment
-#   by exporting them, or you can set them here (where they will override those
-#   in environment, in case you were provisioning with different accesses):
-# AWS_ACCESS_KEY_ID: <key>
-# AWS_SECRET_ACCESS_KEY: <secret>
