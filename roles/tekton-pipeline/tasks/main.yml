@@ -11,6 +11,21 @@
   register: quay_secrets
   when: deploy_quay|default(true)
 
+- name: Wait for pipeline accounts to exist
+  k8s_info:
+    kubeconfig: '{{ kubeconfig }}'
+    api_version: v1
+    kind: ServiceAccount
+    namespace: '{{ item[0] }}-{{ item[1] }}'
+    name: pipeline
+  register: pipeline_accounts
+  until: pipeline_accounts.resources|length > 0
+  retries: 10
+  delay: 30
+  with_nested:
+    - '{{ workshop_users|json_query("[].username") }}'
+    - '{{ projects|json_query("[].name") }}'
+
 # k8s_json_patch nor normal k8s modules are working here... oc CLI is
 - name: Attach new secrets to pipeline service accounts
   shell: |
