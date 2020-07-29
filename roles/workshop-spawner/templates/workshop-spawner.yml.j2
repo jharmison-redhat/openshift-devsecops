@@ -245,7 +245,7 @@ items:
           - name: CONSOLE_BRANDING
             value: openshift
           - name: CONSOLE_IMAGE
-            value: quay.io/openshift/origin-console:4.3
+            value: quay.io/openshift/origin-console:{{ openshift_version|default("4.4") }}
           - name: VOLUME_SIZE
             value: ""
           - name: ADMIN_USERS
