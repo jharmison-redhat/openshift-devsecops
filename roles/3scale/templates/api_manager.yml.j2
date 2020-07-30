@@ -4,7 +4,7 @@ metadata:
   name: devsecops-apimanager
   namespace: 3scale
 spec:
-  wildcardDomain: apps.{{ full_cluster_name }}
+  wildcardDomain: {{ cluster_router }}
   resourceRequirementsEnabled: true
   system:
     fileStorage:

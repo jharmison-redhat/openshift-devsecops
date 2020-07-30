@@ -1,4 +1,4 @@
 ---
 certificate_path: '{{ tmp_dir }}/certs'
 quay_password: '{{ lookup("password", tmp_dir + "/quay.password chars=ascii_letters,digits") }}'
-quay_route: quay.apps.{{ full_cluster_name }}
+quay_route: quay.{{ cluster_router }}

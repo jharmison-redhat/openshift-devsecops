@@ -277,7 +277,7 @@ items:
           - name: KEYCLOAK_CLIENT_ID
             value: codeready-public
           - name: CUSTOM_TAB_1
-            value: "CodeReady Workspaces=https://codeready-{{ crw_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}"
+            value: "CodeReady Workspaces=https://codeready-{{ crw_project_name }}.{{ cluster_router }}"
           - name: API_SERVER
             value: https://api.{{ cluster_name }}.{{ openshift_base_domain }}:6443
           livenessProbe:
@@ -388,7 +388,7 @@ items:
     name: external-keycloak-spawner
     namespace: {{ workshop_spawner_project_name }}
   spec:
-    host: dashboard.apps.{{ cluster_name }}.{{ openshift_base_domain }}
+    host: dashboard.{{ cluster_router }}
     port:
       targetPort: 8080-tcp
     tls:
