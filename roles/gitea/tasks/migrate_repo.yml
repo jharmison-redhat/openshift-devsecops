@@ -6,6 +6,7 @@
 - name: Wait for the Gitea to begin answering requests
   uri:
     url: https://gitea-server-{{ gitea_project_name }}.{{ cluster_router }}
+    validate_certs: no
   register: gitea_available
   until: gitea_available.status != 503
   retries: 10
@@ -14,6 +15,7 @@
 - name: Make an API request to determine the User ID for each user
   uri:
     url: https://gitea-server-{{ gitea_project_name }}.{{ cluster_router }}/api/v1/user
+    validate_certs: no
     body_format: json
     headers:
       Authorization: token {{ user.token }}
