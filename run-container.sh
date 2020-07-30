@@ -145,9 +145,9 @@ full_cluster_name="$cluster_name.$openshift_base_domain"
 mkdir -p tmp/$full_cluster_name/auth
 
 # Try to fix a borked kubeconfig for container runs
-sed -i 's/^kubeconfig:.*$/kubeconfig: '"'"'\{\{ tmp_dir \}\}\/auth\/kubeconfig'"'" vars/$DEVSECOPS_CLUSTER/common.yml &>/dev/null ||:
+sed -i 's/^kubeconfig:.*$/kubeconfig: '"'"'\{\{ tmp_dir \}\}\/auth\/kubeconfig'"'"'/g' vars/$DEVSECOPS_CLUSTER/common.yml &>/dev/null ||:
 # Try to fix a borked oc_cli for container runs
-sed -i 's/^oc_cli:.*$/oc_cli: '"'"'\/usr\/local\/bin\/oc'"'" vars/$DEVSECOPS_CLUSTER/common.yml &>/dev/null ||:
+sed -i 's/^oc_cli:.*$/oc_cli: '"'"'\/usr\/local\/bin\/oc'"'"'/g' vars/$DEVSECOPS_CLUSTER/common.yml &>/dev/null ||:
 
 if [ "$cluster_kubeconfig" ]; then
     # If you specified a kubeconfig to use, just wholesale bring it over
