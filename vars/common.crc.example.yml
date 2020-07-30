@@ -21,9 +21,11 @@ tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
 
 # The path to the kubeconfig file for the cluster you're using for the workshop.
 #   NOTE: Do not use ~ or other shell-expandable variables
+# If you use run-container.sh, it will change this :)
 kubeconfig: '{{ ansible_env["HOME"] }}/.crc/machines/crc/kubeconfig'
 
 # The path to your 'oc' client
+# If you use run-container.sh, it will change this :)
 oc_cli: '{{ ansible_env["HOME"] }}/.crc/bin/oc/oc'
 
 ################################################################################
