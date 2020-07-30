@@ -5,7 +5,41 @@ common_included: yes
 
 ################################################################################
 # NOTE: IF A VARIABLE IS COMMENTED, IT LIKELY DEFAULTS TO THE OPPOSITE
+#
+# If you're here, you're considering going on an adventure. Surely, CodeReady
+#   Containers, an entire OpenShift deployment running in a VM on your
+#   workstation couldn't handle an entire CI/CD pipeline. It can, depending on
+#   your workstation. So, set up CRC (optionally, on Linux:
+#     pip install --user git+https://git.jharmison.com/jharmison/crc-manager.git
+#     crc-manager update
+#   can download it for you)
+# Do the normal setup and enter sudo creds when/if asked:
+#     crc setup
+# Download your pull secret from:
+#   https://cloud.redhat.com/openshift/install/crc/installer-provisioned
+# And optionally save it and configure crc to use it, for example save it in:
+#   ~/.crc/pull-secret.json
+# Then run:
+#     crc config set pull-secret-file ~/.crc/pull-secret.json
+# And then configure CRC with some more resources:
+#     crc config set cpus 24
+#     crc config set memory 49152
+# Obviously you need to have those resources. If you do, then great! Contiue
+#   using the vars file examples and read extra notes particularly carefully.
+#   You can create the directory `vars/crc/` and put your `common.yml` and
+#   `devsecops.yml` in there, and off to the races.
+# Fire up your CRC instance:
+#     crc start
+# And when it's done, to load the infrastructure using your local Ansible
+#   installation, you can run:
+#     ./run.sh -e @vars/crc/common.yml -e @vars/crc/devsecops.yml devsecops
+# Or, if you have podman or docker installed, you can run the content from a
+#   container that has a known-good working environment:
+#     ./run-container.sh -c crc -k ~/.crc/machine/crc/kubeconfig devsecops
+# Then just head to:
+#   https://dashboard.apps-crc.testing
 ################################################################################
+
 letsencrypt: no     # You can't
 
 ################################################################################
