@@ -44,9 +44,10 @@ adjust_console: no        # You shouldn't
 deploy_ocs: no            # You can't
 deploy_service_mesh: no   # You shouldn't
 deploy_3scale: no         # You can't
+deploy_quay: no             # You shouldn't
+deploy_automated_build: no  # You shouldn't
 
 # You can disable these by uncommenting the lines below. They all default to YES.
-# deploy_quay: no
 # deploy_gitea: no
 # deploy_sonarqube: no
 # deploy_nexus: no
@@ -55,9 +56,6 @@ deploy_3scale: no         # You can't
 
 # This will fail if deploy_crw=no, since the workshop dashboard depends on CodeReady Workspaces
 # deploy_workshop: no
-
-# Uncomment this line to prevent initial deployment of  the pipeline resources
-# deploy_automated_build: no
 
 # Change quay config definition to allow mirroring of image repositories
 enable_quay_repo_mirroring: yes
