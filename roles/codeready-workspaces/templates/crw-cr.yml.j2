@@ -1,0 +1,36 @@
+- apiVersion: org.eclipse.che/v1
+  kind: CheCluster
+  metadata:
+    name: codeready-workspaces
+    namespace: {{ crw_project_name }}
+  spec:
+    auth:
+      externalIdentityProvider: false
+      openShiftoAuth: true
+    database:
+      externalDb: false
+    k8s: {}
+    server:
+      cheFlavor: codeready
+{% if (not letsencrypt|default(true)|bool) and byo_cert_fullchain_path is defined %}
+      selfSignedCert: true
+      serverTrustStoreConfigMapName: crw-trust
+{% else %}
+      selfSignedCert: false
+{% endif %}
+      tlsSupport: true
+    storage:
+      preCreateSubPaths: true
+      pvcClaimSize: 1Gi
+      pvcStrategy: per-workspace
+
+{% if (not letsencrypt|default(true)|bool) and byo_cert_fullchain_path is defined %}
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: crw-trust
+    namespace: {{ crw_project_name }}
+  data:
+    crc.crt: |
+{{ lookup("file", byo_cert_fullchain_path)|indent(6, true) }}
+{% endif %}

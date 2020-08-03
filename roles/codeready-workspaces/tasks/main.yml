@@ -14,34 +14,12 @@
 - name: Subscribe to CodeReady Workspaces
   k8s:
     kubeconfig: '{{ kubeconfig }}'
-    definition: '{{ lookup("template", "codeready-workspaces.yml.j2")|from_yaml }}'
+    definition: '{{ lookup("template", "crw-subscription.yml.j2")|from_yaml }}'
 
-- name: Deploy CodeReady Workspaces via CR
+- name: Deploy CodeReady Workspaces
   k8s:
     kubeconfig: '{{ kubeconfig }}'
-    definition:
-      apiVersion: org.eclipse.che/v1
-      kind: CheCluster
-      metadata:
-        name: codeready-workspaces
-        namespace: '{{ crw_project_name }}'
-      spec:
-        auth:
-          externalIdentityProvider: false
-          openShiftoAuth: true
-        database:
-          externalDb: false
-        k8s: {}
-        server:
-          cheFlavor: codeready
-          selfSignedCert: false
-          tlsSupport: true
-          customCheProperties:
-            CHE_LIMITS_WORKSPACE_IDLE_TIMEOUT: "0"
-        storage:
-          preCreateSubPaths: true
-          pvcClaimSize: 1Gi
-          pvcStrategy: per-workspace
+    definition: '{{ lookup("template", "crw-cr.yml.j2")|from_yaml }}'
   register: codeready_workspaces_deployment
   until: not codeready_workspaces_deployment.failed
   retries: 5

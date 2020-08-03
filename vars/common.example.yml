@@ -18,6 +18,14 @@ common_included: yes
 #   cert.
 # letsencrypt: no     # Creates a LetsEncrypt wildcard and api certificate and makes it the default
 
+# Disable letsencrypt, uncomment the following and provide a path to a locally-
+#   generated fullchain certificate and key that your computer trusts in PEM
+#   format if you want to bring your own certificates to the cluster. They
+#   should have a CN or Alias that matches both your cluster API and wildcard
+#   router URLs.
+# byo_cert_fullchain_path: ../tmp/fullchain.pem
+# byo_cert_key_path: ../tmp/key.pem
+
 # The name of the cluster.
 # IF PROVISIONING:
 #   This value will be in your DNS entries and should conform to valid DNS characters.

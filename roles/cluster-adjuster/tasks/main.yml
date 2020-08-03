@@ -6,11 +6,19 @@
 
 - include_tasks: create_users.yml
   when: create_users
+
 - include_tasks: letsencrypt.yml
   when:
     - letsencrypt
     - AWS_ACCESS_KEY_ID is defined or ansible_env["AWS_ACCESS_KEY_ID"] is defined
+- include_tasks: byo_cert.yml
+  when:
+    - not letsencrypt
+    - byo_cert_fullchain_path is defined
+    - byo_cert_key_path is defined
+
 - include_tasks: autoscale.yml
   when: autoscale
+
 - include_tasks: console.yml
   when: adjust_console

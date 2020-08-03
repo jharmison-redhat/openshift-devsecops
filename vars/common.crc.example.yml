@@ -41,6 +41,13 @@ common_included: yes
 ################################################################################
 
 letsencrypt: no     # You can't
+# You should do uncomment the following and provide a path to a locally-
+#   generated fullchain certificate and key that your computer trusts in PEM
+#   format if you want to bring your own certificates to CRC. They
+#   should have a CN or Alias that matches both api.crc.testing and
+#   *.apps-crc.testing
+# byo_cert_fullchain_path: ../tmp/fullchain.pem
+# byo_cert_key_path: ../tmp/key.pem
 
 ################################################################################
 # DO NOT CHANGE OR COMMENT THESE FOR ANY REASON - they're used heavily
