@@ -120,6 +120,7 @@
       ssoSessionMaxLifespan: 28800
     body_format: json
     status_code: 204
+<<<<<<< HEAD
 
 - name: Create CodeReady users
   include_tasks: create_crw_user.yml
@@ -142,3 +143,5 @@
   vars:
     user: "{{ item }}"
   with_list: "{{ workshop_users }}"
+=======
+>>>>>>> 76054a118cb5c0c9a42d697160eb3e687a759838
