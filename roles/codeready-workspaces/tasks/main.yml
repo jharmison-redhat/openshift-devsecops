@@ -120,28 +120,3 @@
       ssoSessionMaxLifespan: 28800
     body_format: json
     status_code: 204
-<<<<<<< HEAD
-
-- name: Create CodeReady users
-  include_tasks: create_crw_user.yml
-  vars:
-    user: "{{ item }}"
-  with_list: "{{ workshop_users }}"
-
-- name: Pre-create and warm user workspaces
-  include_tasks: create_crw_workspace.yml
-  vars:
-    user: "{{ item }}"
-  with_list: "{{ workshop_users }}"
-
-- name: Wait two minutes to allow workspaces to start
-  pause:
-      minutes: 2
-
-- name: Attempt to warm workspaces which failed to start
-  include_tasks: verify_crw_workspace.yml
-  vars:
-    user: "{{ item }}"
-  with_list: "{{ workshop_users }}"
-=======
->>>>>>> 76054a118cb5c0c9a42d697160eb3e687a759838
