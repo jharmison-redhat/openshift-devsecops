@@ -61,7 +61,9 @@
     namespace: '{{ sonarqube_project_name }}'
     name: sonarqube
   register: sonarqube_route
-  until: sonarqube_route.resources|length > 0
+  until:
+    - sonarqube_route.resources is defined
+    - sonarqube_route.resources|length > 0
   retries: 10
   delay: 30
 

@@ -32,3 +32,9 @@
     body_format: json
     status_code: 201,409
   register: user_creation
+  until:
+    - user_creation.status is defined
+    - not user_creation.failed
+  changed_when: user_creation.status == 201
+  retries: 10
+  delay: 10

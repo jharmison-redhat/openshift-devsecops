@@ -1,0 +1,4 @@
+---
+- import_tasks: create_crw_user.yml
+- import_tasks: create_crw_workspace.yml
+- import_tasks: verify_crw_workspace.yml
