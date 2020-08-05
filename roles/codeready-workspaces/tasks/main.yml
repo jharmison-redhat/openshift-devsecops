@@ -93,7 +93,7 @@
 
 - set_fact:
     sso_admin_password: "{{ che_identity_secret | json_query('resources[0].data.password') | b64decode }}"
-    sso_admin_user: "admin"
+    sso_admin_user: "{{ che_identity_secret | json_query('resources[0].data.user') | b64decode }}"
 
 - name: Get CodeReady SSO admin token
   uri:
