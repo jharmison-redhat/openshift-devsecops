@@ -32,20 +32,22 @@
     name: codeready-workspaces
   when: deploy_crw
 - include_role:
+    name: workshop-spawner
+  when: deploy_workshop
+
+- include_role:
     name: tekton
   when:
     - deploy_pipeline
     - pipeline_style == 'tekton'
 - include_role:
+    name: tekton-pipeline
+  when:
+    - deploy_pipeline
+    - pipeline_style == 'tekton'
+
+- include_role:
     name: jenkins
   when:
     - deploy_pipeline
     - pipeline_style == 'jenkins'
-- include_role:
-    name: workshop-spawner
-  when: deploy_workshop
-- include_role:
-    name: pipeline
-  when:
-    - deploy_pipeline
-    - pipeline_style == 'tekton'
