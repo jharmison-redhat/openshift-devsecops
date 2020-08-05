@@ -19,6 +19,8 @@
       selfSignedCert: false
 {% endif %}
       tlsSupport: true
+      customCheProperties:
+        CHE_LIMITS_WORKSPACE_IDLE_TIMEOUT: "0"
     storage:
       preCreateSubPaths: true
       pvcClaimSize: 1Gi

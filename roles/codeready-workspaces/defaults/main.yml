@@ -3,4 +3,4 @@ crw_project_name: devsecops
 crw_project_display: DevSecOps Common Resources
 
 hotload_crw_users: yes
-keycloak_url: "https://keycloak-{{ crw_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}"
+keycloak_url: "https://keycloak-{{ crw_project_name }}.{{ cluster_router }}"
