@@ -1,0 +1,7 @@
+---
+- import_tasks: create_crw_user.yml
+- import_tasks: create_crw_workspace.yml
+
+# Disabling verification as it appears to cause failures to start.
+# This should also speed up deployment.
+# - import_tasks: verify_crw_workspace.yml
