@@ -276,8 +276,8 @@ items:
             value: codeready
           - name: KEYCLOAK_CLIENT_ID
             value: codeready-public
-          - name: CRW_URL
-            value: https://codeready-{{ crw_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}
+          - name: CUSTOM_TAB_1
+            value: "CodeReady Workspaces=https://codeready-{{ crw_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}"
           - name: API_SERVER
             value: https://api.{{ cluster_name }}.{{ openshift_base_domain }}:6443
           livenessProbe:
