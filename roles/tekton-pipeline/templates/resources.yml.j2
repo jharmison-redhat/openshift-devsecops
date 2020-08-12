@@ -43,10 +43,10 @@
     namespace: {{ username }}-cicd
   spec:
     accessModes:
-      - ReadWriteMany
+      - ReadWriteOnce
     resources:
       requests:
-        storage: 1G
-    storageClassName: ocs-storagecluster-cephfs
+        storage: 5G
     volumeMode: Filesystem
+    persistentVolumeReclaimPolicy: Retain
 {% endfor %}

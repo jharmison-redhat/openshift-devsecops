@@ -58,8 +58,8 @@ pipeline_style: tekton
 # This will fail if deploy_crw=no, since the workshop dashboard depends on CodeReady Workspaces
 # deploy_workshop: no
 
-# Uncomment this line to completely deploy the pipeline resources and kick off a deployment
-# deploy_automated_build: yes
+# Uncomment this line to prevent initial deployment of  the pipeline resources
+# deploy_automated_build: no
 
 # Change quay config definition to allow mirroring of image repositories
 enable_quay_repo_mirroring: yes
