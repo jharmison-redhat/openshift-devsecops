@@ -6,6 +6,7 @@ projects:
   source:
     type: git
     location: https://gitea-server-{{ crw_project_name }}.apps.{{ cluster_name }}.{{ openshift_base_domain }}/{{ user.username }}/openshift-tasks.git
+    branch: dso4
 components:
 - id: redhat/java8/latest
   type: chePlugin
