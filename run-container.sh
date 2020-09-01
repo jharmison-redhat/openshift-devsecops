@@ -4,12 +4,13 @@ cd $(dirname $(realpath $0))
 
 verbose_flag=''
 cluster_kubeconfig=''
+force_kubeconfig=''
 extra=()
 playbooks=()
 inventory=''
 
 usage="usage: $(basename $0) [-h|--help] | [-v|--verbose] [(-e |--extra=)VARS] \\
-  (-c |--cluster=)CLUSTER [-k |--kubeconfig=)FILE \\
+  (-c |--cluster=)CLUSTER [-k |--kubeconfig=)FILE [-f|--force] \\
   [[path/to/]PLAY[.yml]] [PLAY[.yml]]..."
 
 
@@ -28,6 +29,8 @@ $usage
                                   to pass into the container image. It will be
                                   copied into the tmp directory for this cluster
                                   prior to bind-mounting the tmp directory.
+    -f|--force                  Force overwrite the kubeconfig if it already
+                                  exists and you have specified it.
     PLAY[.yml]                  You can specify the file name of a playbook
                                   (with or without the .yml extension) to run.
                                   If omitted, you will be presented with a menu
@@ -67,6 +70,8 @@ EOF
             else
                 cluster_kubeconfig=$(echo "$1" | cut -d= -f2-)
             fi                                                  ;;
+        -f|--force)
+            force_kubeconfig=true                               ;;
         *)
             if [ -f "playbooks/${1}.yml" ]; then
                 playbooks+=("playbooks/${1}.yml")
@@ -145,13 +150,17 @@ full_cluster_name="$cluster_name.$openshift_base_domain"
 mkdir -p tmp/$full_cluster_name/auth
 
 # Try to fix a borked kubeconfig for container runs
-sed -i 's/^kubeconfig:.*$/kubeconfig: '"'"'\{\{ tmp_dir \}\}\/auth\/kubeconfig'"'" vars/$DEVSECOPS_CLUSTER/common.yml &>/dev/null ||:
+sed -i 's/^kubeconfig:.*$/kubeconfig: '"'"'\{\{ tmp_dir \}\}\/auth\/kubeconfig'"'"'/g' vars/$DEVSECOPS_CLUSTER/common.yml &>/dev/null ||:
 # Try to fix a borked oc_cli for container runs
-sed -i 's/^oc_cli:.*$/oc_cli: '"'"'\/usr\/local\/bin\/oc'"'" vars/$DEVSECOPS_CLUSTER/common.yml &>/dev/null ||:
+sed -i 's/^oc_cli:.*$/oc_cli: '"'"'\/usr\/local\/bin\/oc'"'"'/g' vars/$DEVSECOPS_CLUSTER/common.yml &>/dev/null ||:
 
 if [ "$cluster_kubeconfig" ]; then
-    # If you specified a kubeconfig to use, just wholesale bring it over
-    cp "$cluster_kubeconfig" "tmp/$full_cluster_name/auth/kubeconfig"
+    if [ -r "tmp/$full_cluster_name/auth/kubeconfig" -a -z "$force_kubeconfig" ]; then
+        echo "[WARN] KUBECONFIG was specified, but already exists at $(pwd)/tmp/$full_cluster_name/auth/kubeconfig" >&2
+        echo "Not overwriting! If you want to overwrite it, please remove it or include the '--force' argument." >&2
+    else
+        cp "$cluster_kubeconfig" "tmp/$full_cluster_name/auth/kubeconfig"
+    fi
 elif [ -r "tmp/$full_cluster_name/auth/kubeconfig" ]; then
     # Everything is wonderful now (maybe)
     echo >/dev/null

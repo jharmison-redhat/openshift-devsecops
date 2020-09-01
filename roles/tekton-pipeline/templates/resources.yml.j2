@@ -8,7 +8,7 @@
     params:
       - name: url
         value: >-
-          https://gitea-server-devsecops.apps.{{cluster_name}}.{{openshift_base_domain}}/{{username}}/openshift-tasks.git
+          https://gitea-server-devsecops.{{ cluster_router }}/{{ username }}/openshift-tasks.git
       - name: revision
         value: 'dso4'
     type: git
@@ -21,7 +21,7 @@
   spec:
     params:
       - name: url
-        value: quay.apps.{{cluster_name}}.{{openshift_base_domain}}/{{username}}/openshift-tasks
+        value: quay.{{ cluster_router }}/{{ username }}/openshift-tasks
     type: image
 
 - apiVersion: tekton.dev/v1alpha1

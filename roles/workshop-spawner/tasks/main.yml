@@ -91,7 +91,7 @@
 
 - name: Wait for the Spawner to respond to requests
   uri:
-    url: 'https://dashboard.apps.{{ cluster_name }}.{{ openshift_base_domain }}/'
+    url: 'https://dashboard.{{ cluster_router }}/'
     return_content: yes
     validate_certs: no
   register: dashboard_endpoint

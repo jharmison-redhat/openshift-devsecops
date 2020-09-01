@@ -106,6 +106,7 @@
       kind: Secret
       metadata:
         name: kubeadmin
+  when: full_cluster_name != "crc.testing"
 
 - name: Create User objects for each HTPasswd user
   k8s:

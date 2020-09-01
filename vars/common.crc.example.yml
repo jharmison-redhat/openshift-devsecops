@@ -1,0 +1,103 @@
+---
+# This tells the playbooks to not try to include default-named vars files
+common_included: yes
+
+
+################################################################################
+# NOTE: IF A VARIABLE IS COMMENTED, IT LIKELY DEFAULTS TO THE OPPOSITE
+#
+# If you're here, you're considering going on an adventure. Surely, CodeReady
+#   Containers, an entire OpenShift deployment running in a VM on your
+#   workstation couldn't handle an entire CI/CD pipeline. It can, depending on
+#   your workstation. So, set up CRC (optionally, on Linux:
+#     pip install --user git+https://git.jharmison.com/jharmison/crc-manager.git
+#     crc-manager update
+#   can download it for you)
+# Do the normal setup and enter sudo creds when/if asked:
+#     crc setup
+# Download your pull secret from:
+#   https://cloud.redhat.com/openshift/install/crc/installer-provisioned
+# And optionally save it and configure crc to use it, for example save it in:
+#   ~/.crc/pull-secret.json
+# Then run:
+#     crc config set pull-secret-file ~/.crc/pull-secret.json
+# And then configure CRC with some more resources:
+#     crc config set cpus 24
+#     crc config set memory 49152
+# Obviously you need to have those resources. If you do, then great! Contiue
+#   using the vars file examples and read extra notes particularly carefully.
+#   You can create the directory `vars/crc/` and put your `common.yml` and
+#   `devsecops.yml` in there, and off to the races.
+# Fire up your CRC instance:
+#     crc start
+# And when it's done, to load the infrastructure using your local Ansible
+#   installation, you can run:
+#     ./run.sh -e @vars/crc/common.yml -e @vars/crc/devsecops.yml devsecops
+# Or, if you have podman or docker installed, you can run the content from a
+#   container that has a known-good working environment:
+#     ./run-container.sh -c crc -k ~/.crc/machine/crc/kubeconfig devsecops
+# Then just head to:
+#   https://dashboard.apps-crc.testing
+################################################################################
+
+letsencrypt: no     # You can't
+# You should do uncomment the following and provide a path to a locally-
+#   generated fullchain certificate and key that your computer trusts in PEM
+#   format if you want to bring your own certificates to CRC. They
+#   should have a CN or Alias that matches both api.crc.testing and
+#   *.apps-crc.testing
+# byo_cert_fullchain_path: ../tmp/fullchain.pem
+# byo_cert_key_path: ../tmp/key.pem
+
+################################################################################
+# DO NOT CHANGE OR COMMENT THESE FOR ANY REASON - they're used heavily
+#   throughout all the various roles
+cluster_name: crc
+openshift_base_domain: testing
+_tmp_parent: '{{ "/".join([ playbook_dir, "../tmp" ])|realpath }}'
+full_cluster_name: '{{ ".".join([ cluster_name, openshift_base_domain ]) }}'
+cluster_router: 'apps-crc.testing'
+tmp_dir: '{{ "/".join([ _tmp_parent, full_cluster_name ]) }}'
+################################################################################
+
+# The path to the kubeconfig file for the cluster you're using for the workshop.
+#   NOTE: Do not use ~ or other shell-expandable variables
+# If you use run-container.sh, it will change this :)
+kubeconfig: '{{ ansible_env["HOME"] }}/.crc/machines/crc/kubeconfig'
+
+# The path to your 'oc' client
+# If you use run-container.sh, it will change this :)
+oc_cli: '{{ ansible_env["HOME"] }}/.crc/bin/oc/oc'
+
+################################################################################
+# The remaining variables are to customize your deployment configuration beyond
+#   what is required for the workshop to function. You should read through and
+#   understand them, but they aren't necessary to minimally deploy.
+################################################################################
+
+# A list of manually created users:
+manual_users:
+  - username: openshift-admin
+    password: RedHatAdmin1
+    admin: yes
+
+# A specially designated user for administering workshop content
+workshop_admin:
+  username: workshop-admin
+  password: RedHatAdmin1
+  admin: yes
+
+# The number of users created, as a string
+number_of_users: "3"
+
+# Generate a sequence of users
+sequence_users: |
+  {%- for username in lookup("sequence", "1-" + number_of_users + ":user%0i", wantlist=True) %}
+    - username: {{ username }}
+      password: openshift
+  {% endfor -%}
+
+# The users to create in OpenShift
+openshift_users: '{{ manual_users + [workshop_admin] + sequence_users|from_yaml }}'
+# The users to create workshop projects/integrations for
+workshop_users: '{{ [workshop_admin] + sequence_users|from_yaml }}'
