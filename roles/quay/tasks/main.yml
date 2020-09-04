@@ -1,9 +1,10 @@
 ---
+- name: Determine if we should do quay certs
+  set_fact:
+    do_quay_certs: (letsencrypt|bool and (AWS_ACCESS_KEY_ID is defined or ansible_env["AWS_ACCESS_KEY_ID"] is defined) and (AWS_ACCESS_KEY_ID|default("") != "" or ansible_env["AWS_ACCESS_KEY_ID"]|default("") != ""))|bool
+
 - include_tasks: certificates.yml
-  when:
-    - letsencrypt
-    - AWS_ACCESS_KEY_ID is defined or ansible_env["AWS_ACCESS_KEY_ID"] is defined
-    - AWS_ACCESS_KEY_ID|default("") != "" or ansible_env["AWS_ACCESS_KEY_ID"]|default("") != ""
+  when: '{{ do_quay_certs }}'
 
 - name: Subscribe to Quay Enterprise
   k8s:

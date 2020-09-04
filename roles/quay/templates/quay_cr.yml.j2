@@ -13,7 +13,7 @@ spec:
 {% endif %}
     externalAccess:
       hostname: {{ quay_route }}
-{% if (letsencrypt|default(true)) %}
+{% if do_quay_certs %}
       tls:
         secretName: quay-tls-certs
         termination: passthrough
