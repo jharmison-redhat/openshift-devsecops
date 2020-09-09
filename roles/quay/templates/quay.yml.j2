@@ -52,7 +52,7 @@
     superuser-password: {{ quay_password }}
     superuser-email: quay@redhat.com
 
-{% if (letsencrypt|default(true)) %}
+{% if do_quay_certs|bool %}
 # Secret to use cluster certs for Quay
 - apiVersion: v1
   kind: Secret
