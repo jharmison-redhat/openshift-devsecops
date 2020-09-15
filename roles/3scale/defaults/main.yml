@@ -1,3 +1,0 @@
----
-rwx_backing_style: pvc
-rwx_backing_store: ocs-storagecluster-cephfs

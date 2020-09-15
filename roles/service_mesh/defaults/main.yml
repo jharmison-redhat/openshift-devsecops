@@ -1,4 +1,0 @@
----
-sm_namespace: istio-system
-sm_ns_display: Service Mesh Control Plane
-sm_production_style: true

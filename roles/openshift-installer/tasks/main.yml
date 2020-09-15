@@ -1,9 +1,0 @@
----
-- name: Ensure that the cluster tmp directory exists
-  file:
-    path: '{{ tmp_dir }}'
-    state: directory
-
-- import_tasks: download.yml
-- import_tasks: prep.yml
-- import_tasks: install.yml
